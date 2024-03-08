@@ -9,18 +9,19 @@
 
 */
 
-//#include "Dual_CAN_Driver.h"
+#include "Dual_CAN_Driver.h"
 #include "Controls_Tasks.h"
 
 // The setup function runs once when you press reset or power on the board.
 void setup() {
 
   //TURN OFF THE GPS so I can use the goddamn serial port
-  //pinMode(26, OUTPUT);
-  //digitalWrite(26, LOW);
+  pinMode(26, OUTPUT);
+  digitalWrite(26, LOW);
 
   // Initialize serial communication at 115200 bits per second:
   Serial.begin(115200);
+  delay(1000);
   Serial.println("\n Starting...\n");
   Serial.flush();
 
@@ -34,10 +35,11 @@ void setup() {
     , 1 //run on the default core
     );
 
-  /*
-  if (CAN_SetupRxTasks() == CAN_SETUP_BOTH_SUCCESS){
+  if (CAN_SetupTasks() == CAN_SETUP_BOTH_SUCCESS){
     Serial.println("CAN HARDWARE INIT SUCCESS");
-  };*/
+  }else{
+    Serial.println("CAN HARDWARE INIT FAILURE");
+  }
 
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
 }

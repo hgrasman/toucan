@@ -29,8 +29,6 @@ typedef struct CANTaskParams{
 }CANTaskParams;
 
 //CAN Hardware interface
-MCP_CAN CAN0(new SPIClass(VSPI), CAN0_SPI_CS_PIN);
-MCP_CAN CAN1(new SPIClass(VSPI), CAN1_SPI_CS_PIN);
 QueueHandle_t xCAN0RxQueue;
 QueueHandle_t xCAN1RxQueue;
 
@@ -56,10 +54,9 @@ void CANRxTask(void *pvParameters){
 
 uint8_t CAN_SetupTasks(void){
 
-  //SPIClass *vspi = NULL;
-  //vspi = new SPIClass(VSPI);
-  //MCP_CAN CAN0(vspi, CAN0_SPI_CS_PIN);
-  //MCP_CAN CAN1(vspi, CAN1_SPI_CS_PIN);
+  SPIClass* vspi = new SPIClass(VSPI);
+  MCP_CAN CAN0(vspi, CAN0_SPI_CS_PIN);
+  MCP_CAN CAN1(vspi, CAN1_SPI_CS_PIN);
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
@@ -67,7 +64,7 @@ uint8_t CAN_SetupTasks(void){
     attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
     CAN0.setMode(MCP_NORMAL);
 
-    xCAN0RxQueue = xQueueCreate(8, sizeof(uint8_t));
+    xCAN0RxQueue = xQueueCreate(8, sizeof(uint8_t)); //TODO real queue
     CANTaskParams CAN0Params = {xCAN0RxQueue, NULL};
     xTaskCreatePinnedToCore(
       CANRxTask
