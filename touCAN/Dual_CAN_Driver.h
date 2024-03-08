@@ -19,6 +19,5 @@
 #define CAN_SETUP_CAN1_FAILURE 2
 #define CAN_SETUP_BOTH_FAILURE 3
 
-
-uint8_t CAN_SetupRxTasks(void);
+uint8_t CAN_SetupTasks(void);
 void fHybridTxTask(void *pvParameters);
