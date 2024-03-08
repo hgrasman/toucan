@@ -9,6 +9,16 @@
 
 */
 
+#define CAN0_SPI_CS_PIN 4
+#define CAN0_INT_RX_PIN 9
+#define CAN1_SPI_CS_PIN 8
+#define CAN1_INT_RX_PIN 9
 
+#define CAN_SETUP_BOTH_SUCCESS 0
+#define CAN_SETUP_CAN0_FAILURE 1
+#define CAN_SETUP_CAN1_FAILURE 2
+#define CAN_SETUP_BOTH_FAILURE 3
+
+
+uint8_t CAN_SetupRxTasks(void);
 void fHybridTxTask(void *pvParameters);
-void CANRxTask(void *pvParameters);

@@ -12,11 +12,13 @@
 #include "Arduino.h" 
 
 void VDKartTask(void *pvParameters){  // This is a task.
-  const uint32_t period_ticks = pdMS_TO_TICKS(500);
-  
+  TickType_t xLastWakeTime;
+  const TickType_t xPeriod = pdMS_TO_TICKS(500);
+
+  xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
     
     Serial.printf("Yo this is the TQ Request. My code isn't done yet\n");
-    vTaskDelay(period_ticks);
+    vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }
