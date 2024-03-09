@@ -9,10 +9,10 @@
 
 */
 
-#define CAN0_SPI_CS_PIN 4
+#define CAN0_SPI_CS_PIN 5
 #define CAN0_INT_RX_PIN 9
-#define CAN1_SPI_CS_PIN 0
-#define CAN1_INT_RX_PIN 9
+#define CAN1_SPI_CS_PIN 1
+#define CAN1_INT_RX_PIN 18
 
 #define CAN_SETUP_BOTH_SUCCESS 0
 #define CAN_SETUP_CAN0_FAILURE 1

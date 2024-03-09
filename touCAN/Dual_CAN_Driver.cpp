@@ -25,12 +25,15 @@ typedef struct CANData{
 
 typedef struct CANTaskParams{
   QueueHandle_t xCANRxQueue;
-  int n;//TODO data broker objects
+  MCP_CAN CANx;
 }CANTaskParams;
 
 //CAN Hardware interface
 QueueHandle_t xCAN0RxQueue;
 QueueHandle_t xCAN1RxQueue;
+
+CANTaskParams CAN0Params = {0,0};
+CANTaskParams CAN1Params = {0,0};
 
 ICACHE_RAM_ATTR void CAN0_RX_ISR(void){
   
@@ -44,11 +47,32 @@ ICACHE_RAM_ATTR void CAN1_RX_ISR(void){
 
 void CANRxTask(void *pvParameters){
 
-  CANTaskParams params = *((CANTaskParams*) pvParameters);
+  CANTaskParams *params = (CANTaskParams*) pvParameters;
   
+  CANData incomingData; 
   for (;;){
-    Serial.print("CANRX SPawned: "); Serial.println(pcTaskGetName( NULL ));
-    vTaskDelay(1000);
+    Serial.println(pcTaskGetName( NULL ));
+    if( xQueueReceive( params->xCANRxQueue, &incomingData, portMAX_DELAY ) )
+     {
+        Serial.println("Rx'd something");
+        Serial.print(incomingData.arb_id);
+     }
+  }
+}
+
+void CANTxTask(void *pvParameters){
+
+  CANTaskParams *params = (CANTaskParams*) pvParameters;
+
+  for (;;){
+    CANData testData;
+    testData.arb_id = 54;
+    Serial.println("1");
+    xQueueSend(params->xCANRxQueue, (void*) &testData, 0);
+    Serial.println("2");
+    testData.arb_id = 45;
+    vTaskDelay(5000);
+    Serial.println("DONE");
   }
 }
 
@@ -56,7 +80,7 @@ uint8_t CAN_SetupTasks(void){
 
   SPIClass* vspi = new SPIClass(VSPI);
   MCP_CAN CAN0(vspi, CAN0_SPI_CS_PIN);
-  MCP_CAN CAN1(vspi, CAN1_SPI_CS_PIN);
+  //MCP_CAN CAN1(vspi, CAN1_SPI_CS_PIN);
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
@@ -64,8 +88,8 @@ uint8_t CAN_SetupTasks(void){
     attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
     CAN0.setMode(MCP_NORMAL);
 
-    xCAN0RxQueue = xQueueCreate(8, sizeof(uint8_t)); //TODO real queue
-    CANTaskParams CAN0Params = {xCAN0RxQueue, NULL};
+    xCAN0RxQueue = xQueueCreate(8, sizeof(CANData)); //TODO real queue
+    CAN0Params = {xCAN0RxQueue, CAN0};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" // A name just for humans
@@ -76,13 +100,21 @@ uint8_t CAN_SetupTasks(void){
       , tskNO_AFFINITY //run on the default core
       );
 
-      //TODO RX TASK
+      xTaskCreatePinnedToCore(
+      CANTxTask
+      ,  "CAN0 Tx Task" // A name just for humans
+      ,  2048        // The stack size can be checked by calling `uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);`
+      ,  (void*) &CAN0Params // Task parameter which can modify the task behavior. This must be passed as pointer to void.
+      ,  1  // Priority
+      ,  NULL // Task handle is not used here - simply pass NULL
+      , tskNO_AFFINITY //run on the default core
+      );
 
   }else{
     status |= CAN_SETUP_CAN0_FAILURE;
   }
 
-
+  /*
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
     CAN1.setMode(MCP_NORMAL);
@@ -98,24 +130,13 @@ uint8_t CAN_SetupTasks(void){
       ,  NULL // Task handle is not used here - simply pass NULL
       , tskNO_AFFINITY //run on the default core
       );
-
+  
 
 
   }else{
     status |= CAN_SETUP_CAN1_FAILURE;
-  }
+  }*/
 
   return(status);
 
-}
-
-void fHybridTxTask(void *pvParameters){  // This is a task.
-  TickType_t xLastWakeTime;
-  const TickType_t xPeriod = pdMS_TO_TICKS(500);
-
-  xLastWakeTime = xTaskGetTickCount(); // Initialize
-  for(;;){
-    Serial.printf("Yo this is the tx thread. My code isn't done yet\n");
-    vTaskDelayUntil(&xLastWakeTime, xPeriod);
-  }
 }
