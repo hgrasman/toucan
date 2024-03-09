@@ -31,9 +31,10 @@ typedef struct CANTaskParams{
 //CAN Hardware interface
 QueueHandle_t xCAN0RxQueue;
 QueueHandle_t xCAN1RxQueue;
-
 CANTaskParams CAN0Params = {0,0};
 CANTaskParams CAN1Params = {0,0};
+MCP_CAN CAN0(CAN0_SPI_CS_PIN);
+MCP_CAN CAN1(CAN1_SPI_CS_PIN);
 
 ICACHE_RAM_ATTR void CAN0_RX_ISR(void){
   
@@ -51,11 +52,10 @@ void CANRxTask(void *pvParameters){
   
   CANData incomingData; 
   for (;;){
-    Serial.println(pcTaskGetName( NULL ));
     if( xQueueReceive( params->xCANRxQueue, &incomingData, portMAX_DELAY ) )
      {
-        Serial.println("Rx'd something");
-        Serial.print(incomingData.arb_id);
+        Serial.print("Rx'd something: ");
+        Serial.println(incomingData.arb_id);
      }
   }
 }
@@ -64,23 +64,16 @@ void CANTxTask(void *pvParameters){
 
   CANTaskParams *params = (CANTaskParams*) pvParameters;
 
+  CANData testData;
   for (;;){
-    CANData testData;
-    testData.arb_id = 54;
-    Serial.println("1");
+    testData.arb_id += 1;
     xQueueSend(params->xCANRxQueue, (void*) &testData, 0);
-    Serial.println("2");
-    testData.arb_id = 45;
+    testData.arb_id += 13;
     vTaskDelay(5000);
-    Serial.println("DONE");
   }
 }
 
 uint8_t CAN_SetupTasks(void){
-
-  SPIClass* vspi = new SPIClass(VSPI);
-  MCP_CAN CAN0(vspi, CAN0_SPI_CS_PIN);
-  //MCP_CAN CAN1(vspi, CAN1_SPI_CS_PIN);
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
@@ -97,7 +90,7 @@ uint8_t CAN_SetupTasks(void){
       ,  (void*) &CAN0Params // Task parameter which can modify the task behavior. This must be passed as pointer to void.
       ,  1  // Priority
       ,  NULL // Task handle is not used here - simply pass NULL
-      , tskNO_AFFINITY //run on the default core
+      ,  tskNO_AFFINITY //run on the default core
       );
 
       xTaskCreatePinnedToCore(
@@ -107,7 +100,7 @@ uint8_t CAN_SetupTasks(void){
       ,  (void*) &CAN0Params // Task parameter which can modify the task behavior. This must be passed as pointer to void.
       ,  1  // Priority
       ,  NULL // Task handle is not used here - simply pass NULL
-      , tskNO_AFFINITY //run on the default core
+      ,  tskNO_AFFINITY //run on the default core
       );
 
   }else{
