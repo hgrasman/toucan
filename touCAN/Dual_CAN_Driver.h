@@ -1,5 +1,5 @@
 /*
-  Software component responsible for monitoring cart systems and issuing commands.
+  Software component responsible for hardware interface of the two CAN networks.
 
   Contributors:
     -Henry Grasman
@@ -9,10 +9,9 @@
 
 */
 
-#define CAN_SETUP_BOTH_SUCCESS 0
-#define CAN_SETUP_CAN0_FAILURE 1
-#define CAN_SETUP_CAN1_FAILURE 2
-#define CAN_SETUP_BOTH_FAILURE 3
+#define CAN_SETUP_BOTH_SUCCESS 0b00
+#define CAN_SETUP_CAN0_FAILURE 0b01
+#define CAN_SETUP_CAN1_FAILURE 0b10
+#define CAN_SETUP_BOTH_FAILURE 0b11
 
 uint8_t CAN_SetupTasks(void);
-void fHybridTxTask(void *pvParameters);
