@@ -30,7 +30,7 @@ typedef struct CANTaskParams{
 }CANTaskParams;
 
 //CAN Hardware interface
-static portMUX_TYPE my_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static portMUX_TYPE CAN_spinlock = portMUX_INITIALIZER_UNLOCKED;
 static TaskHandle_t xTaskCAN0RxHandle = NULL;
 static TaskHandle_t xTaskCAN1RxHandle = NULL;
 CANTaskParams CAN0Params = {0,0};
@@ -38,16 +38,18 @@ CANTaskParams CAN1Params = {0,0};
 MCP_CAN CAN0(CAN0_SPI_CS_PIN);
 MCP_CAN CAN1(CAN1_SPI_CS_PIN);
 
-ICACHE_RAM_ATTR void CAN0_RX_ISR(void){
-  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  vTaskNotifyGiveFromISR( xTaskCAN0RxHandle, &xHigherPriorityTaskWoken );
-  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+#define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
+ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
+  taskENTER_CRITICAL_ISR(&CAN_spinlock);\
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;\
+  vTaskNotifyGiveFromISR( xTaskCANxRxHandle, &xHigherPriorityTaskWoken );\
+  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );\
+  taskEXIT_CRITICAL_ISR(&CAN_spinlock);\
 }
-ICACHE_RAM_ATTR void CAN1_RX_ISR(void){
-  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  vTaskNotifyGiveFromISR( xTaskCAN1RxHandle, &xHigherPriorityTaskWoken );
-  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-}
+CREATE_CANx_ISR(CAN0_RX_ISR, xTaskCAN0RxHandle)
+CREATE_CANx_ISR(CAN1_RX_ISR, xTaskCAN1RxHandle)
+
+
 
 void CANRxTask(void *pvParameters){
 
