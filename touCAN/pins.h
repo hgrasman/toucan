@@ -1,0 +1,5 @@
+#define CAN0_SPI_CS_PIN 5
+#define CAN0_INT_RX_PIN 17
+
+#define CAN1_SPI_CS_PIN 32
+#define CAN1_INT_RX_PIN 35

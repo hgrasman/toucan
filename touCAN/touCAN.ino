@@ -11,12 +11,12 @@
 
 #include "Dual_CAN_Driver.h"
 #include "Controls_Tasks.h"
-#include <mcp_can.h>
 
 // The setup function runs once when you press reset or power on the board.
 void setup() {
 
   // Initialize serial communication at 115200 bits per second:
+  delay(1000);
   Serial.begin(115200);
   delay(1000);
   Serial.println("\n Starting...\n");
