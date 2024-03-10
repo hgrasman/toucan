@@ -10,7 +10,6 @@
 */
 
 //These are the variables which are to be made accessible to the core code
-//none
 
 //This is the function handle which will be executed
 void VDKartTask(void *pvParameters);

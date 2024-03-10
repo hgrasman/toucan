@@ -30,33 +30,37 @@ typedef struct CANTaskParams{
 }CANTaskParams;
 
 //CAN Hardware interface
-QueueHandle_t xCAN0RxQueue;
-QueueHandle_t xCAN1RxQueue;
+static portMUX_TYPE my_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static TaskHandle_t xTaskCAN0RxHandle = NULL;
+static TaskHandle_t xTaskCAN1RxHandle = NULL;
 CANTaskParams CAN0Params = {0,0};
 CANTaskParams CAN1Params = {0,0};
 MCP_CAN CAN0(CAN0_SPI_CS_PIN);
 MCP_CAN CAN1(CAN1_SPI_CS_PIN);
 
 ICACHE_RAM_ATTR void CAN0_RX_ISR(void){
-  
-  //put it in the rx queue internally (one register in HW so we need to clear it quick)
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  vTaskNotifyGiveFromISR( xTaskCAN0RxHandle, &xHigherPriorityTaskWoken );
+  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 ICACHE_RAM_ATTR void CAN1_RX_ISR(void){
-  //TODO
-  //xQueueSendFromISR( xCAN1RxQueue, &cIn, &xHigherPriorityTaskWoken );
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  vTaskNotifyGiveFromISR( xTaskCAN1RxHandle, &xHigherPriorityTaskWoken );
+  portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
 void CANRxTask(void *pvParameters){
 
   CANTaskParams *params = (CANTaskParams*) pvParameters;
+  QueueHandle_t xRxQueue = params->xCANRxQueue;
   
   CANData incomingData; 
   for (;;){
-    if( xQueueReceive( params->xCANRxQueue, &incomingData, portMAX_DELAY ) )
+    if( ulTaskNotifyTake(pdTRUE, portMAX_DELAY ))
      {
-        Serial.print(pcTaskGetName(NULL));
-        Serial.print(": Rx'd something: ");
-        Serial.println(incomingData.arb_id);
+        while(params->CANx.checkReceive() == CAN_MSGAVAIL){
+          params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data);
+        }
      }
   }
 }
@@ -67,10 +71,9 @@ void CANTxTask(void *pvParameters){
 
   CANData testData;
   for (;;){
-    testData.arb_id += 1;
-    xQueueSend(params->xCANRxQueue, (void*) &testData, 0);
-    testData.arb_id += 13;
-    vTaskDelay(5000);
+    uint8_t data[] = {1,1,1,1,1,1,1,1};
+    params->CANx.sendMsgBuf(22, 8, data);
+    vTaskDelay(1);
   }
 }
 
@@ -79,18 +82,16 @@ uint8_t CAN_SetupTasks(void){
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
-    attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
-    CAN0.setMode(MCP_NORMAL);
+    CAN0.setMode(MCP_LOOPBACK);
 
-    xCAN0RxQueue = xQueueCreate(8, sizeof(CANData)); //TODO real queue
-    CAN0Params = {xCAN0RxQueue, CAN0};
+    CAN0Params = {NULL, CAN0};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" // A name just for humans
       ,  2048        // The stack size can be checked by calling `uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);`
       ,  (void*) &CAN0Params // Task parameter which can modify the task behavior. This must be passed as pointer to void.
       ,  1  // Priority
-      ,  NULL // Task handle is not used here - simply pass NULL
+      ,  &xTaskCAN0RxHandle // Task handle is not used here - simply pass NULL
       ,  tskNO_AFFINITY //run on the default core
       );
 
@@ -104,35 +105,37 @@ uint8_t CAN_SetupTasks(void){
       ,  tskNO_AFFINITY //run on the default core
       );
 
+      attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
+
   }else{
     status |= CAN_SETUP_CAN0_FAILURE;
   }
-  
-  if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
-    attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
-    CAN1.setMode(MCP_NORMAL);
 
-    xCAN1RxQueue = xQueueCreate(8, sizeof(CANData)); //TODO real queue
-    CAN1Params = {xCAN1RxQueue, CAN1};
+  if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
+    CAN1.setMode(MCP_LOOPBACK);
+
+    CAN1Params = {NULL, CAN1};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" // A name just for humans
       ,  2048        // The stack size can be checked by calling `uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);`
       ,  (void*) &CAN1Params // Task parameter which can modify the task behavior. This must be passed as pointer to void.
       ,  1  // Priority
-      ,  NULL // Task handle is not used here - simply pass NULL
+      ,  &xTaskCAN1RxHandle // Task handle is not used here - simply pass NULL
       ,  tskNO_AFFINITY //run on the default core
       );
 
       xTaskCreatePinnedToCore(
       CANTxTask
-      ,  "CAN1 Tx Task" // A name just for humans
+      ,  "CAN0 Tx Task" // A name just for humans
       ,  2048        // The stack size can be checked by calling `uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);`
       ,  (void*) &CAN1Params // Task parameter which can modify the task behavior. This must be passed as pointer to void.
       ,  1  // Priority
       ,  NULL // Task handle is not used here - simply pass NULL
       ,  tskNO_AFFINITY //run on the default core
       );
+
+      attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
 
   }else{
     status |= CAN_SETUP_CAN1_FAILURE;
