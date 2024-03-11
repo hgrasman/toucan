@@ -143,7 +143,7 @@ uint8_t CAN_SetupTasks(void){
 
       xTaskCreatePinnedToCore(
       CANTxTask
-      ,  "CAN0 Tx Task" 
+      ,  "CAN1 Tx Task" 
       ,  2048        
       ,  (void*) &CAN1Params 
       ,  1  // Priority
