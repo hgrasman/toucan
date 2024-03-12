@@ -9,22 +9,6 @@
 
 */
 
-typedef struct ValeoEncodingStructs{
-  //CAN TX
-  x8578_can_db_client_pcm_pmz_w_mhev_t    w_mhev_msg; //Calibrate limits
-  x8578_can_db_client_pcm_pmz_u_mhev_t    u_mhev_msg; 
-  x8578_can_db_client_pcm_pmz_t_mhev_t    t_mhev_msg;
-  x8578_can_db_client_bcm_pmz_a_t         bcm_pmz_msg; //set car to running
-  x8578_can_db_client_gwm_pmz_h_t         gwm_pmz_msg; //crash status
-  x8578_can_db_client_pcm_pmz_f_hybrid_t  f_hybrid_msg; //torque command
-
-  //CAN RX
-  x8578_can_db_client_epic_pmz_i_t        pmz_i_msg; //DTC Diagnostic
-  x8578_can_db_client_epic_pmz_c_t        pmz_c_msg; //recv
-  x8578_can_db_client_epic_pmz_g_t        pmz_g_msg; //recv
-  x8578_can_db_client_epic_pmz_h_t        pmz_h_msg; //recv
-  x8578_can_db_client_epic_pmz_e_t        pmz_e_msg; //recv
-} ValeoEncodingStructs;
 
 #define CAN_SETUP_BOTH_SUCCESS 0b00
 #define CAN_SETUP_CAN0_FAILURE 0b01
