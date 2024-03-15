@@ -11,6 +11,7 @@ CONFIDENTIAL? It's all according to open standards but best not to share it.
 
 #include "arduino.h"
 #include "Valeo_ext.h"
+#include <string.h>
 
 
 uint8_t crcTable[256] = {
@@ -219,4 +220,3 @@ uint16_t ArrangeUMHEV(
 
 	return (6);
 }
-

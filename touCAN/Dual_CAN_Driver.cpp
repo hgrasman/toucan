@@ -16,7 +16,7 @@
 #include <SPI.h>
 #include <mcp_can.h> //coryjfowler's library
 #include <mcp_can_dfs.h>
-#include "Valeo_ext/Valeo_ext.h"
+#include "Valeo_ext.h"
 
 //Struct type to hold all CAN data
 typedef struct CANData{ 
@@ -69,18 +69,21 @@ void CANRxTask(void *pvParameters){
   
   CANData incomingData; 
   for (;;){
-    if( ulTaskNotifyTake(pdTRUE, portMAX_DELAY ))
-     {
-        while(params->CANx.checkReceive() == CAN_MSGAVAIL){
-          params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data); //get data
-          //do something with the data
-          switch(incomingData.arb_id){
-            case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
-              Serial.print("found a C");
-              break;
-          }
-        }
-     }
+    if( !ulTaskNotifyTake(pdTRUE, portMAX_DELAY )){
+      continue;
+    }
+
+    while(params->CANx.checkReceive() == CAN_MSGAVAIL){
+      params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data); //get data
+      //do something with the data
+      switch(incomingData.arb_id){
+        case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
+          Serial.print("found a C");
+          x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
+          Serial.println(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
+          break;
+      }
+    }
   }
 }
 
@@ -94,9 +97,12 @@ void CANTxTask(void *pvParameters){
   CANTaskParams *params = (CANTaskParams*) pvParameters;
 
   for (;;){
-    uint8_t data[] = {1,1,1,1,1,1,1,1};
-    params->CANx.sendMsgBuf(22, 8, data);
-    vTaskDelay(1);
+
+    uint8_t data[8];
+    params->EncodingData.pmz_c_msg.em_speed = 140;
+    x8578_can_db_client_epic_pmz_c_pack(data, &params->EncodingData.pmz_c_msg, sizeof(data));
+    params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID, sizeof(data), data);
+    vTaskDelay(10);
   }
 }
 
@@ -109,7 +115,7 @@ uint8_t CAN_SetupTasks(void){
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
-    CAN0.setMode(MCP_LOOPBACK);
+    CAN0.setMode(MCP_NORMAL);
 
     CAN0Params = {CAN0,ValeoEncodingCAN0};
     xTaskCreatePinnedToCore(
@@ -139,7 +145,7 @@ uint8_t CAN_SetupTasks(void){
   }
 
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
-    CAN1.setMode(MCP_LOOPBACK);
+    CAN1.setMode(MCP_NORMAL);
 
     CAN1Params = {CAN1,ValeoEncodingCAN1};
     xTaskCreatePinnedToCore(

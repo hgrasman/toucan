@@ -869,7 +869,7 @@ struct x8578_can_db_client_epic_pmz_g_t {
     uint8_t em_torq_limit_gp_counter;
 
     /**
-     * Instantaneous Minimum torque available from the Electric Machine in 'Torque Control' Mode.
+     * Instantaneous Minimum torque available from the Electric Machineï¿½in 'Torque Control' Mode.
      *
      * Range: 0..1023 (-1023..0 Nm)
      * Scale: 1
@@ -878,7 +878,7 @@ struct x8578_can_db_client_epic_pmz_g_t {
     uint16_t em_min_torque_limit;
 
     /**
-     * Continuous Minimum torque available from the Electric Machine in 'Torque Control' Mode.
+     * Continuous Minimum torque available from the Electric Machineï¿½in 'Torque Control' Mode.
      *
      * Range: 0..1023 (-1023..0 Nm)
      * Scale: 1
@@ -887,7 +887,7 @@ struct x8578_can_db_client_epic_pmz_g_t {
     uint16_t em_min_cont_torque_limit;
 
     /**
-     * Instantaneous Maximum torque available from the Electric Machine in 'Torque Control' Mode.
+     * Instantaneous Maximum torque available from the Electric Machineï¿½in 'Torque Control' Mode.
      *
      * Range: 0..1023 (0..1023 Nm)
      * Scale: 1
@@ -896,7 +896,7 @@ struct x8578_can_db_client_epic_pmz_g_t {
     uint16_t em_max_torque_limit;
 
     /**
-     * Continuous Maximum torque available from the Electric Machine in 'Torque Control' Mode.
+     * Continuous Maximum torque available from the Electric Machineï¿½in 'Torque Control' Mode.
      *
      * Range: 0..1023 (0..1023 Nm)
      * Scale: 1

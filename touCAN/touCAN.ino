@@ -22,12 +22,13 @@ void setup() {
   Serial.println("\n Starting...\n");
   Serial.flush();
 
-  
+
   if (CAN_SetupTasks() == CAN_SETUP_BOTH_SUCCESS){
     Serial.println("CAN HARDWARE INIT SUCCESS");
   }else{
     Serial.println("CAN HARDWARE INIT FAILURE");
   }
+
 
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
 }
