@@ -17,16 +17,16 @@ TaskHandle_t xTaskVDKartHandle;
 
 void VDKartTask(void *pvParameters){  // This is a task.
   TickType_t xLastWakeTime;
-  const TickType_t xPeriod = pdMS_TO_TICKS(100);
+  const TickType_t xPeriod = pdMS_TO_TICKS(10);
+
+  float trq = 0;
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
-    
-    uint16_t pedalIn1 = analogRead(PEDAL_IN_NML_PIN);
-    uint16_t pedalIn2 = analogRead(PEDAL_IN_NML_PIN);
-    Serial.print(pedalIn1); Serial.print(" "); Serial.print(pedalIn2);
-    CAN0BrokerData.torqueRequest.setValue(0);
-    CAN1BrokerData.torqueRequest.setValue(0);
+    //Serial.print(pedalIn1); Serial.print(", 0, 4095,"); Serial.println(pedalIn2);
+    trq = (trq +.01);
+    if (trq > 1) {trq = 0;}
+    CAN0TorqueRequest.setValue(trq);
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }

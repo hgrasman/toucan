@@ -18,17 +18,11 @@ class BrokerData {
   public:
     BrokerData();
     void setValue(float new_value);
-    void getValue(float* val, int64_t* time);
-
-  private:            
+    float getValue(void);            
     float value;
     int64_t last_update_time;
 };
 
-typedef struct BrokerCANData{
-  BrokerData inverter_temperature_pct;
-  BrokerData torqueRequest;
-}BrokerCANData;
-
+extern BrokerData CAN0TorqueRequest;
 
 #endif

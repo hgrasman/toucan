@@ -14,8 +14,6 @@
 #include "dataBroker.h"
 
 //These are the variables which are to be made accessible to the core code
-extern BrokerCANData CAN0BrokerData;
-extern BrokerCANData CAN1BrokerData;
 
 //This is the function handle which will be executed
 #define VDKART_SETUP_SUCCESS 0b00

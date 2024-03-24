@@ -22,10 +22,13 @@ void BrokerData::setValue(float new_value) {
       last_update_time = esp_timer_get_time();
 }
 
-void BrokerData::getValue(float* val, int64_t* time) {
-      *val = value;
-      *time = last_update_time;
+float BrokerData::getValue() { 
+      return (value);
 }
+
+//Data for other functions
+BrokerData CAN0TorqueRequest = BrokerData();
+BrokerData CAN1TorqueRequest= BrokerData();
 
 
 
