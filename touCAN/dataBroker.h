@@ -19,11 +19,13 @@ class BrokerData {
     BrokerData();
     BrokerData(float initial_value);
     void setValue(float new_value);
-    float getValue(void);            
-    float value;
-    int64_t last_update_time;
+    float getValue(void);  
+    float getValue(int64_t* time_Variable);       
+    volatile float value;
+    volatile int64_t last_update_time;
 };
 
 extern BrokerData CAN0TorqueRequest;
+extern BrokerData CAN1TorqueRequest;
 
 #endif

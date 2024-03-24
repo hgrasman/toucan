@@ -24,12 +24,15 @@ BrokerData::BrokerData(float initial_value){
 
 void BrokerData::setValue(float new_value) {
       this->value = new_value;
-      Serial.print("new is: ");Serial.println(this->value);
       this->last_update_time = esp_timer_get_time();
 }
 
 float BrokerData::getValue() { 
-      Serial.print("val is: ");Serial.println(this->value);
+      return (this->value);
+}
+
+float BrokerData::getValue(int64_t* time_Variable) { 
+      *time_Variable = this->last_update_time;
       return (this->value);
 }
 

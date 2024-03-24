@@ -30,7 +30,7 @@ typedef struct CANData{
 typedef struct CANTaskParams{
   MCP_CAN CANx;
   ValeoEncodingData EncodingData;
-  BrokerData torqueRequest;
+  BrokerData* torqueRequest;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -184,7 +184,7 @@ void CANTxTask(void *pvParameters){
     }
 
     //F Hybrid
-    float LeTorqueRequest = params->torqueRequest.getValue();
+    float LeTorqueRequest = params->torqueRequest->getValue();
     PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
                    X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE,
                    0,0,LeTorqueRequest);
@@ -208,7 +208,7 @@ uint8_t CAN_SetupTasks(void){
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
-    CAN0Params = {CAN0,ValeoEncodingCAN0, CAN0TorqueRequest};
+    CAN0Params = {CAN0,ValeoEncodingCAN0, &CAN0TorqueRequest};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -238,7 +238,7 @@ uint8_t CAN_SetupTasks(void){
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 
-    CAN1Params = {CAN1,ValeoEncodingCAN1, CAN0TorqueRequest};
+    CAN1Params = {CAN1,ValeoEncodingCAN1, &CAN1TorqueRequest};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 

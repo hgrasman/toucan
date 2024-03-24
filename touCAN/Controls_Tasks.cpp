@@ -26,7 +26,8 @@ void VDKartTask(void *pvParameters){  // This is a task.
     //Serial.print(pedalIn1); Serial.print(", 0, 4095,"); Serial.println(pedalIn2);
     trq = (trq +.01);
     if (trq > 1) {trq = 0;}
-    CAN0TorqueRequest.setValue(trq);
+    CAN0TorqueRequest.setValue(trq/2);
+    CAN1TorqueRequest.setValue(trq/2);
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }
