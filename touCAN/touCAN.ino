@@ -16,12 +16,17 @@
 void setup() {
 
   // Initialize serial communication at 115200 bits per second:
-  delay(1000);
+  delay(2000);
   Serial.begin(115200);
-  delay(1000);
+  delay(2000);
   Serial.println("\n Starting...\n");
   Serial.flush();
 
+  if (VDKart_SetupTasks() == VDKART_SETUP_SUCCESS){
+    Serial.println("VDKART INIT SUCCESS");
+  }else{
+    Serial.println("VDKART INIT FAILURE");
+  }
 
   if (CAN_SetupTasks() == CAN_SETUP_BOTH_SUCCESS){
     Serial.println("CAN HARDWARE INIT SUCCESS");

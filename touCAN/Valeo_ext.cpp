@@ -146,6 +146,7 @@ uint32_t ComputeCrc(uint8_t* MsgData, uint8_t CrcLength)
 }
 
 
+//F HYBRID
 uint16_t ArrangeFHybrid(
 	uint8_t* dst_p,
 	struct x8578_can_db_client_pcm_pmz_f_hybrid_t* src_p,
@@ -156,20 +157,56 @@ uint16_t ArrangeFHybrid(
 	}
 
 	//arrange according to crc documentation
-	dst_p[0] = ((src_p->em_torque_request_ext) >> 7) & 0xFF;
+	dst_p[0] = ((src_p->em_speed_request_ext) >> 7) & 0xFF;
 	dst_p[1] = ((src_p->em_speed_request_ext) << 1) & 0xFE;
-	dst_p[2] = ((src_p->em_speed_request_ext) >> 7) & 0xFF;
-	dst_p[3] = ((src_p->em_torque_request_ext) << 1) & 0xFE;
+	dst_p[2] = ((src_p->em_torque_request_ext) << 1) & 0xFE;
+	dst_p[3] = ((src_p->em_torque_request_ext) >> 7) & 0xFF;
 	dst_p[4] = ((src_p->em_voltage_dc_link_req_ext) >> 2) & 0xFF;
 	dst_p[5] = (((src_p->em_voltage_dc_link_req_ext) << 8) & 0xA0) | ((src_p->em_operating_mode_req_ext) & 0x0F);
 	dst_p[6] = ((src_p->vscem_req_gp_counter) << 4) & 0xF0;
 
 	return (7);
 
+}
+
+uint8_t PrepareFHybrid(
+	struct x8578_can_db_client_pcm_pmz_f_hybrid_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  uint8_t vscem_req_gp_counter,
+  float em_operating_mode_req_ext,
+  float em_voltage_dc_link_req_ext,
+  float em_speed_request_ext,
+  float em_torque_request_ext) {
+
+    uint16_t crclength;
+    uint8_t crc;
+
+    if (size<8){
+      return(0);
+    }
+
+    src_p->vscem_req_gp_counter = x8578_can_db_client_pcm_pmz_f_hybrid_vscem_req_gp_counter_encode(vscem_req_gp_counter);
+    src_p->em_operating_mode_req_ext = x8578_can_db_client_pcm_pmz_f_hybrid_em_operating_mode_req_ext_encode(em_operating_mode_req_ext);
+    src_p->em_voltage_dc_link_req_ext = x8578_can_db_client_pcm_pmz_f_hybrid_em_voltage_dc_link_req_ext_encode(em_voltage_dc_link_req_ext);
+    src_p->em_speed_request_ext = x8578_can_db_client_pcm_pmz_f_hybrid_em_speed_request_ext_encode(em_speed_request_ext);
+    src_p->em_torque_request_ext = x8578_can_db_client_pcm_pmz_f_hybrid_em_torque_request_ext_encode(em_torque_request_ext);
+
+    crclength = ArrangeFHybrid(data, src_p, size);
+
+    crc = ComputeCrc(data, crclength);
+
+    src_p->vscem_req_gp_cs = x8578_can_db_client_pcm_pmz_f_hybrid_vscem_req_gp_cs_encode(crc);
+    
+    x8578_can_db_client_pcm_pmz_f_hybrid_pack(data, src_p, size);
+
+    return(size);
 
 }
 
 
+
+//WHMEV 
 uint16_t ArrangeWMHEV(
 	uint8_t* dst_p,
 	struct x8578_can_db_client_pcm_pmz_w_mhev_t* src_p,
@@ -179,13 +216,56 @@ uint16_t ArrangeWMHEV(
 		return(-1);
 	}
 
-	dst_p[0] = (((src_p->em_vol_dc_link_motor_limit >> 7) & 0x07) | ((src_p->em_motor_limit_grp_counter & 0x0F) << 3) | ((src_p->em_cur_dc_link_motor_limit & 0x01) << 7));
-	dst_p[1] = ((src_p->em_cur_dc_link_motor_limit >> 1) & 0xFF);
-	dst_p[2] = (src_p->em_vol_dc_link_motor_limit & 0x7F) << 1;
+	dst_p[0] = (src_p->em_vol_dc_link_motor_limit & 0x7F) << 1;
+  dst_p[1] = (((src_p->em_vol_dc_link_motor_limit >> 7) & 0x07) |\
+              ((src_p->em_motor_limit_grp_counter & 0x0F) << 3) |\
+              ((src_p->em_cur_dc_link_motor_limit & 0x01) << 7));
+	dst_p[2] = ((src_p->em_cur_dc_link_motor_limit >> 1) & 0xFF);
 
 	return (3);
 }
 
+uint8_t PrepareWMHEV(
+	struct x8578_can_db_client_pcm_pmz_w_mhev_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float bisg_calibration_id_req,
+  float em_torque_gradient_pos,
+  float engine_torque_ripple,
+  float em_torque_gradient_neg,
+  float em_cur_dc_link_motor_limit,
+  uint8_t em_motor_limit_grp_counter,
+  float em_vol_dc_link_motor_limit) {
+
+    uint16_t crclength;
+    uint8_t crc;
+
+    if (size<8){
+      return(0);
+    }
+
+    src_p->bisg_calibration_id_req = x8578_can_db_client_pcm_pmz_w_mhev_bisg_calibration_id_req_encode(bisg_calibration_id_req);
+    src_p->em_torque_gradient_pos = x8578_can_db_client_pcm_pmz_w_mhev_em_torque_gradient_pos_encode(em_torque_gradient_pos);
+    src_p->engine_torque_ripple = x8578_can_db_client_pcm_pmz_w_mhev_engine_torque_ripple_encode(engine_torque_ripple);
+    src_p->em_torque_gradient_neg = x8578_can_db_client_pcm_pmz_w_mhev_em_torque_gradient_neg_encode(em_torque_gradient_neg);
+    src_p->em_cur_dc_link_motor_limit = x8578_can_db_client_pcm_pmz_w_mhev_em_cur_dc_link_motor_limit_encode(em_cur_dc_link_motor_limit);
+    src_p->em_motor_limit_grp_counter = x8578_can_db_client_pcm_pmz_w_mhev_em_motor_limit_grp_counter_encode(em_motor_limit_grp_counter);
+    src_p->em_vol_dc_link_motor_limit = x8578_can_db_client_pcm_pmz_w_mhev_em_vol_dc_link_motor_limit_encode(em_vol_dc_link_motor_limit);
+
+    crclength = ArrangeWMHEV(data, src_p, size);
+
+    crc = ComputeCrc(data, crclength);
+
+    src_p->em_motor_limit_grp_cs = x8578_can_db_client_pcm_pmz_w_mhev_em_motor_limit_grp_cs_encode(crc);
+    
+    x8578_can_db_client_pcm_pmz_w_mhev_pack(data, src_p, size);
+
+    return(size);
+
+}
+
+
+//THMEV
 uint16_t ArrangeTMHEV(
 	uint8_t* dst_p,
 	struct x8578_can_db_client_pcm_pmz_t_mhev_t* src_p,
@@ -195,13 +275,52 @@ uint16_t ArrangeTMHEV(
 		return(-1);
 	}
 
-	dst_p[0] = (((src_p->em_vol_dc_link_gen_limit >> 7) & 0x07) | ((src_p->em_gen_limit_grp_counter & 0x0F) << 3) | ((src_p->em_cur_dc_link_gen_limit & 0x01) << 7));
-	dst_p[1] = ((src_p->em_cur_dc_link_gen_limit >> 1) & 0xFF);
-	dst_p[2] = ((src_p->em_vol_dc_link_gen_limit & 0x7F) << 1);
+	dst_p[0] = ((src_p->em_vol_dc_link_gen_limit & 0x7F) << 1);
+  dst_p[1] = (((src_p->em_vol_dc_link_gen_limit >> 7) & 0x07) |\
+              ((src_p->em_gen_limit_grp_counter & 0x0F) << 3) |\
+              ((src_p->em_cur_dc_link_gen_limit & 0x01) << 7) );
+	dst_p[2] = ((src_p->em_cur_dc_link_gen_limit >> 1) & 0xFF);
 
 	return (3);
 }
 
+uint8_t PrepareTMHEV(
+	struct x8578_can_db_client_pcm_pmz_t_mhev_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float toc_pump_dr_req,
+  float em_coolant_pump_dr_req,
+  float em_cur_dc_link_gen_limit,
+  uint8_t em_gen_limit_grp_counter,
+  float em_vol_dc_link_gen_limit) {
+
+    uint16_t crclength;
+    uint8_t crc;
+
+    if (size<8){
+      return(0);
+    }
+
+    src_p->toc_pump_dr_req = x8578_can_db_client_pcm_pmz_t_mhev_toc_pump_dr_req_encode(toc_pump_dr_req);
+    src_p->em_coolant_pump_dr_req = x8578_can_db_client_pcm_pmz_t_mhev_em_coolant_pump_dr_req_encode(em_coolant_pump_dr_req);
+    src_p->em_cur_dc_link_gen_limit = x8578_can_db_client_pcm_pmz_t_mhev_em_cur_dc_link_gen_limit_encode(em_cur_dc_link_gen_limit);
+    src_p->em_gen_limit_grp_counter = x8578_can_db_client_pcm_pmz_t_mhev_em_gen_limit_grp_counter_encode(em_gen_limit_grp_counter);
+    src_p->em_vol_dc_link_gen_limit = x8578_can_db_client_pcm_pmz_t_mhev_em_vol_dc_link_gen_limit_encode(em_vol_dc_link_gen_limit);
+
+    crclength = ArrangeTMHEV(data, src_p, size);
+
+    crc = ComputeCrc(data, crclength);
+
+    src_p->em_gen_limit_grp_cs = x8578_can_db_client_pcm_pmz_t_mhev_em_gen_limit_grp_cs_encode(crc);
+    
+    x8578_can_db_client_pcm_pmz_t_mhev_pack(data, src_p, size);
+
+    return(size);
+
+}
+
+
+//UMHEV
 uint16_t ArrangeUMHEV(
 	uint8_t* dst_p,
 	struct x8578_can_db_client_pcm_pmz_u_mhev_t* src_p,
@@ -211,12 +330,98 @@ uint16_t ArrangeUMHEV(
 		return(-1);
 	}
 
-	dst_p[0] = (src_p->em_torque_min_limit & 0x00FF);
-	dst_p[1] = (((src_p->em_torque_min_limit >> 8) & 0x03) | ((src_p->vscem_torq_lim_gp_counter & 0x0F) << 2) |((src_p->em_torque_max_limit & 0x03) << 6));
-	dst_p[2] = ((src_p->em_torque_max_limit >> 2) & 0x00FF);
+	dst_p[0] = ((src_p->em_torque_max_limit >> 2) & 0x00FF);
+	dst_p[1] = (src_p->em_torque_min_limit & 0x00FF);
+	dst_p[2] = (((src_p->em_torque_min_limit >> 8) & 0x03) |\
+              ((src_p->vscem_torq_lim_gp_counter & 0x0F) << 2) |\
+              ((src_p->em_torque_max_limit & 0x03) << 6));
 	dst_p[3] = ((src_p->drvline_damp_torq_max_lim >> 2) & 0x00FF);
-	dst_p[4] = (((src_p->drvline_damp_torq_max_lim & 0x03) << 6) | ((src_p->drvline_damp_torq_min_lim >> 8) & 0x03));
+	dst_p[4] = (((src_p->drvline_damp_torq_max_lim & 0x03) << 6) |\
+              ((src_p->drvline_damp_torq_min_lim >> 8) & 0x03));
 	dst_p[5] = (src_p->drvline_damp_torq_min_lim & 0x00FF);
 
 	return (6);
 }
+
+uint8_t PrepareUMHEV(
+	struct x8578_can_db_client_pcm_pmz_u_mhev_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  uint8_t vscem_torq_lim_gp_counter,
+  float em_torque_min_limit,
+  float em_torque_max_limit,
+  float drvline_damp_torq_min_lim,
+  float drvline_damp_torq_max_lim) {
+
+    uint16_t crclength;
+    uint8_t crc;
+
+    if (size<8){
+      return(0);
+    }
+
+    src_p->vscem_torq_lim_gp_counter = x8578_can_db_client_pcm_pmz_u_mhev_vscem_torq_lim_gp_counter_encode(vscem_torq_lim_gp_counter);
+    src_p->em_torque_min_limit = x8578_can_db_client_pcm_pmz_u_mhev_em_torque_min_limit_encode(em_torque_min_limit);
+    src_p->em_torque_max_limit = x8578_can_db_client_pcm_pmz_u_mhev_em_torque_max_limit_encode(em_torque_max_limit);
+    src_p->drvline_damp_torq_min_lim = x8578_can_db_client_pcm_pmz_u_mhev_drvline_damp_torq_min_lim_encode(drvline_damp_torq_min_lim);
+    src_p->drvline_damp_torq_max_lim = x8578_can_db_client_pcm_pmz_u_mhev_drvline_damp_torq_max_lim_encode(drvline_damp_torq_max_lim);
+
+    crclength = ArrangeUMHEV(data, src_p, size);
+
+    crc = ComputeCrc(data, crclength);
+
+    src_p->vscem_torq_lim_gp_cs = x8578_can_db_client_pcm_pmz_u_mhev_vscem_torq_lim_gp_cs_encode(crc);
+    
+    x8578_can_db_client_pcm_pmz_u_mhev_pack(data, src_p, size);
+
+    return(size);
+
+}
+
+//BCM
+uint8_t PrepareBCM(
+	struct x8578_can_db_client_bcm_pmz_a_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float car_mode_hs,
+  float car_mode_hs_ub,
+  float power_mode_ub,
+  float power_mode) {
+
+    if (size<8){
+      return(0);
+    }
+
+    src_p->car_mode_hs = x8578_can_db_client_bcm_pmz_a_car_mode_hs_encode(car_mode_hs);
+    src_p->car_mode_hs_ub = x8578_can_db_client_bcm_pmz_a_car_mode_hs_ub_encode(car_mode_hs_ub);
+    src_p->power_mode_ub = x8578_can_db_client_bcm_pmz_a_power_mode_ub_encode(power_mode_ub);
+    src_p->power_mode = x8578_can_db_client_bcm_pmz_a_power_mode_encode(power_mode);
+    
+    x8578_can_db_client_bcm_pmz_a_pack(data, src_p, size);
+
+    return(size);
+
+}
+
+//GWM
+uint8_t PrepareGWM(
+	struct x8578_can_db_client_gwm_pmz_h_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float crash_status_rcm,
+  float crash_status_rcm_ub) {
+
+    if (size<8){
+      return(0);
+    }
+
+    src_p->crash_status_rcm = x8578_can_db_client_gwm_pmz_h_crash_status_rcm_encode(crash_status_rcm);
+    src_p->crash_status_rcm_ub = x8578_can_db_client_gwm_pmz_h_crash_status_rcm_ub_encode(crash_status_rcm_ub);
+    
+    x8578_can_db_client_gwm_pmz_h_pack(data, src_p, size);
+
+    return(size);
+
+}
+
+

@@ -15,22 +15,7 @@ CONFIDENTIAL? It's all according to open standards but best not to share it.
 #include "x8578_can_db_client.h"
 #include "stdint.h"
 
-typedef struct ValeoEncodingData{
-  //CAN TX
-  x8578_can_db_client_pcm_pmz_w_mhev_t    w_mhev_msg; //Calibrate limits
-  x8578_can_db_client_pcm_pmz_u_mhev_t    u_mhev_msg; 
-  x8578_can_db_client_pcm_pmz_t_mhev_t    t_mhev_msg;
-  x8578_can_db_client_bcm_pmz_a_t         bcm_pmz_msg; //set car to running
-  x8578_can_db_client_gwm_pmz_h_t         gwm_pmz_msg; //crash status
-  x8578_can_db_client_pcm_pmz_f_hybrid_t  f_hybrid_msg; //torque command
-
-  //CAN RX
-  x8578_can_db_client_epic_pmz_i_t        pmz_i_msg; //DTC Diagnostic
-  x8578_can_db_client_epic_pmz_c_t        pmz_c_msg; //recv
-  x8578_can_db_client_epic_pmz_g_t        pmz_g_msg; //recv
-  x8578_can_db_client_epic_pmz_h_t        pmz_h_msg; //recv
-  x8578_can_db_client_epic_pmz_e_t        pmz_e_msg; //recv
-} ValeoEncodingData;
+#define CAN_TX_ARRAYSIZE 8
 
 uint8_t ComputeCounter(uint8_t Counter);
 
@@ -43,21 +28,78 @@ uint16_t ArrangeFHybrid(
     struct x8578_can_db_client_pcm_pmz_f_hybrid_t* src_p,
     uint16_t size);
 
+uint8_t PrepareFHybrid(
+  struct x8578_can_db_client_pcm_pmz_f_hybrid_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  uint8_t vscem_req_gp_counter,
+  float em_operating_mode_req_ext,
+  float em_voltage_dc_link_req_ext,
+  float em_speed_request_ext,
+  float em_torque_request_ext);
+
 uint16_t ArrangeWMHEV(
     uint8_t* dst_p,
     struct x8578_can_db_client_pcm_pmz_w_mhev_t* src_p,
     uint16_t size);
+
+uint8_t PrepareWMHEV(
+	struct x8578_can_db_client_pcm_pmz_w_mhev_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float bisg_calibration_id_req,
+  float em_torque_gradient_pos,
+  float engine_torque_ripple,
+  float em_torque_gradient_neg,
+  float em_cur_dc_link_motor_limit,
+  uint8_t em_motor_limit_grp_counter,
+  float em_vol_dc_link_motor_limit);
 
 uint16_t ArrangeTMHEV(
     uint8_t* dst_p,
     struct x8578_can_db_client_pcm_pmz_t_mhev_t* src_p,
     uint16_t size);
 
+uint8_t PrepareTMHEV(
+	struct x8578_can_db_client_pcm_pmz_t_mhev_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float toc_pump_dr_req,
+  float em_coolant_pump_dr_req,
+  float em_cur_dc_link_gen_limit,
+  uint8_t em_gen_limit_grp_counter,
+  float em_vol_dc_link_gen_limit);
+
 uint16_t ArrangeUMHEV(
     uint8_t* dst_p,
     struct x8578_can_db_client_pcm_pmz_u_mhev_t* src_p,
     uint16_t size);
 
+uint8_t PrepareUMHEV(
+	struct x8578_can_db_client_pcm_pmz_u_mhev_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  uint8_t vscem_torq_lim_gp_counter,
+  float em_torque_min_limit,
+  float em_torque_max_limit,
+  float drvline_damp_torq_min_lim,
+  float drvline_damp_torq_max_lim);
+
+uint8_t PrepareBCM(
+	struct x8578_can_db_client_bcm_pmz_a_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float car_mode_hs,
+  float car_mode_hs_ub,
+  float power_mode_ub,
+  float power_mode);
+
+uint8_t PrepareGWM(
+	struct x8578_can_db_client_gwm_pmz_h_t* src_p,
+  uint8_t* data,
+  uint8_t size,
+  float crash_status_rcm,
+  float crash_status_rcm_ub);
 
 #endif
 
