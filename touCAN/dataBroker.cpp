@@ -13,17 +13,24 @@
 #include "dataBroker.h"
 
 BrokerData::BrokerData(){
-      value = 0;
+      this->value = 0;
+      last_update_time = -1; //data not valid
+}
+
+BrokerData::BrokerData(float initial_value){
+      this->value = initial_value;
       last_update_time = -1; //data not valid
 }
 
 void BrokerData::setValue(float new_value) {
-      value = new_value;
-      last_update_time = esp_timer_get_time();
+      this->value = new_value;
+      Serial.print("new is: ");Serial.println(this->value);
+      this->last_update_time = esp_timer_get_time();
 }
 
 float BrokerData::getValue() { 
-      return (value);
+      Serial.print("val is: ");Serial.println(this->value);
+      return (this->value);
 }
 
 //Data for other functions

@@ -17,6 +17,7 @@
 class BrokerData {
   public:
     BrokerData();
+    BrokerData(float initial_value);
     void setValue(float new_value);
     float getValue(void);            
     float value;

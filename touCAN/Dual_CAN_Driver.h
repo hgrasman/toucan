@@ -34,7 +34,6 @@ typedef struct ValeoEncodingData{
   x8578_can_db_client_epic_pmz_e_t        pmz_e_msg; //recv
 } ValeoEncodingData;
 
-extern BrokerData CAN0TorqueRequest;
 
 #define CAN_SETUP_BOTH_SUCCESS 0b00
 #define CAN_SETUP_CAN0_FAILURE 0b01

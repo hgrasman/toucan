@@ -112,12 +112,14 @@ void CANRxTask(void *pvParameters){
           break;
 
         default:
+          break;
           Serial.print("ID: "); Serial.print(incomingData.arb_id);
-          Serial.print("  [");
+          /*Serial.print("  [");
           for (int i = 0; i<incomingData.data_len;i++){
             Serial.print(incomingData.data[i]);Serial.print(" ");
           }
-          Serial.println("]");
+          Serial.println("]");*/
+          Serial.println();
       }
     }
 
