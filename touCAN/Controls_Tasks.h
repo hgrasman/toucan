@@ -12,8 +12,7 @@
 #define CONTROLS_TASKS
 
 #include "dataBroker.h"
-
-//These are the variables which are to be made accessible to the core code
+#include "stdint.h"
 
 //This is the function handle which will be executed
 #define VDKART_SETUP_SUCCESS 0b00

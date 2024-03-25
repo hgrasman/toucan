@@ -36,9 +36,24 @@ float BrokerData::getValue(int64_t* time_Variable) {
       return (this->value);
 }
 
+bool BrokerData::dataInitialized(void){
+      return (this->last_update_time >= 0);
+}
+
+SemaphoreHandle_t xSemaphore_SerialMutex;
+
 //Data for other functions
-BrokerData CAN0TorqueRequest = BrokerData();
-BrokerData CAN1TorqueRequest= BrokerData();
+BrokerData VeCRLR_ControlReadyFlag = BrokerData();
+
+BrokerData VeVDKR_CAN0TorqueRequest = BrokerData();
+BrokerData VeVDKR_CAN1TorqueRequest= BrokerData();
+
+BrokerData VeSNSR_IMU6AxRaw = BrokerData();
+BrokerData VeSNSR_IMU6AyRaw = BrokerData();
+BrokerData VeSNSR_IMU6AzRaw = BrokerData();
+BrokerData VeSNSR_IMU6WxRaw = BrokerData();
+BrokerData VeSNSR_IMU6WyRaw = BrokerData();
+BrokerData VeSNSR_IMU6WzRaw = BrokerData();
 
 
 
