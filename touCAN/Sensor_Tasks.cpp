@@ -25,7 +25,7 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
-  MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, portMAX_DELAY) 
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
@@ -38,14 +38,16 @@ void MCU6050Task(void *pvParameters){  // This is a task.
     VeSNSR_a_IMU6WyRaw.setValue(IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
     VeSNSR_a_IMU6WzRaw.setValue(IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
 
-    //print
-    MUTEX_PRINT(VeSNSR_a_IMU6AxRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_a_IMU6AyRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_a_IMU6AzRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_a_IMU6WxRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_a_IMU6WyRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINTLN(VeSNSR_a_IMU6WzRaw.getValue());
-
+/*  //print
+    WRAP_SERIAL_MUTEX(\
+    Serial.print(VeSNSR_a_IMU6AxRaw.getValue()); Serial.print(", ");\
+    Serial.print(VeSNSR_a_IMU6AyRaw.getValue()); Serial.print(", ");\
+    Serial.print(VeSNSR_a_IMU6AzRaw.getValue()); Serial.print(", ");\
+    Serial.print(VeSNSR_a_IMU6WxRaw.getValue()); Serial.print(", ");\
+    Serial.print(VeSNSR_a_IMU6WyRaw.getValue()); Serial.print(", ");\
+    Serial.println(VeSNSR_a_IMU6WzRaw.getValue());\
+    , pdMS_TO_TICKS(5))
+*/
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }
@@ -53,14 +55,14 @@ void MCU6050Task(void *pvParameters){  // This is a task.
 uint8_t MPU6050_SetupTasks(void){
 
   Wire.begin(); //start I2C on default pins
-  MUTEX_PRINTLN("I2C Controller Configured");
+  Serial.println("I2C Controller Configured");
 
   //default 2g and 250 deg/sec?: yes "namely +/- 2g and +/- 250 degrees/sec"
   accelgyro.initialize();
   if (!accelgyro.testConnection()){
     return(MCU6050_INIT_FAILURE);
   }
-  MUTEX_PRINTLN("MCU6050 Initialized");
+  Serial.println("MCU6050 Initialized");
 
   xTaskCreatePinnedToCore(
       MCU6050Task

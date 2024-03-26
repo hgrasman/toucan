@@ -19,31 +19,33 @@ void setup() {
 
   // Initialize serial communication at 115200 bits per second:
   xSemaphore_SerialMutex = xSemaphoreCreateMutex();
-  delay(1000);
-  Serial.begin(115200);
-  delay(2000);
-  MUTEX_PRINTLN("\n Starting...\n");
-  Serial.flush();
+  WRAP_SERIAL_MUTEX(\
+    delay(500);\
+    Serial.begin(115200);\
+    delay(1000);\
+    Serial.println("\n Starting...\n");\
+    Serial.flush();\
+    , portMAX_DELAY)
 
   if (MPU6050_SetupTasks() == MCU6050_INIT_SUCCESS){
-    MUTEX_PRINTLN("IMU INIT SUCCESS");
+    WRAP_SERIAL_MUTEX(Serial.println("IMU INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
-    MUTEX_PRINTLN("IMU INIT FAILURE");
+    WRAP_SERIAL_MUTEX(Serial.println("IMU INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
   if (VDKart_SetupTasks() == VDKART_SETUP_SUCCESS){
-    MUTEX_PRINTLN("VDKART INIT SUCCESS");
+    WRAP_SERIAL_MUTEX(Serial.println("VDKART INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
-    MUTEX_PRINTLN("VDKART INIT FAILURE");
+    WRAP_SERIAL_MUTEX(Serial.println("VDKART INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
   if (CAN_SetupTasks() == CAN_SETUP_BOTH_SUCCESS){
-    MUTEX_PRINTLN("CAN HARDWARE INIT SUCCESS");
+    WRAP_SERIAL_MUTEX(Serial.println("CAN HARDWARE INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
-    MUTEX_PRINTLN("CAN HARDWARE INIT FAILURE");
+    WRAP_SERIAL_MUTEX(Serial.println("CAN HARDWARE INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
-  MUTEX_PRINTLN("Flagging Go");
+  WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
   VeCRLR_b_ControlReadyFlag.setValue(0);
 
 

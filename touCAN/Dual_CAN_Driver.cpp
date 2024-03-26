@@ -74,13 +74,13 @@ void CANRxTask(void *pvParameters){
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
-  MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, portMAX_DELAY) 
   
   CANData incomingData; 
   for (;;){
 
     if( !ulTaskNotifyTake(pdTRUE, portMAX_DELAY )){
-      MUTEX_PRINTLN("CAN stuck waiting.");
+      WRAP_SERIAL_MUTEX(Serial.println("CAN stuck waiting.");, pdMS_TO_TICKS(5)) 
     }
 
     while(params->CANx.checkReceive() == CAN_MSGAVAIL){
@@ -88,42 +88,36 @@ void CANRxTask(void *pvParameters){
       //do something with the data
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
-          //MUTEX_PRINT("found a A ");
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
-          //MUTEX_PRINT("found a C ");
           x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
           params->VeCANR_rpm_CANxiBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
           break;
  
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
-          //MUTEX_PRINT("found a E ");
           x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
           params->VeCANR_I_CANxiBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
-          //MUTEX_PRINT("found a G ");
           x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
-          //MUTEX_PRINT("found a H ");
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
           params->VeCANR_e_CANxiBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
-          //MUTEX_PRINT("found a I ");
           x8578_can_db_client_epic_pmz_i_unpack(&params->EncodingData.pmz_i_msg, incomingData.data, incomingData.data_len);
-          if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {MUTEX_PRINT("Diagnostic: ");MUTEX_PRINTLN(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
+          if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {Serial.print("Diagnostic: ");Serial.println(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
           break;
 
         default:
+          WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
           break;
-          MUTEX_PRINT("ID: "); MUTEX_PRINTLN(incomingData.arb_id);
       }
     }
 
@@ -150,7 +144,7 @@ void CANTxTask(void *pvParameters){
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
-  MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, portMAX_DELAY) 
 
   for (;;){
 
@@ -193,10 +187,11 @@ void CANTxTask(void *pvParameters){
     }
 
     //F Hybrid
-    float LeTorqueRequest = params->VeVDKR_CANxTorqueRequest->getValue();
+    double LeTorqueRequest = params->VeVDKR_CANxTorqueRequest->getValue();
     PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
                    X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE,
                    0,0,LeTorqueRequest);
+    
     if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_LENGTH, data) == CAN_OK ){
       f_hybrid_counter = ComputeCounter(f_hybrid_counter);
       //vTaskDelay(pdMS_TO_TICKS(1));
@@ -214,7 +209,7 @@ uint8_t CAN_SetupTasks(void){
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
-  MUTEX_PRINTLN("CAN0 Setup Beginning");
+  WRAP_SERIAL_MUTEX(Serial.println("CAN0 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
@@ -245,7 +240,7 @@ uint8_t CAN_SetupTasks(void){
     status |= CAN_SETUP_CAN0_FAILURE;
   }
 
-  MUTEX_PRINTLN("CAN1 Setup Beginning");
+  WRAP_SERIAL_MUTEX(Serial.println("CAN1 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 

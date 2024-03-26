@@ -23,13 +23,27 @@ void VDKartTask(void *pvParameters){  // This is a task.
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
-  MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
 
-  float trq = 0;
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
+
+  double trq = 0;
+  double imuIn = 0;
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
-    
+
+    imuIn= (-VeSNSR_a_IMU6AyRaw.getValue())*.1 + imuIn*.9;
+    trq = imuIn * 2.5;
+
+    if (trq<.05 && trq>-.05){trq = 0;
+    }else if (trq>.05){trq -= .05;
+    }else if (trq<-.05){trq += .05;}
+
+    if (trq<0){trq = 0;}
+
+    //WRAP_SERIAL_MUTEX(Serial.print(imuIn); Serial.print(',');Serial.println(trq), pdMS_TO_TICKS(5))
+    WRAP_SERIAL_MUTEX(Serial.print(trq); Serial.println(VeCANR_e_CAN0iBSGOpMode.getValue());, pdMS_TO_TICKS(5))
+
     VeVDKR_tq_CAN0TorqueRequest.setValue(trq);
     VeVDKR_tq_CAN1TorqueRequest.setValue(trq);
 
