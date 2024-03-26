@@ -146,44 +146,57 @@ void CANTxTask(void *pvParameters){
   }
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, portMAX_DELAY) 
 
+  uint8_t configSelector = 0;
+  xLastWakeTime = xTaskGetTickCount(); // Initialize
   for (;;){
 
-    //WMHEV
-    PrepareWMHEV(&params->EncodingData.w_mhev_msg, data, sizeof(data), 
-                 0, W_MHEV_TORQUE_GRAD_POS, 0,  W_MHEV_TORQUE_GRAD_NEG, W_MHEV_DC_CURR_LIMIT, w_mhev_counter, W_MHEV_DC_VOLT_MIN);
-    if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_LENGTH, data) == CAN_OK ){
-      w_mhev_counter = ComputeCounter(w_mhev_counter);
-      vTaskDelay(pdMS_TO_TICKS(1));
-    }
-
-    //UMHEV
-    PrepareUMHEV(&params->EncodingData.u_mhev_msg, data, sizeof(data),
-                 u_mhev_counter, U_MHEV_TORQ_MIN_LIMIT, U_MHEV_TORQ_MAX_LIMIT, U_MHEV_DMP_MIN_LIMIT, U_MHEV_DMP_MAX_LIMIT);
-    if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_LENGTH, data) == CAN_OK ){
-      u_mhev_counter = ComputeCounter(u_mhev_counter);
-      vTaskDelay(pdMS_TO_TICKS(1));
-    }
-
-    //TMHEV
-    PrepareTMHEV(&params->EncodingData.t_mhev_msg, data, sizeof(data),
-                 0, 0, T_MHEV_REGEN_CURR_LIMIT, t_mhev_counter, T_MHEV_REGEN_VOLT_LIMIT);
-    if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_LENGTH, data) == CAN_OK ){
-      t_mhev_counter = ComputeCounter(t_mhev_counter);
-      vTaskDelay(pdMS_TO_TICKS(1));
-    }
-
-    //BCM
-    PrepareBCM(&params->EncodingData.bcm_pmz_msg, data, sizeof(data),
-               X8578_CAN_DB_CLIENT_BCM_PMZ_A_CAR_MODE_HS_NORMAL_CHOICE, 0, 0, X8578_CAN_DB_CLIENT_BCM_PMZ_A_POWER_MODE_RUNNING_2_CHOICE);
-    if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_BCM_PMZ_A_FRAME_ID, X8578_CAN_DB_CLIENT_BCM_PMZ_A_IS_EXTENDED, X8578_CAN_DB_CLIENT_BCM_PMZ_A_LENGTH, data) == CAN_OK ){
-      vTaskDelay(pdMS_TO_TICKS(1));
-    }
-
-    //GWM
-    PrepareGWM(&params->EncodingData.gwm_pmz_msg, data, sizeof(data),
-               X8578_CAN_DB_CLIENT_GWM_PMZ_H_CRASH_STATUS_RCM_NO_CRASH_CHOICE, 0);
-    if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_GWM_PMZ_H_FRAME_ID, X8578_CAN_DB_CLIENT_GWM_PMZ_H_IS_EXTENDED, X8578_CAN_DB_CLIENT_GWM_PMZ_H_LENGTH, data) == CAN_OK ){
-      vTaskDelay(pdMS_TO_TICKS(1));
+    //Send configs one every 10ms tx period
+    switch(configSelector){
+      case 0:
+        //WMHEV
+        PrepareWMHEV(&params->EncodingData.w_mhev_msg, data, sizeof(data), 
+                    0, W_MHEV_TORQUE_GRAD_POS, 0,  W_MHEV_TORQUE_GRAD_NEG, W_MHEV_DC_CURR_LIMIT, w_mhev_counter, W_MHEV_DC_VOLT_MIN);
+        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_LENGTH, data) == CAN_OK ){
+          w_mhev_counter = ComputeCounter(w_mhev_counter);
+          vTaskDelay(pdMS_TO_TICKS(5));
+        }
+        break;
+      case 1:
+        //UMHEV
+        PrepareUMHEV(&params->EncodingData.u_mhev_msg, data, sizeof(data),
+                    u_mhev_counter, U_MHEV_TORQ_MIN_LIMIT, U_MHEV_TORQ_MAX_LIMIT, U_MHEV_DMP_MIN_LIMIT, U_MHEV_DMP_MAX_LIMIT);
+        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_LENGTH, data) == CAN_OK ){
+          u_mhev_counter = ComputeCounter(u_mhev_counter);
+          vTaskDelay(pdMS_TO_TICKS(5));
+        }
+        break;
+      case 2:
+        //TMHEV
+        PrepareTMHEV(&params->EncodingData.t_mhev_msg, data, sizeof(data),
+                    0, 0, T_MHEV_REGEN_CURR_LIMIT, t_mhev_counter, T_MHEV_REGEN_VOLT_LIMIT);
+        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_LENGTH, data) == CAN_OK ){
+          t_mhev_counter = ComputeCounter(t_mhev_counter);
+          vTaskDelay(pdMS_TO_TICKS(5));
+        }
+        break;
+      case 3:
+        //BCM
+        PrepareBCM(&params->EncodingData.bcm_pmz_msg, data, sizeof(data),
+                  X8578_CAN_DB_CLIENT_BCM_PMZ_A_CAR_MODE_HS_NORMAL_CHOICE, 0, 0, X8578_CAN_DB_CLIENT_BCM_PMZ_A_POWER_MODE_RUNNING_2_CHOICE);
+        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_BCM_PMZ_A_FRAME_ID, X8578_CAN_DB_CLIENT_BCM_PMZ_A_IS_EXTENDED, X8578_CAN_DB_CLIENT_BCM_PMZ_A_LENGTH, data) == CAN_OK ){
+          vTaskDelay(pdMS_TO_TICKS(5));
+        }
+        break;
+      case 4:
+        //GWM
+        PrepareGWM(&params->EncodingData.gwm_pmz_msg, data, sizeof(data),
+                  X8578_CAN_DB_CLIENT_GWM_PMZ_H_CRASH_STATUS_RCM_NO_CRASH_CHOICE, 0);
+        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_GWM_PMZ_H_FRAME_ID, X8578_CAN_DB_CLIENT_GWM_PMZ_H_IS_EXTENDED, X8578_CAN_DB_CLIENT_GWM_PMZ_H_LENGTH, data) == CAN_OK ){
+          vTaskDelay(pdMS_TO_TICKS(5));
+        }
+        break;
+      default:
+        configSelector = 0; //reset
     }
 
     //F Hybrid
