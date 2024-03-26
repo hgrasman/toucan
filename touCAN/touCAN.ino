@@ -44,7 +44,7 @@ void setup() {
   }
 
   MUTEX_PRINTLN("Flagging Go");
-  VeCRLR_ControlReadyFlag.setValue(0);
+  VeCRLR_b_ControlReadyFlag.setValue(0);
 
 
   // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.

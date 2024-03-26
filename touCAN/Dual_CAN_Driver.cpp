@@ -31,6 +31,9 @@ typedef struct CANTaskParams{
   MCP_CAN CANx;
   ValeoEncodingData EncodingData;
   BrokerData* VeVDKR_CANxTorqueRequest;
+  BrokerData* VeCANR_rpm_CANxiBSGRotorSpeed;
+  BrokerData* VeCANR_e_CANxiBSGOpMode;
+  BrokerData* VeCANR_I_CANxiBSGDCCurrent;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -68,6 +71,9 @@ void CANRxTask(void *pvParameters){
 
   CANTaskParams *params = (CANTaskParams*) pvParameters;
 
+  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
+    vTaskDelay(1);
+  }
   MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
   
   CANData incomingData; 
@@ -82,46 +88,42 @@ void CANRxTask(void *pvParameters){
       //do something with the data
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
-          MUTEX_PRINT("found a A ");
+          //MUTEX_PRINT("found a A ");
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
-          MUTEX_PRINT("found a C ");
+          //MUTEX_PRINT("found a C ");
           x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
+          params->VeCANR_rpm_CANxiBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
           break;
  
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
-          MUTEX_PRINT("found a E ");
+          //MUTEX_PRINT("found a E ");
           x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
+          params->VeCANR_I_CANxiBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
-          MUTEX_PRINT("found a G ");
+          //MUTEX_PRINT("found a G ");
           x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
-          MUTEX_PRINT("found a H ");
+          //MUTEX_PRINT("found a H ");
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
-          MUTEX_PRINTLN(params->EncodingData.pmz_h_msg.em_operating_mode_ext2);
+          params->VeCANR_e_CANxiBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
-          MUTEX_PRINT("found a I ");
+          //MUTEX_PRINT("found a I ");
           x8578_can_db_client_epic_pmz_i_unpack(&params->EncodingData.pmz_i_msg, incomingData.data, incomingData.data_len);
           if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {MUTEX_PRINT("Diagnostic: ");MUTEX_PRINTLN(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
           break;
 
         default:
           break;
-          MUTEX_PRINT("ID: "); MUTEX_PRINT(incomingData.arb_id);
-          /*MUTEX_PRINT("  [");
-          for (int i = 0; i<incomingData.data_len;i++){
-            MUTEX_PRINT(incomingData.data[i]);MUTEX_PRINT(" ");
-          }
-          MUTEX_PRINTLN("]");*/
-          MUTEX_PRINTLN();
+          MUTEX_PRINT("ID: "); MUTEX_PRINTLN(incomingData.arb_id);
       }
     }
 
@@ -145,7 +147,7 @@ void CANTxTask(void *pvParameters){
   uint8_t u_mhev_counter = 0;
   uint8_t t_mhev_counter = 0;
 
-  while (VeCRLR_ControlReadyFlag.dataInitialized() != true){
+  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
   MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
@@ -216,7 +218,7 @@ uint8_t CAN_SetupTasks(void){
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
-    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_CAN0TorqueRequest};
+    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0TorqueRequest, &VeCANR_rpm_CAN0iBSGRotorSpeed, &VeCANR_e_CAN0iBSGOpMode, &VeCANR_I_CAN0iBSGDCCurrent};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -247,7 +249,7 @@ uint8_t CAN_SetupTasks(void){
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 
-    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_CAN1TorqueRequest};
+    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1TorqueRequest, &VeCANR_rpm_CAN1iBSGRotorSpeed, &VeCANR_e_CAN1iBSGOpMode, &VeCANR_I_CAN1iBSGDCCurrent};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 

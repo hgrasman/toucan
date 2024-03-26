@@ -42,18 +42,29 @@ bool BrokerData::dataInitialized(void){
 
 SemaphoreHandle_t xSemaphore_SerialMutex;
 
-//Data for other functions
-BrokerData VeCRLR_ControlReadyFlag = BrokerData();
+//CRLR Controller Ring
+BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 
-BrokerData VeVDKR_CAN0TorqueRequest = BrokerData();
-BrokerData VeVDKR_CAN1TorqueRequest= BrokerData();
+//VDKR VDKart Ring
+BrokerData VeVDKR_tq_CAN0TorqueRequest = BrokerData();
+BrokerData VeVDKR_tq_CAN1TorqueRequest = BrokerData();
 
-BrokerData VeSNSR_IMU6AxRaw = BrokerData();
-BrokerData VeSNSR_IMU6AyRaw = BrokerData();
-BrokerData VeSNSR_IMU6AzRaw = BrokerData();
-BrokerData VeSNSR_IMU6WxRaw = BrokerData();
-BrokerData VeSNSR_IMU6WyRaw = BrokerData();
-BrokerData VeSNSR_IMU6WzRaw = BrokerData();
+//CANR CAN driver Ring
+BrokerData VeCANR_rpm_CAN0iBSGRotorSpeed = BrokerData();
+BrokerData VeCANR_e_CAN0iBSGOpMode = BrokerData();
+BrokerData VeCANR_I_CAN0iBSGDCCurrent = BrokerData();
+
+BrokerData VeCANR_rpm_CAN1iBSGRotorSpeed = BrokerData();
+BrokerData VeCANR_e_CAN1iBSGOpMode = BrokerData();
+BrokerData VeCANR_I_CAN1iBSGDCCurrent = BrokerData();
+
+//SNSR Sensor Ring
+BrokerData VeSNSR_a_IMU6AxRaw = BrokerData();
+BrokerData VeSNSR_a_IMU6AyRaw = BrokerData();
+BrokerData VeSNSR_a_IMU6AzRaw = BrokerData();
+BrokerData VeSNSR_a_IMU6WxRaw = BrokerData();
+BrokerData VeSNSR_a_IMU6WyRaw = BrokerData();
+BrokerData VeSNSR_a_IMU6WzRaw = BrokerData();
 
 
 

@@ -31,16 +31,23 @@ class BrokerData {
 #define MUTEX_PRINTLN(x) if( xSemaphoreTake( xSemaphore_SerialMutex, portMAX_DELAY ) == pdTRUE ){Serial.println(x); xSemaphoreGive( xSemaphore_SerialMutex );}
 extern SemaphoreHandle_t xSemaphore_SerialMutex;
 
-extern BrokerData VeCRLR_ControlReadyFlag;
+extern BrokerData VeCRLR_b_ControlReadyFlag;
 
-extern BrokerData VeVDKR_CAN0TorqueRequest;
-extern BrokerData VeVDKR_CAN1TorqueRequest;
+extern BrokerData VeVDKR_tq_CAN0TorqueRequest;
+extern BrokerData VeVDKR_tq_CAN1TorqueRequest;
 
-extern BrokerData VeSNSR_IMU6AxRaw;
-extern BrokerData VeSNSR_IMU6AyRaw;
-extern BrokerData VeSNSR_IMU6AzRaw;
-extern BrokerData VeSNSR_IMU6WxRaw;
-extern BrokerData VeSNSR_IMU6WyRaw;
-extern BrokerData VeSNSR_IMU6WzRaw;
+extern BrokerData VeCANR_rpm_CAN0iBSGRotorSpeed;
+extern BrokerData VeCANR_e_CAN0iBSGOpMode;
+extern BrokerData VeCANR_I_CAN0iBSGDCCurrent;
+extern BrokerData VeCANR_rpm_CAN1iBSGRotorSpeed;
+extern BrokerData VeCANR_e_CAN1iBSGOpMode;
+extern BrokerData VeCANR_I_CAN1iBSGDCCurrent;
+
+extern BrokerData VeSNSR_a_IMU6AxRaw;
+extern BrokerData VeSNSR_a_IMU6AyRaw;
+extern BrokerData VeSNSR_a_IMU6AzRaw;
+extern BrokerData VeSNSR_a_IMU6WxRaw;
+extern BrokerData VeSNSR_a_IMU6WyRaw;
+extern BrokerData VeSNSR_a_IMU6WzRaw;
 
 #endif

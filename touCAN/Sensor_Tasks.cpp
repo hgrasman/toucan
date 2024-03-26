@@ -22,7 +22,7 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
 
   //wait on the global control signal
-  while (VeCRLR_ControlReadyFlag.dataInitialized() != true){
+  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
   MUTEX_PRINT(pcTaskGetTaskName(NULL)); MUTEX_PRINTLN(" Go");
@@ -31,18 +31,20 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   for(;;){
     
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    VeSNSR_IMU6AxRaw.setValue(IMU_DEFAULT_A_RES * (double)ax/IMU_MAX_INT);
-    VeSNSR_IMU6AyRaw.setValue(IMU_DEFAULT_A_RES * (double)ay/IMU_MAX_INT);
-    VeSNSR_IMU6AzRaw.setValue(IMU_DEFAULT_A_RES * (double)az/IMU_MAX_INT);
-    VeSNSR_IMU6WxRaw.setValue(IMU_DEFAULT_W_RES * (double)gx/IMU_MAX_INT);
-    VeSNSR_IMU6WyRaw.setValue(IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
-    VeSNSR_IMU6WzRaw.setValue(IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
-    MUTEX_PRINT(VeSNSR_IMU6AxRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_IMU6AyRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_IMU6AzRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_IMU6WxRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINT(VeSNSR_IMU6WyRaw.getValue()); MUTEX_PRINT(", ");
-    MUTEX_PRINTLN(VeSNSR_IMU6WzRaw.getValue());
+    VeSNSR_a_IMU6AxRaw.setValue(IMU_DEFAULT_A_RES * (double)ax/IMU_MAX_INT);
+    VeSNSR_a_IMU6AyRaw.setValue(IMU_DEFAULT_A_RES * (double)ay/IMU_MAX_INT);
+    VeSNSR_a_IMU6AzRaw.setValue(IMU_DEFAULT_A_RES * (double)az/IMU_MAX_INT);
+    VeSNSR_a_IMU6WxRaw.setValue(IMU_DEFAULT_W_RES * (double)gx/IMU_MAX_INT);
+    VeSNSR_a_IMU6WyRaw.setValue(IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
+    VeSNSR_a_IMU6WzRaw.setValue(IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
+
+    //print
+    MUTEX_PRINT(VeSNSR_a_IMU6AxRaw.getValue()); MUTEX_PRINT(", ");
+    MUTEX_PRINT(VeSNSR_a_IMU6AyRaw.getValue()); MUTEX_PRINT(", ");
+    MUTEX_PRINT(VeSNSR_a_IMU6AzRaw.getValue()); MUTEX_PRINT(", ");
+    MUTEX_PRINT(VeSNSR_a_IMU6WxRaw.getValue()); MUTEX_PRINT(", ");
+    MUTEX_PRINT(VeSNSR_a_IMU6WyRaw.getValue()); MUTEX_PRINT(", ");
+    MUTEX_PRINTLN(VeSNSR_a_IMU6WzRaw.getValue());
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
