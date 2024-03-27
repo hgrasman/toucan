@@ -69,7 +69,7 @@ uint8_t MPU6050_SetupTasks(void){
       ,  "IMU MCU6050" 
       ,  2048        
       ,  NULL
-      ,  8  // Priority
+      ,  6  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );

@@ -34,6 +34,7 @@ typedef struct CANTaskParams{
   BrokerData* VeCANR_rpm_CANxiBSGRotorSpeed;
   BrokerData* VeCANR_e_CANxiBSGOpMode;
   BrokerData* VeCANR_I_CANxiBSGDCCurrent;
+  BrokerData* VeCANR_tq_CANxiBSGTorqueDelivered;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -41,7 +42,8 @@ ValeoEncodingData ValeoEncodingCAN0;
 ValeoEncodingData ValeoEncodingCAN1;
 
 //Necessary globals interacted with by threads
-static portMUX_TYPE CAN_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
+SemaphoreHandle_t xSemaphore_CANSPIMutex;
 static TaskHandle_t xTaskCAN0RxHandle;
 static TaskHandle_t xTaskCAN1RxHandle;
 CANTaskParams CAN0Params = {NULL}; //don't remove the {NULL} 
@@ -53,11 +55,11 @@ MCP_CAN CAN1(CAN1_SPI_CS_PIN);
 //ISRs for each CAN interrupt with a macro bc I'm lazy
 #define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
 ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
-  taskENTER_CRITICAL_ISR(&CAN_spinlock);\
+  taskENTER_CRITICAL_ISR(&CAN_INT_spinlock);\
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;\
   vTaskNotifyGiveFromISR( xTaskCANxRxHandle, &xHigherPriorityTaskWoken );\
   portYIELD_FROM_ISR( xHigherPriorityTaskWoken );\
-  taskEXIT_CRITICAL_ISR(&CAN_spinlock);\
+  taskEXIT_CRITICAL_ISR(&CAN_INT_spinlock);\
 }
 CREATE_CANx_ISR(CAN0_RX_ISR, xTaskCAN0RxHandle)
 CREATE_CANx_ISR(CAN1_RX_ISR, xTaskCAN1RxHandle)
@@ -79,34 +81,43 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
-    if( !ulTaskNotifyTake(pdTRUE, portMAX_DELAY )){
-      WRAP_SERIAL_MUTEX(Serial.println("CAN stuck waiting.");, pdMS_TO_TICKS(5)) 
+    if( !ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(100))){
+      //WRAP_SERIAL_MUTEX(Serial.println("CAN stuck waiting.");, pdMS_TO_TICKS(5)) 
     }
 
     while(params->CANx.checkReceive() == CAN_MSGAVAIL){
-      params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data); //get data
+      if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+        params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data); //get data
+        xSemaphoreGive( xSemaphore_CANSPIMutex );
+      }
       //do something with the data
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
+          //WRAP_SERIAL_MUTEX(Serial.println("A");, pdMS_TO_TICKS(5))
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
           x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
+          //WRAP_SERIAL_MUTEX(Serial.println("C");, pdMS_TO_TICKS(5))
           params->VeCANR_rpm_CANxiBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
+          params->VeCANR_tq_CANxiBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
           break;
  
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
           x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
+          //WRAP_SERIAL_MUTEX(Serial.println("E");, pdMS_TO_TICKS(5))
           params->VeCANR_I_CANxiBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
           x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
+          //WRAP_SERIAL_MUTEX(Serial.println("G");, pdMS_TO_TICKS(5))
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
+          //WRAP_SERIAL_MUTEX(Serial.println("H");, pdMS_TO_TICKS(5))
           params->VeCANR_e_CANxiBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           break;
 
@@ -116,9 +127,10 @@ void CANRxTask(void *pvParameters){
           break;
 
         default:
-          WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
+          //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
           break;
       }
+      vTaskDelay(pdMS_TO_TICKS(1)); //ignore like half the frames on god jesus christ
     }
 
   }
@@ -150,64 +162,73 @@ void CANTxTask(void *pvParameters){
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for (;;){
 
+    //F Hybrid
+    double LeTorqueRequest = params->VeVDKR_CANxTorqueRequest->getValue();
+    PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
+                   X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE,
+                   0,0,LeTorqueRequest);
+    if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+      if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_LENGTH, data) == CAN_OK ){
+        f_hybrid_counter = ComputeCounter(f_hybrid_counter);
+      }
+      xSemaphoreGive( xSemaphore_CANSPIMutex );
+    }
+
     //Send configs one every 10ms tx period
-    switch(configSelector){
+    switch(configSelector++){
       case 0:
         //WMHEV
         PrepareWMHEV(&params->EncodingData.w_mhev_msg, data, sizeof(data), 
                     0, W_MHEV_TORQUE_GRAD_POS, 0,  W_MHEV_TORQUE_GRAD_NEG, W_MHEV_DC_CURR_LIMIT, w_mhev_counter, W_MHEV_DC_VOLT_MIN);
-        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_LENGTH, data) == CAN_OK ){
-          w_mhev_counter = ComputeCounter(w_mhev_counter);
-          vTaskDelay(pdMS_TO_TICKS(5));
+        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+          if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_LENGTH, data) == CAN_OK ){
+            w_mhev_counter = ComputeCounter(w_mhev_counter);
+          }
+          xSemaphoreGive( xSemaphore_CANSPIMutex );
         }
         break;
       case 1:
         //UMHEV
         PrepareUMHEV(&params->EncodingData.u_mhev_msg, data, sizeof(data),
-                    u_mhev_counter, U_MHEV_TORQ_MIN_LIMIT, U_MHEV_TORQ_MAX_LIMIT, U_MHEV_DMP_MIN_LIMIT, U_MHEV_DMP_MAX_LIMIT);
-        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_LENGTH, data) == CAN_OK ){
-          u_mhev_counter = ComputeCounter(u_mhev_counter);
-          vTaskDelay(pdMS_TO_TICKS(5));
+                    u_mhev_counter, U_MHEV_TORQ_MIN_LIMIT, U_MHEV_TORQ_MAX_LIMIT, U_MHEV_DMP_MIN_LIMIT, U_MHEV_DMP_MAX_LIMIT);           
+        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+          if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_LENGTH, data) == CAN_OK ){
+            u_mhev_counter = ComputeCounter(u_mhev_counter);
+          }
+          xSemaphoreGive( xSemaphore_CANSPIMutex );
         }
         break;
       case 2:
         //TMHEV
         PrepareTMHEV(&params->EncodingData.t_mhev_msg, data, sizeof(data),
                     0, 0, T_MHEV_REGEN_CURR_LIMIT, t_mhev_counter, T_MHEV_REGEN_VOLT_LIMIT);
-        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_LENGTH, data) == CAN_OK ){
-          t_mhev_counter = ComputeCounter(t_mhev_counter);
-          vTaskDelay(pdMS_TO_TICKS(5));
+        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+          if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_LENGTH, data) == CAN_OK ){
+            t_mhev_counter = ComputeCounter(t_mhev_counter);
+          }
+          xSemaphoreGive( xSemaphore_CANSPIMutex );
         }
         break;
       case 3:
         //BCM
         PrepareBCM(&params->EncodingData.bcm_pmz_msg, data, sizeof(data),
                   X8578_CAN_DB_CLIENT_BCM_PMZ_A_CAR_MODE_HS_NORMAL_CHOICE, 0, 0, X8578_CAN_DB_CLIENT_BCM_PMZ_A_POWER_MODE_RUNNING_2_CHOICE);
-        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_BCM_PMZ_A_FRAME_ID, X8578_CAN_DB_CLIENT_BCM_PMZ_A_IS_EXTENDED, X8578_CAN_DB_CLIENT_BCM_PMZ_A_LENGTH, data) == CAN_OK ){
-          vTaskDelay(pdMS_TO_TICKS(5));
+        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+          params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_BCM_PMZ_A_FRAME_ID, X8578_CAN_DB_CLIENT_BCM_PMZ_A_IS_EXTENDED, X8578_CAN_DB_CLIENT_BCM_PMZ_A_LENGTH, data);
+          xSemaphoreGive( xSemaphore_CANSPIMutex );
         }
         break;
       case 4:
         //GWM
         PrepareGWM(&params->EncodingData.gwm_pmz_msg, data, sizeof(data),
                   X8578_CAN_DB_CLIENT_GWM_PMZ_H_CRASH_STATUS_RCM_NO_CRASH_CHOICE, 0);
-        if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_GWM_PMZ_H_FRAME_ID, X8578_CAN_DB_CLIENT_GWM_PMZ_H_IS_EXTENDED, X8578_CAN_DB_CLIENT_GWM_PMZ_H_LENGTH, data) == CAN_OK ){
-          vTaskDelay(pdMS_TO_TICKS(5));
+        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+          params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_GWM_PMZ_H_FRAME_ID, X8578_CAN_DB_CLIENT_GWM_PMZ_H_IS_EXTENDED, X8578_CAN_DB_CLIENT_GWM_PMZ_H_LENGTH, data);
+          xSemaphoreGive( xSemaphore_CANSPIMutex );
         }
         break;
       default:
         configSelector = 0; //reset
-    }
-
-    //F Hybrid
-    double LeTorqueRequest = params->VeVDKR_CANxTorqueRequest->getValue();
-    PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
-                   X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE,
-                   0,0,LeTorqueRequest);
-    
-    if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_LENGTH, data) == CAN_OK ){
-      f_hybrid_counter = ComputeCounter(f_hybrid_counter);
-      //vTaskDelay(pdMS_TO_TICKS(1));
     }
 
     xTaskDelayUntil( &xLastWakeTime, xFrequency );
@@ -222,11 +243,14 @@ uint8_t CAN_SetupTasks(void){
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
+  xSemaphore_CANSPIMutex = xSemaphoreCreateMutex();
+
   WRAP_SERIAL_MUTEX(Serial.println("CAN0 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
-    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0TorqueRequest, &VeCANR_rpm_CAN0iBSGRotorSpeed, &VeCANR_e_CAN0iBSGOpMode, &VeCANR_I_CAN0iBSGDCCurrent};
+    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0TorqueRequest, &VeCANR_rpm_CAN0iBSGRotorSpeed, 
+                  &VeCANR_e_CAN0iBSGOpMode, &VeCANR_I_CAN0iBSGDCCurrent, &VeCANR_tq_CAN0iBSGTorqueDelivered};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -257,7 +281,8 @@ uint8_t CAN_SetupTasks(void){
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 
-    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1TorqueRequest, &VeCANR_rpm_CAN1iBSGRotorSpeed, &VeCANR_e_CAN1iBSGOpMode, &VeCANR_I_CAN1iBSGDCCurrent};
+    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1TorqueRequest, &VeCANR_rpm_CAN1iBSGRotorSpeed, 
+                  &VeCANR_e_CAN1iBSGOpMode, &VeCANR_I_CAN1iBSGDCCurrent, &VeCANR_tq_CAN1iBSGTorqueDelivered};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 

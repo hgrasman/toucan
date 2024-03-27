@@ -53,10 +53,12 @@ BrokerData VeVDKR_tq_CAN1TorqueRequest = BrokerData();
 BrokerData VeCANR_rpm_CAN0iBSGRotorSpeed = BrokerData();
 BrokerData VeCANR_e_CAN0iBSGOpMode = BrokerData();
 BrokerData VeCANR_I_CAN0iBSGDCCurrent = BrokerData();
+BrokerData VeCANR_tq_CAN0iBSGTorqueDelivered = BrokerData();
 
 BrokerData VeCANR_rpm_CAN1iBSGRotorSpeed = BrokerData();
 BrokerData VeCANR_e_CAN1iBSGOpMode = BrokerData();
 BrokerData VeCANR_I_CAN1iBSGDCCurrent = BrokerData();
+BrokerData VeCANR_tq_CAN1iBSGTorqueDelivered = BrokerData();
 
 //SNSR Sensor Ring
 BrokerData VeSNSR_a_IMU6AxRaw = BrokerData();

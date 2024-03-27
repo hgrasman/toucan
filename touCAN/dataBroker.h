@@ -38,9 +38,12 @@ extern BrokerData VeVDKR_tq_CAN1TorqueRequest;
 extern BrokerData VeCANR_rpm_CAN0iBSGRotorSpeed;
 extern BrokerData VeCANR_e_CAN0iBSGOpMode;
 extern BrokerData VeCANR_I_CAN0iBSGDCCurrent;
+extern BrokerData VeCANR_tq_CAN0iBSGTorqueDelivered;
+
 extern BrokerData VeCANR_rpm_CAN1iBSGRotorSpeed;
 extern BrokerData VeCANR_e_CAN1iBSGOpMode;
 extern BrokerData VeCANR_I_CAN1iBSGDCCurrent;
+extern BrokerData VeCANR_tq_CAN1iBSGTorqueDelivered;
 
 extern BrokerData VeSNSR_a_IMU6AxRaw;
 extern BrokerData VeSNSR_a_IMU6AyRaw;

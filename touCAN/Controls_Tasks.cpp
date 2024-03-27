@@ -42,8 +42,12 @@ void VDKartTask(void *pvParameters){  // This is a task.
     if (trq<0){trq = 0;}
 
     //WRAP_SERIAL_MUTEX(Serial.print(imuIn); Serial.print(',');Serial.println(trq), pdMS_TO_TICKS(5))
-    //WRAP_SERIAL_MUTEX(Serial.print(trq); Serial.print(", "); Serial.println(VeCANR_e_CAN0iBSGOpMode.getValue());, pdMS_TO_TICKS(5))
-
+/*    WRAP_SERIAL_MUTEX(Serial.print(trq); Serial.print(", ");\
+     Serial.print(VeCANR_e_CAN0iBSGOpMode.getValue()); Serial.print(", ");\
+     Serial.print(VeCANR_tq_CAN0iBSGTorqueDelivered.getValue());
+     Serial.println("");
+    , pdMS_TO_TICKS(5))
+*/
     VeVDKR_tq_CAN0TorqueRequest.setValue(trq);
     VeVDKR_tq_CAN1TorqueRequest.setValue(trq);
 
