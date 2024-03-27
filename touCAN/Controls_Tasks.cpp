@@ -27,13 +27,22 @@ void VDKartTask(void *pvParameters){  // This is a task.
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
   double trq = 0;
-  double imuIn = 0;
+  double LeCRLR_a_AxFilt;
+  double LeCRLR_a_AyFilt;
+  double LeCRLR_a_AzFilt;  
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
-    imuIn= (-VeSNSR_a_IMU6AyRaw.getValue())*.1 + imuIn*.9;
-    trq = imuIn * 2.5;
+    LeCRLR_a_AxFilt = VeSNSR_a_IMU6AxFilt.getValue();
+    LeCRLR_a_AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
+    LeCRLR_a_AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
+
+    double LeCRLR_p_TorqueSplitTarget = (LeCRLR_a_AxFilt*2+.5);
+    if (LeCRLR_p_TorqueSplitTarget<0){LeCRLR_p_TorqueSplitTarget = 0;}
+    if (LeCRLR_p_TorqueSplitTarget>1){LeCRLR_p_TorqueSplitTarget = 1;}
+
+    trq = -LeCRLR_a_AyFilt * 5;
 
     if (trq<.05 && trq>-.05){trq = 0;
     }else if (trq>.05){trq -= .05;
@@ -41,15 +50,8 @@ void VDKartTask(void *pvParameters){  // This is a task.
 
     if (trq<0){trq = 0;}
 
-    //WRAP_SERIAL_MUTEX(Serial.print(imuIn); Serial.print(',');Serial.println(trq), pdMS_TO_TICKS(5))
-/*    WRAP_SERIAL_MUTEX(Serial.print(trq); Serial.print(", ");\
-     Serial.print(VeCANR_e_CAN0iBSGOpMode.getValue()); Serial.print(", ");\
-     Serial.print(VeCANR_tq_CAN0iBSGTorqueDelivered.getValue());
-     Serial.println("");
-    , pdMS_TO_TICKS(5))
-*/
-    VeVDKR_tq_CAN0TorqueRequest.setValue(trq);
-    VeVDKR_tq_CAN1TorqueRequest.setValue(trq);
+    VeVDKR_tq_CAN0TorqueRequest.setValue(trq * LeCRLR_p_TorqueSplitTarget);
+    VeVDKR_tq_CAN1TorqueRequest.setValue(trq * (1-LeCRLR_p_TorqueSplitTarget));
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }

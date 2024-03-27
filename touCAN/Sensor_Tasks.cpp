@@ -13,9 +13,15 @@
 #include "Sensor_Tasks.h"
 #include "pins.h"
 
+#define IMU_A_FILT_STRENGTH 0.9
+
 MPU6050 accelgyro;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
+
+double LeSNSR_a_AxFilt = 0;
+double LeSNSR_a_AyFilt = 0;
+double LeSNSR_a_AzFilt = 0;
 
 void MCU6050Task(void *pvParameters){  // This is a task.
   TickType_t xLastWakeTime;
@@ -34,20 +40,19 @@ void MCU6050Task(void *pvParameters){  // This is a task.
     VeSNSR_a_IMU6AxRaw.setValue(IMU_DEFAULT_A_RES * (double)ax/IMU_MAX_INT);
     VeSNSR_a_IMU6AyRaw.setValue(IMU_DEFAULT_A_RES * (double)ay/IMU_MAX_INT);
     VeSNSR_a_IMU6AzRaw.setValue(IMU_DEFAULT_A_RES * (double)az/IMU_MAX_INT);
-    VeSNSR_a_IMU6WxRaw.setValue(IMU_DEFAULT_W_RES * (double)gx/IMU_MAX_INT);
-    VeSNSR_a_IMU6WyRaw.setValue(IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
-    VeSNSR_a_IMU6WzRaw.setValue(IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
+    VeSNSR_w_IMU6WxRaw.setValue(IMU_DEFAULT_W_RES * (double)gx/IMU_MAX_INT);
+    VeSNSR_w_IMU6WyRaw.setValue(IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
+    VeSNSR_w_IMU6WzRaw.setValue(IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
 
-/*  //print
-    WRAP_SERIAL_MUTEX(\
-    Serial.print(VeSNSR_a_IMU6AxRaw.getValue()); Serial.print(", ");\
-    Serial.print(VeSNSR_a_IMU6AyRaw.getValue()); Serial.print(", ");\
-    Serial.print(VeSNSR_a_IMU6AzRaw.getValue()); Serial.print(", ");\
-    Serial.print(VeSNSR_a_IMU6WxRaw.getValue()); Serial.print(", ");\
-    Serial.print(VeSNSR_a_IMU6WyRaw.getValue()); Serial.print(", ");\
-    Serial.println(VeSNSR_a_IMU6WzRaw.getValue());\
-    , pdMS_TO_TICKS(5))
-*/
+    //calculate filtered data
+    LeSNSR_a_AxFilt = (VeSNSR_a_IMU6AxRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AxFilt*IMU_A_FILT_STRENGTH;
+    LeSNSR_a_AyFilt = (VeSNSR_a_IMU6AyRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AyFilt*IMU_A_FILT_STRENGTH;
+    LeSNSR_a_AzFilt = (VeSNSR_a_IMU6AzRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AzFilt*IMU_A_FILT_STRENGTH;
+    VeSNSR_a_IMU6AxFilt.setValue(LeSNSR_a_AxFilt);
+    VeSNSR_a_IMU6AyFilt.setValue(LeSNSR_a_AyFilt);
+    VeSNSR_a_IMU6AzFilt.setValue(LeSNSR_a_AzFilt);
+
+
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }
@@ -69,7 +74,7 @@ uint8_t MPU6050_SetupTasks(void){
       ,  "IMU MCU6050" 
       ,  2048        
       ,  NULL
-      ,  6  // Priority
+      ,  7  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );

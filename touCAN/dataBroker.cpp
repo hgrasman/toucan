@@ -64,9 +64,15 @@ BrokerData VeCANR_tq_CAN1iBSGTorqueDelivered = BrokerData();
 BrokerData VeSNSR_a_IMU6AxRaw = BrokerData();
 BrokerData VeSNSR_a_IMU6AyRaw = BrokerData();
 BrokerData VeSNSR_a_IMU6AzRaw = BrokerData();
-BrokerData VeSNSR_a_IMU6WxRaw = BrokerData();
-BrokerData VeSNSR_a_IMU6WyRaw = BrokerData();
-BrokerData VeSNSR_a_IMU6WzRaw = BrokerData();
+BrokerData VeSNSR_w_IMU6WxRaw = BrokerData();
+BrokerData VeSNSR_w_IMU6WyRaw = BrokerData();
+BrokerData VeSNSR_w_IMU6WzRaw = BrokerData();
+
+BrokerData VeSNSR_a_IMU6AxFilt = BrokerData();
+BrokerData VeSNSR_a_IMU6AyFilt = BrokerData();
+BrokerData VeSNSR_a_IMU6AzFilt = BrokerData();
+
+
 
 
 
