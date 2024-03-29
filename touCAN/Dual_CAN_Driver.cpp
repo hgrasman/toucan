@@ -18,18 +18,67 @@
 #include <mcp_can_dfs.h>
 #include "iBSG_config.h"
 
-//Struct type to hold all CAN data
-typedef struct CANData{ 
-  uint32_t arb_id;
-  uint8_t extended; //glorified boolean
-  uint8_t data_len;
-  uint8_t data[8];
-}CANData;
+//Struct for CAN rx/tx intermedate encoding decoding
+typedef struct CANEncodingData{
+  //CAN TX
+  x8578_can_db_client_pcm_pmz_w_mhev_t    w_mhev_msg; //Calibrate limits
+  x8578_can_db_client_pcm_pmz_u_mhev_t    u_mhev_msg; 
+  x8578_can_db_client_pcm_pmz_t_mhev_t    t_mhev_msg;
+  x8578_can_db_client_bcm_pmz_a_t         bcm_pmz_msg; //set car to running
+  x8578_can_db_client_gwm_pmz_h_t         gwm_pmz_msg; //crash status
+  x8578_can_db_client_pcm_pmz_f_hybrid_t  f_hybrid_msg; //torque command
+
+  //CAN RX
+  x8578_can_db_client_epic_pmz_a_t        pmz_a_msg;
+  x8578_can_db_client_epic_pmz_i_t        pmz_i_msg; //DTC Diagnostic
+  x8578_can_db_client_epic_pmz_c_t        pmz_c_msg; //recv
+  x8578_can_db_client_epic_pmz_g_t        pmz_g_msg; //recv
+  x8578_can_db_client_epic_pmz_h_t        pmz_h_msg; //recv
+  x8578_can_db_client_epic_pmz_e_t        pmz_e_msg; //recv
+
+  bms_mc2_bms_data_a_t                    bms_a_msg;
+  bms_mc2_bms_data_b_t                    bms_b_msg;
+  bms_mc2_bms_data_c_t                    bms_c_msg;
+  bms_mc2_bms_data_d_t                    bms_d_msg;
+  bms_mc2_bms_data_e_t                    bms_e_msg;
+  bms_mc2_bms_data_f_t                    bms_f_msg;
+  bms_mc2_bms_data_g_t                    bms_g_msg;
+} CANEncodingData;
+
+//Struct for all the battery data
+typedef struct BatteryBroker{
+  BrokerData* VeCANR_I_CANx_BatteryCurrent;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell1;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell2;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell3;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell4;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell5;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell6;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell7;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell8;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell9;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell10;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell11;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell12;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell13;
+  BrokerData* VeCANR_T_CANx_BatteryTemp1;
+  BrokerData* VeCANR_T_CANx_BatteryTemp2;
+  BrokerData* VeCANR_T_CANx_BatteryTemp3;
+  BrokerData* VeCANR_T_CANx_BatteryTemp4;
+  BrokerData* VeCANR_T_CANx_BatteryTemp5;
+  BrokerData* VeCANR_T_CANx_BatteryTemp6;
+  BrokerData* VeCANR_T_CANx_BatteryTemp7;
+  BrokerData* VeCANR_T_CANx_BatteryTemp8;
+  BrokerData* VeCANR_T_CANx_BatteryTemp9;
+  BrokerData* VeCANR_T_CANx_BatteryTemp10;
+  BrokerData* VeCANR_T_CANx_BatteryTemp11;
+}BatteryBroker;
 
 //Struct for passing parameters to the CANTasks
 typedef struct CANTaskParams{
   MCP_CAN CANx;
-  ValeoEncodingData EncodingData;
+  CANEncodingData EncodingData;
+  BatteryBroker BatteryData;
   BrokerData* VeVDKR_CANx_TorqueRequest;
   BrokerData* VeVDKR_e_CANx_OpModeRequest;
   BrokerData* VeCANR_rpm_CANx_iBSGRotorSpeed;
@@ -44,20 +93,53 @@ typedef struct CANTaskParams{
   BrokerData* VeCANR_tq_CANx_iBSGInstMaxTrqLim;
 }CANTaskParams;
 
-//structs to hold intermediate data
-ValeoEncodingData ValeoEncodingCAN0;
-ValeoEncodingData ValeoEncodingCAN1;
+//Struct type to hold all CAN data
+typedef struct CANData{ 
+  uint32_t arb_id;
+  uint8_t extended; //glorified boolean
+  uint8_t data_len;
+  uint8_t data[8];
+}CANData;
 
-//Necessary globals interacted with by threads
-static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
+
+//Unique data for CAN0
+CANEncodingData EncodingCAN0;
+MCP_CAN CAN0(CAN0_SPI_CS_PIN);
+BatteryBroker BatteryDataCAN0 = { &VeCANR_I_CAN0_BatteryCurrent, &VeCANR_v_CAN0_BatteryVoltageCell1, &VeCANR_v_CAN0_BatteryVoltageCell2, 
+                                  &VeCANR_v_CAN0_BatteryVoltageCell3, &VeCANR_v_CAN0_BatteryVoltageCell4, &VeCANR_v_CAN0_BatteryVoltageCell5,
+                                  &VeCANR_v_CAN0_BatteryVoltageCell6, &VeCANR_v_CAN0_BatteryVoltageCell7, &VeCANR_v_CAN0_BatteryVoltageCell8, 
+                                  &VeCANR_v_CAN0_BatteryVoltageCell9,  &VeCANR_v_CAN0_BatteryVoltageCell10, &VeCANR_v_CAN0_BatteryVoltageCell11, 
+                                  &VeCANR_v_CAN0_BatteryVoltageCell12, &VeCANR_v_CAN0_BatteryVoltageCell13,  
+                                  &VeCANR_T_CAN0_BatteryTemp1, &VeCANR_T_CAN0_BatteryTemp2, &VeCANR_T_CAN0_BatteryTemp3, &VeCANR_T_CAN0_BatteryTemp4,
+                                  &VeCANR_T_CAN0_BatteryTemp5, &VeCANR_T_CAN0_BatteryTemp6, &VeCANR_T_CAN0_BatteryTemp7, &VeCANR_T_CAN0_BatteryTemp8, 
+                                  &VeCANR_T_CAN0_BatteryTemp9, &VeCANR_T_CAN0_BatteryTemp10, &VeCANR_T_CAN0_BatteryTemp11};
+CANTaskParams CAN0Params = {CAN0,EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
+                            &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
+                            &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
+                            &VeCANR_pct_CAN0_iBSGInverterTempRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemp,
+                            &VeCANR_pct_CAN0_iBSGMotorTempRate, &VeCANR_tq_CAN0_iBSGInstMinTrqLim, &VeCANR_tq_CAN0_iBSGInstMaxTrqLim};
+
+//CAN1 Data
+CANEncodingData EncodingCAN1;
+MCP_CAN CAN1(CAN1_SPI_CS_PIN);
+BatteryBroker BatteryDataCAN1 = { &VeCANR_I_CAN1_BatteryCurrent, &VeCANR_v_CAN1_BatteryVoltageCell1, &VeCANR_v_CAN1_BatteryVoltageCell2, 
+                                  &VeCANR_v_CAN1_BatteryVoltageCell3, &VeCANR_v_CAN1_BatteryVoltageCell4, &VeCANR_v_CAN1_BatteryVoltageCell5,
+                                  &VeCANR_v_CAN1_BatteryVoltageCell6, &VeCANR_v_CAN1_BatteryVoltageCell7, &VeCANR_v_CAN1_BatteryVoltageCell8, 
+                                  &VeCANR_v_CAN1_BatteryVoltageCell9,  &VeCANR_v_CAN1_BatteryVoltageCell10, &VeCANR_v_CAN1_BatteryVoltageCell11, 
+                                  &VeCANR_v_CAN1_BatteryVoltageCell12, &VeCANR_v_CAN1_BatteryVoltageCell13,  
+                                  &VeCANR_T_CAN1_BatteryTemp1, &VeCANR_T_CAN1_BatteryTemp2, &VeCANR_T_CAN1_BatteryTemp3, &VeCANR_T_CAN1_BatteryTemp4,
+                                  &VeCANR_T_CAN1_BatteryTemp5, &VeCANR_T_CAN1_BatteryTemp6, &VeCANR_T_CAN1_BatteryTemp7, &VeCANR_T_CAN1_BatteryTemp8, 
+                                  &VeCANR_T_CAN1_BatteryTemp9, &VeCANR_T_CAN1_BatteryTemp10, &VeCANR_T_CAN1_BatteryTemp11};
+CANTaskParams CAN1Params = {CAN1,EncodingCAN1, BatteryDataCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
+                            &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
+                            &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
+                            &VeCANR_pct_CAN1_iBSGInverterTempRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemp,
+                            &VeCANR_pct_CAN1_iBSGMotorTempRate, &VeCANR_tq_CAN1_iBSGInstMinTrqLim, &VeCANR_tq_CAN1_iBSGInstMaxTrqLim};
+
+
 static TaskHandle_t xTaskCAN0RxHandle;
 static TaskHandle_t xTaskCAN1RxHandle;
-CANTaskParams CAN0Params = {NULL}; //don't remove the {NULL} 
-CANTaskParams CAN1Params = {NULL}; //there is no constructor and the compiler will cry
-MCP_CAN CAN0(CAN0_SPI_CS_PIN);
-MCP_CAN CAN1(CAN1_SPI_CS_PIN);
-
-
+static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
 //ISRs for each CAN interrupt with a macro bc I'm lazy
 #define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
 ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
@@ -126,11 +208,33 @@ void CANRxTask(void *pvParameters){
           params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
           params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_h_em_voltage_dc_link_mv_decode(params->EncodingData.pmz_h_msg.em_voltage_dc_link_mv));
+          params->BatteryData.VeCANR_I_CANx_BatteryCurrent->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
           x8578_can_db_client_epic_pmz_i_unpack(&params->EncodingData.pmz_i_msg, incomingData.data, incomingData.data_len);
           if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {Serial.print("Diagnostic: ");Serial.println(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
+          break;
+
+        case BMS_MC2_BMS_DATA_A_FRAME_ID:
+          break;
+
+        case BMS_MC2_BMS_DATA_B_FRAME_ID:
+          break;
+
+        case BMS_MC2_BMS_DATA_C_FRAME_ID:
+          break;
+
+        case BMS_MC2_BMS_DATA_D_FRAME_ID:
+          break;
+
+        case BMS_MC2_BMS_DATA_E_FRAME_ID:
+          break;
+
+        case BMS_MC2_BMS_DATA_F_FRAME_ID:
+          break;
+
+        case BMS_MC2_BMS_DATA_G_FRAME_ID:
           break;
 
         default:
@@ -253,11 +357,6 @@ uint8_t CAN_SetupTasks(void){
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
-    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
-                  &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
-                  &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
-                  &VeCANR_pct_CAN0_iBSGInverterTempRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemp,
-                  &VeCANR_pct_CAN0_iBSGMotorTempRate, &VeCANR_tq_CAN0_iBSGInstMinTrqLim, &VeCANR_tq_CAN0_iBSGInstMaxTrqLim};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -288,11 +387,6 @@ uint8_t CAN_SetupTasks(void){
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 
-    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
-                  &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
-                  &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
-                  &VeCANR_pct_CAN1_iBSGInverterTempRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemp,
-                  &VeCANR_pct_CAN1_iBSGMotorTempRate, &VeCANR_tq_CAN1_iBSGInstMinTrqLim, &VeCANR_tq_CAN1_iBSGInstMaxTrqLim};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 
