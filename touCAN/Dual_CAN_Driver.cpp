@@ -39,6 +39,8 @@ typedef struct CANTaskParams{
   BrokerData* VeCANR_V_CANx_iBSGVoltageDCLink;
   BrokerData* VeCANR_T_CANx_iBSGStatorTemp;
   BrokerData* VeCANR_pct_CANx_iBSGMotorTempRate;
+  BrokerData* VeCANR_tq_CANx_iBSGInstMinTrqLim;
+  BrokerData* VeCANR_tq_CANx_iBSGInstMaxTrqLim;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -111,11 +113,12 @@ void CANRxTask(void *pvParameters){
           params->VeCANR_I_CANx_iBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
           params->VeCANR_T_CANx_iBSGStatorTemp->setValue(x8578_can_db_client_epic_pmz_e_em_temperature_decode(params->EncodingData.pmz_e_msg.em_temperature));
           params->VeCANR_pct_CANx_iBSGMotorTempRate->setValue(x8578_can_db_client_epic_pmz_e_temperature_rate_decode(params->EncodingData.pmz_e_msg.temperature_rate));
-          //temperature_rate total rating
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
           x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
+          params->VeCANR_tq_CANx_iBSGInstMinTrqLim->setValue(x8578_can_db_client_epic_pmz_g_em_min_torque_limit_decode(params->EncodingData.pmz_g_msg.em_min_torque_limit));
+          params->VeCANR_tq_CANx_iBSGInstMaxTrqLim->setValue(x8578_can_db_client_epic_pmz_g_em_max_torque_limit_decode(params->EncodingData.pmz_g_msg.em_max_torque_limit));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
@@ -253,7 +256,7 @@ uint8_t CAN_SetupTasks(void){
     CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                   &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
                   &VeCANR_pct_CAN0_iBSGInverterTempRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemp,
-                  &VeCANR_pct_CAN0_iBSGMotorTempRate};
+                  &VeCANR_pct_CAN0_iBSGMotorTempRate, &VeCANR_tq_CAN0_iBSGInstMinTrqLim, &VeCANR_tq_CAN0_iBSGInstMaxTrqLim};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -287,7 +290,7 @@ uint8_t CAN_SetupTasks(void){
     CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                   &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
                   &VeCANR_pct_CAN1_iBSGInverterTempRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemp,
-                  &VeCANR_pct_CAN1_iBSGMotorTempRate};
+                  &VeCANR_pct_CAN1_iBSGMotorTempRate, &VeCANR_tq_CAN1_iBSGInstMinTrqLim, &VeCANR_tq_CAN1_iBSGInstMaxTrqLim};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 

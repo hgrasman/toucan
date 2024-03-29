@@ -51,6 +51,8 @@ extern BrokerData VeCANR_pct_CAN0_iBSGInverterTempRate;
 extern BrokerData VeCANR_V_CAN0_iBSGVoltageDCLink;
 extern BrokerData VeCANR_T_CAN0_iBSGStatorTemp;
 extern BrokerData VeCANR_pct_CAN0_iBSGMotorTempRate;
+extern BrokerData VeCANR_tq_CAN0_iBSGInstMinTrqLim;
+extern BrokerData VeCANR_tq_CAN0_iBSGInstMaxTrqLim;
 
 extern BrokerData VeCANR_rpm_CAN1_iBSGRotorSpeed;
 extern BrokerData VeCANR_e_CAN1_iBSGOpMode;
@@ -60,6 +62,8 @@ extern BrokerData VeCANR_pct_CAN1_iBSGInverterTempRate;
 extern BrokerData VeCANR_V_CAN1_iBSGVoltageDCLink;
 extern BrokerData VeCANR_T_CAN1_iBSGStatorTemp;
 extern BrokerData VeCANR_pct_CAN1_iBSGMotorTempRate;
+extern BrokerData VeCANR_tq_CAN1_iBSGInstMinTrqLim;
+extern BrokerData VeCANR_tq_CAN1_iBSGInstMaxTrqLim;
 
 //SNSR Sensor Ring
 extern BrokerData VeSNSR_a_IMU6AxRaw;
