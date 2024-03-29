@@ -48,6 +48,7 @@ SemaphoreHandle_t xSemaphore_CANSPIMutex = xSemaphoreCreateMutex();
 BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 
 //VDKR VDKart Ring
+BrokerData VeVDKR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
 BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();
 

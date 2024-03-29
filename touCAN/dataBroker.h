@@ -39,6 +39,7 @@ extern SemaphoreHandle_t xSemaphore_I2CMutex;
 extern BrokerData VeCRLR_b_ControlReadyFlag;
 
 //VDKR VDKart Ring
+extern BrokerData VeVDKR_e_CANx_OpModeRequest;
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest;
 extern BrokerData VeVDKR_tq_CAN1_TorqueRequest;
 

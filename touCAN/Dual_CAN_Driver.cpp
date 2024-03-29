@@ -31,6 +31,7 @@ typedef struct CANTaskParams{
   MCP_CAN CANx;
   ValeoEncodingData EncodingData;
   BrokerData* VeVDKR_CANx_TorqueRequest;
+  BrokerData* VeVDKR_e_CANx_OpModeRequest;
   BrokerData* VeCANR_rpm_CANx_iBSGRotorSpeed;
   BrokerData* VeCANR_e_CANx_iBSGOpMode;
   BrokerData* VeCANR_I_CANx_iBSGDCCurrent;
@@ -168,10 +169,10 @@ void CANTxTask(void *pvParameters){
   for (;;){
 
     //F Hybrid
-    double LeTorqueRequest = params->VeVDKR_CANx_TorqueRequest->getValue();
+    double LeCANR_tq_TorqueRequest = params->VeVDKR_CANx_TorqueRequest->getValue();
+    double LeCANR_e_OpModeRequest = params->VeVDKR_e_CANx_OpModeRequest->getValue();
     PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
-                   X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE,
-                   0,0,LeTorqueRequest);
+                   LeCANR_e_OpModeRequest,0,0,LeCANR_tq_TorqueRequest);
     if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
       if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_LENGTH, data) == CAN_OK ){
         f_hybrid_counter = ComputeCounter(f_hybrid_counter);
@@ -252,7 +253,8 @@ uint8_t CAN_SetupTasks(void){
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
-    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
+    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
+                  &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                   &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
                   &VeCANR_pct_CAN0_iBSGInverterTempRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemp,
                   &VeCANR_pct_CAN0_iBSGMotorTempRate, &VeCANR_tq_CAN0_iBSGInstMinTrqLim, &VeCANR_tq_CAN0_iBSGInstMaxTrqLim};
@@ -286,7 +288,8 @@ uint8_t CAN_SetupTasks(void){
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 
-    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
+    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
+                  &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                   &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
                   &VeCANR_pct_CAN1_iBSGInverterTempRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemp,
                   &VeCANR_pct_CAN1_iBSGMotorTempRate, &VeCANR_tq_CAN1_iBSGInstMinTrqLim, &VeCANR_tq_CAN1_iBSGInstMaxTrqLim};

@@ -31,6 +31,8 @@ void VDKartTask(void *pvParameters){  // This is a task.
   double LeCRLR_a_AyFilt;
   double LeCRLR_a_AzFilt;  
 
+  VeVDKR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE);
+
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
