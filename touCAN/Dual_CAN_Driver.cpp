@@ -35,8 +35,10 @@ typedef struct CANTaskParams{
   BrokerData* VeCANR_e_CANx_iBSGOpMode;
   BrokerData* VeCANR_I_CANx_iBSGDCCurrent;
   BrokerData* VeCANR_tq_CANx_iBSGTorqueDelivered;
-  BrokerData* VeCANR_pct_CANx_iBSGInverterTemperature;
+  BrokerData* VeCANR_pct_CANx_iBSGInverterTemperatureRate;
   BrokerData* VeCANR_V_CANx_iBSGVoltageDCLink;
+  BrokerData* VeCANR_T_CANx_iBSGStatorTemperature;
+  BrokerData* VeCANR_T_CANx_iBSGRotorTemperature;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -95,7 +97,7 @@ void CANRxTask(void *pvParameters){
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_pct_CANx_iBSGInverterTemperature->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
+          params->VeCANR_pct_CANx_iBSGInverterTemperatureRate->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
@@ -107,6 +109,9 @@ void CANRxTask(void *pvParameters){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
           x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
           params->VeCANR_I_CANx_iBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
+          params->VeCANR_T_CANx_iBSGStatorTemperature->setValue(x8578_can_db_client_epic_pmz_e_em_temperature_decode(params->EncodingData.pmz_e_msg.em_temperature));
+          params->VeCANR_T_CANx_iBSGRotorTemperature->setValue(x8578_can_db_client_epic_pmz_e_em_rotor_temperature_decode(params->EncodingData.pmz_e_msg.em_rotor_temperature));
+          //temperature_rate total rating
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
@@ -247,7 +252,8 @@ uint8_t CAN_SetupTasks(void){
 
     CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                   &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
-                  &VeCANR_pct_CAN0_iBSGInverterTemperature, &VeCANR_V_CAN0_iBSGVoltageDCLink};
+                  &VeCANR_pct_CAN0_iBSGInverterTemperatureRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemperature,
+                  &VeCANR_T_CAN0_iBSGRotorTemperature};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -280,7 +286,8 @@ uint8_t CAN_SetupTasks(void){
 
     CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                   &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
-                  &VeCANR_pct_CAN1_iBSGInverterTemperature, &VeCANR_V_CAN1_iBSGVoltageDCLink};
+                  &VeCANR_pct_CAN1_iBSGInverterTemperatureRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemperature,
+                  &VeCANR_T_CAN1_iBSGRotorTemperature};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 

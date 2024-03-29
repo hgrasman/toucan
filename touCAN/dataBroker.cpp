@@ -56,15 +56,19 @@ BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed = BrokerData();
 BrokerData VeCANR_e_CAN0_iBSGOpMode = BrokerData();
 BrokerData VeCANR_I_CAN0_iBSGDCCurrent = BrokerData();
 BrokerData VeCANR_tq_CAN0_iBSGTorqueDelivered = BrokerData();
-BrokerData VeCANR_pct_CAN0_iBSGInverterTemperature = BrokerData();
+BrokerData VeCANR_pct_CAN0_iBSGInverterTemperatureRate = BrokerData();
 BrokerData VeCANR_V_CAN0_iBSGVoltageDCLink = BrokerData();
+BrokerData VeCANR_T_CAN0_iBSGStatorTemperature = BrokerData();
+BrokerData VeCANR_T_CAN0_iBSGRotorTemperature = BrokerData();
 
 BrokerData VeCANR_rpm_CAN1_iBSGRotorSpeed = BrokerData();
 BrokerData VeCANR_e_CAN1_iBSGOpMode = BrokerData();
 BrokerData VeCANR_I_CAN1_iBSGDCCurrent = BrokerData();
 BrokerData VeCANR_tq_CAN1_iBSGTorqueDelivered = BrokerData();
-BrokerData VeCANR_pct_CAN1_iBSGInverterTemperature = BrokerData();
+BrokerData VeCANR_pct_CAN1_iBSGInverterTemperatureRate = BrokerData();
 BrokerData VeCANR_V_CAN1_iBSGVoltageDCLink = BrokerData();
+BrokerData VeCANR_T_CAN1_iBSGStatorTemperature = BrokerData();
+BrokerData VeCANR_T_CAN1_iBSGRotorTemperature = BrokerData();
 
 //SNSR Sensor Ring
 BrokerData VeSNSR_a_IMU6AxRaw = BrokerData();
