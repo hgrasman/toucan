@@ -47,7 +47,6 @@ typedef struct CANEncodingData{
 
 //Struct for all the battery data
 typedef struct BatteryBroker{
-  BrokerData* VeCANR_I_CANx_BatteryCurrent;
   BrokerData* VeCANR_v_CANx_BatteryVoltageCell1;
   BrokerData* VeCANR_v_CANx_BatteryVoltageCell2;
   BrokerData* VeCANR_v_CANx_BatteryVoltageCell3;
@@ -61,6 +60,9 @@ typedef struct BatteryBroker{
   BrokerData* VeCANR_v_CANx_BatteryVoltageCell11;
   BrokerData* VeCANR_v_CANx_BatteryVoltageCell12;
   BrokerData* VeCANR_v_CANx_BatteryVoltageCell13;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell14;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell15;
+  BrokerData* VeCANR_v_CANx_BatteryVoltageCell16;
   BrokerData* VeCANR_T_CANx_BatteryTemp1;
   BrokerData* VeCANR_T_CANx_BatteryTemp2;
   BrokerData* VeCANR_T_CANx_BatteryTemp3;
@@ -72,6 +74,7 @@ typedef struct BatteryBroker{
   BrokerData* VeCANR_T_CANx_BatteryTemp9;
   BrokerData* VeCANR_T_CANx_BatteryTemp10;
   BrokerData* VeCANR_T_CANx_BatteryTemp11;
+  BrokerData* VeCANR_I_CANx_BatteryCurrent;
 }BatteryBroker;
 
 //Struct for passing parameters to the CANTasks
@@ -105,14 +108,13 @@ typedef struct CANData{
 //Unique data for CAN0
 CANEncodingData EncodingCAN0;
 MCP_CAN CAN0(CAN0_SPI_CS_PIN);
-BatteryBroker BatteryDataCAN0 = { &VeCANR_I_CAN0_BatteryCurrent, &VeCANR_v_CAN0_BatteryVoltageCell1, &VeCANR_v_CAN0_BatteryVoltageCell2, 
-                                  &VeCANR_v_CAN0_BatteryVoltageCell3, &VeCANR_v_CAN0_BatteryVoltageCell4, &VeCANR_v_CAN0_BatteryVoltageCell5,
-                                  &VeCANR_v_CAN0_BatteryVoltageCell6, &VeCANR_v_CAN0_BatteryVoltageCell7, &VeCANR_v_CAN0_BatteryVoltageCell8, 
-                                  &VeCANR_v_CAN0_BatteryVoltageCell9,  &VeCANR_v_CAN0_BatteryVoltageCell10, &VeCANR_v_CAN0_BatteryVoltageCell11, 
-                                  &VeCANR_v_CAN0_BatteryVoltageCell12, &VeCANR_v_CAN0_BatteryVoltageCell13,  
+BatteryBroker BatteryDataCAN0 = { &VeCANR_v_CAN0_BatteryVoltageCell1, &VeCANR_v_CAN0_BatteryVoltageCell2, &VeCANR_v_CAN0_BatteryVoltageCell3, &VeCANR_v_CAN0_BatteryVoltageCell4, 
+                                  &VeCANR_v_CAN0_BatteryVoltageCell5, &VeCANR_v_CAN0_BatteryVoltageCell6, &VeCANR_v_CAN0_BatteryVoltageCell7, &VeCANR_v_CAN0_BatteryVoltageCell8, 
+                                  &VeCANR_v_CAN0_BatteryVoltageCell9, &VeCANR_v_CAN0_BatteryVoltageCell10, &VeCANR_v_CAN0_BatteryVoltageCell11, &VeCANR_v_CAN0_BatteryVoltageCell12,
+                                  &VeCANR_v_CAN0_BatteryVoltageCell13, &VeCANR_v_CAN0_BatteryVoltageCell14, &VeCANR_v_CAN0_BatteryVoltageCell15, &VeCANR_v_CAN0_BatteryVoltageCell16,  
                                   &VeCANR_T_CAN0_BatteryTemp1, &VeCANR_T_CAN0_BatteryTemp2, &VeCANR_T_CAN0_BatteryTemp3, &VeCANR_T_CAN0_BatteryTemp4,
                                   &VeCANR_T_CAN0_BatteryTemp5, &VeCANR_T_CAN0_BatteryTemp6, &VeCANR_T_CAN0_BatteryTemp7, &VeCANR_T_CAN0_BatteryTemp8, 
-                                  &VeCANR_T_CAN0_BatteryTemp9, &VeCANR_T_CAN0_BatteryTemp10, &VeCANR_T_CAN0_BatteryTemp11};
+                                  &VeCANR_T_CAN0_BatteryTemp9, &VeCANR_T_CAN0_BatteryTemp10, &VeCANR_T_CAN0_BatteryTemp11, &VeCANR_I_CAN0_BatteryCurrent};
 CANTaskParams CAN0Params = {CAN0,EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
                             &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                             &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
@@ -122,14 +124,13 @@ CANTaskParams CAN0Params = {CAN0,EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_
 //CAN1 Data
 CANEncodingData EncodingCAN1;
 MCP_CAN CAN1(CAN1_SPI_CS_PIN);
-BatteryBroker BatteryDataCAN1 = { &VeCANR_I_CAN1_BatteryCurrent, &VeCANR_v_CAN1_BatteryVoltageCell1, &VeCANR_v_CAN1_BatteryVoltageCell2, 
-                                  &VeCANR_v_CAN1_BatteryVoltageCell3, &VeCANR_v_CAN1_BatteryVoltageCell4, &VeCANR_v_CAN1_BatteryVoltageCell5,
-                                  &VeCANR_v_CAN1_BatteryVoltageCell6, &VeCANR_v_CAN1_BatteryVoltageCell7, &VeCANR_v_CAN1_BatteryVoltageCell8, 
-                                  &VeCANR_v_CAN1_BatteryVoltageCell9,  &VeCANR_v_CAN1_BatteryVoltageCell10, &VeCANR_v_CAN1_BatteryVoltageCell11, 
-                                  &VeCANR_v_CAN1_BatteryVoltageCell12, &VeCANR_v_CAN1_BatteryVoltageCell13,  
+BatteryBroker BatteryDataCAN1 = { &VeCANR_v_CAN1_BatteryVoltageCell1, &VeCANR_v_CAN1_BatteryVoltageCell2, &VeCANR_v_CAN1_BatteryVoltageCell3, &VeCANR_v_CAN1_BatteryVoltageCell4, 
+                                  &VeCANR_v_CAN1_BatteryVoltageCell5, &VeCANR_v_CAN1_BatteryVoltageCell6, &VeCANR_v_CAN1_BatteryVoltageCell7, &VeCANR_v_CAN1_BatteryVoltageCell8, 
+                                  &VeCANR_v_CAN1_BatteryVoltageCell9, &VeCANR_v_CAN1_BatteryVoltageCell10, &VeCANR_v_CAN1_BatteryVoltageCell11, &VeCANR_v_CAN1_BatteryVoltageCell12,
+                                  &VeCANR_v_CAN1_BatteryVoltageCell13, &VeCANR_v_CAN1_BatteryVoltageCell14, &VeCANR_v_CAN1_BatteryVoltageCell15, &VeCANR_v_CAN1_BatteryVoltageCell16,  
                                   &VeCANR_T_CAN1_BatteryTemp1, &VeCANR_T_CAN1_BatteryTemp2, &VeCANR_T_CAN1_BatteryTemp3, &VeCANR_T_CAN1_BatteryTemp4,
                                   &VeCANR_T_CAN1_BatteryTemp5, &VeCANR_T_CAN1_BatteryTemp6, &VeCANR_T_CAN1_BatteryTemp7, &VeCANR_T_CAN1_BatteryTemp8, 
-                                  &VeCANR_T_CAN1_BatteryTemp9, &VeCANR_T_CAN1_BatteryTemp10, &VeCANR_T_CAN1_BatteryTemp11};
+                                  &VeCANR_T_CAN1_BatteryTemp9, &VeCANR_T_CAN1_BatteryTemp10, &VeCANR_T_CAN1_BatteryTemp11, &VeCANR_I_CAN1_BatteryCurrent};
 CANTaskParams CAN1Params = {CAN1,EncodingCAN1, BatteryDataCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeVDKR_e_CANx_OpModeRequest,
                             &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                             &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
@@ -208,7 +209,6 @@ void CANRxTask(void *pvParameters){
           params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
           params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_h_em_voltage_dc_link_mv_decode(params->EncodingData.pmz_h_msg.em_voltage_dc_link_mv));
-          params->BatteryData.VeCANR_I_CANx_BatteryCurrent->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
@@ -217,15 +217,35 @@ void CANRxTask(void *pvParameters){
           break;
 
         case BMS_MC2_BMS_DATA_A_FRAME_ID:
+          bms_mc2_bms_data_a_unpack(&params->EncodingData.bms_a_msg, incomingData.data, incomingData.data_len);
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->setValue(bms_mc2_bms_data_a_cell_1_voltage_decode(params->EncodingData.bms_a_msg.cell_1_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->setValue(bms_mc2_bms_data_a_cell_2_voltage_decode(params->EncodingData.bms_a_msg.cell_2_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->setValue(bms_mc2_bms_data_a_cell_3_voltage_decode(params->EncodingData.bms_a_msg.cell_3_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->setValue(bms_mc2_bms_data_a_cell_4_voltage_decode(params->EncodingData.bms_a_msg.cell_4_voltage));
           break;
 
         case BMS_MC2_BMS_DATA_B_FRAME_ID:
+          bms_mc2_bms_data_b_unpack(&params->EncodingData.bms_b_msg, incomingData.data, incomingData.data_len);
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->setValue(bms_mc2_bms_data_b_cell_5_voltage_decode(params->EncodingData.bms_b_msg.cell_5_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->setValue(bms_mc2_bms_data_b_cell_6_voltage_decode(params->EncodingData.bms_b_msg.cell_6_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->setValue(bms_mc2_bms_data_b_cell_7_voltage_decode(params->EncodingData.bms_b_msg.cell_7_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->setValue(bms_mc2_bms_data_b_cell_8_voltage_decode(params->EncodingData.bms_b_msg.cell_8_voltage));
           break;
 
         case BMS_MC2_BMS_DATA_C_FRAME_ID:
+          bms_mc2_bms_data_c_unpack(&params->EncodingData.bms_c_msg, incomingData.data, incomingData.data_len);
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->setValue(bms_mc2_bms_data_c_cell_9_voltage_decode(params->EncodingData.bms_c_msg.cell_9_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->setValue(bms_mc2_bms_data_c_cell_10_voltage_decode(params->EncodingData.bms_c_msg.cell_10_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->setValue(bms_mc2_bms_data_c_cell_11_voltage_decode(params->EncodingData.bms_c_msg.cell_11_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->setValue(bms_mc2_bms_data_c_cell_12_voltage_decode(params->EncodingData.bms_c_msg.cell_12_voltage));
           break;
 
         case BMS_MC2_BMS_DATA_D_FRAME_ID:
+          bms_mc2_bms_data_d_unpack(&params->EncodingData.bms_d_msg, incomingData.data, incomingData.data_len);
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->setValue(bms_mc2_bms_data_d_cell_13_voltage_decode(params->EncodingData.bms_d_msg.cell_13_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->setValue(bms_mc2_bms_data_d_cell_14_voltage_decode(params->EncodingData.bms_d_msg.cell_14_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->setValue(bms_mc2_bms_data_d_cell_15_voltage_decode(params->EncodingData.bms_d_msg.cell_15_voltage));
+          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->setValue(bms_mc2_bms_data_d_cell_16_voltage_decode(params->EncodingData.bms_d_msg.cell_16_voltage));
           break;
 
         case BMS_MC2_BMS_DATA_E_FRAME_ID:
