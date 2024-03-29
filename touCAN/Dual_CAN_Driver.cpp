@@ -96,9 +96,6 @@ void CANRxTask(void *pvParameters){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
           params->VeCANR_pct_CANx_iBSGInverterTemperature->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
-          params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_a_em_voltage_dc_link_decode(params->EncodingData.pmz_a_msg.em_voltage_dc_link));
-          Serial.println(x8578_can_db_client_epic_pmz_a_em_voltage_dc_link_decode(params->EncodingData.pmz_a_msg.em_voltage_dc_link));
-          //em_voltage_dc_link_ext ??
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
@@ -119,6 +116,7 @@ void CANRxTask(void *pvParameters){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
           params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
+          params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_h_em_voltage_dc_link_mv_decode(params->EncodingData.pmz_h_msg.em_voltage_dc_link_mv));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
