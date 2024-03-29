@@ -30,12 +30,13 @@ typedef struct CANData{
 typedef struct CANTaskParams{
   MCP_CAN CANx;
   ValeoEncodingData EncodingData;
-  BrokerData* VeVDKR_CANxTorqueRequest;
-  BrokerData* VeCANR_rpm_CANxiBSGRotorSpeed;
-  BrokerData* VeCANR_e_CANxiBSGOpMode;
-  BrokerData* VeCANR_I_CANxiBSGDCCurrent;
-  BrokerData* VeCANR_tq_CANxiBSGTorqueDelivered;
-  BrokerData* VeCANR_pct_CANxiBSGInverterTemperature;
+  BrokerData* VeVDKR_CANx_TorqueRequest;
+  BrokerData* VeCANR_rpm_CANx_iBSGRotorSpeed;
+  BrokerData* VeCANR_e_CANx_iBSGOpMode;
+  BrokerData* VeCANR_I_CANx_iBSGDCCurrent;
+  BrokerData* VeCANR_tq_CANx_iBSGTorqueDelivered;
+  BrokerData* VeCANR_pct_CANx_iBSGInverterTemperature;
+  BrokerData* VeCANR_V_CANx_iBSGVoltageDCLink;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -94,20 +95,21 @@ void CANRxTask(void *pvParameters){
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_pct_CANxiBSGInverterTemperature->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
-          //em_voltage_dc_link
+          params->VeCANR_pct_CANx_iBSGInverterTemperature->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
+          params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_a_em_voltage_dc_link_decode(params->EncodingData.pmz_a_msg.em_voltage_dc_link));
+          Serial.println(x8578_can_db_client_epic_pmz_a_em_voltage_dc_link_decode(params->EncodingData.pmz_a_msg.em_voltage_dc_link));
           //em_voltage_dc_link_ext ??
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
           x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_rpm_CANxiBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
-          params->VeCANR_tq_CANxiBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
+          params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
+          params->VeCANR_tq_CANx_iBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
           break;
  
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
           x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_I_CANxiBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
+          params->VeCANR_I_CANx_iBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
@@ -116,7 +118,7 @@ void CANRxTask(void *pvParameters){
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_e_CANxiBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
+          params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
@@ -161,7 +163,7 @@ void CANTxTask(void *pvParameters){
   for (;;){
 
     //F Hybrid
-    double LeTorqueRequest = params->VeVDKR_CANxTorqueRequest->getValue();
+    double LeTorqueRequest = params->VeVDKR_CANx_TorqueRequest->getValue();
     PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
                    X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE,
                    0,0,LeTorqueRequest);
@@ -247,7 +249,7 @@ uint8_t CAN_SetupTasks(void){
 
     CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                   &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
-                  &VeCANR_pct_CAN0_iBSGInverterTemperature};
+                  &VeCANR_pct_CAN0_iBSGInverterTemperature, &VeCANR_V_CAN0_iBSGVoltageDCLink};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -271,7 +273,7 @@ uint8_t CAN_SetupTasks(void){
       attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
 
   }else{
-    status |= CAN_SETUP_CAN0__FAILURE;
+    status |= CAN_SETUP_CAN0_FAILURE;
   }
 
   WRAP_SERIAL_MUTEX(Serial.println("CAN1 Setup Beginning");, pdMS_TO_TICKS(5)) 
@@ -280,7 +282,7 @@ uint8_t CAN_SetupTasks(void){
 
     CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                   &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
-                  &VeCANR_pct_CAN1_iBSGInverterTemperature};
+                  &VeCANR_pct_CAN1_iBSGInverterTemperature, &VeCANR_V_CAN1_iBSGVoltageDCLink};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 
@@ -304,7 +306,7 @@ uint8_t CAN_SetupTasks(void){
       attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
 
   }else{
-    status |= CAN_SETUP_CAN1__FAILURE;
+    status |= CAN_SETUP_CAN1_FAILURE;
   }
 
   return(status);
