@@ -50,10 +50,11 @@ void VDKartTask(void *pvParameters){  // This is a task.
 
     if (trq<0){trq = 0;}
 
- /*   WRAP_SERIAL_MUTEX(Serial.print(VeCANR_tq_CAN0_iBSGInstMinTrqLim.getValue());Serial.print(", ");\
+    WRAP_SERIAL_MUTEX(Serial.print(VeCANR_tq_CAN0_iBSGInstMinTrqLim.getValue());Serial.print(", ");\
+                      Serial.print(VeCANR_rpm_CAN0_iBSGRotorSpeed.getValue());Serial.print(", ");\
                       Serial.println(VeCANR_tq_CAN0_iBSGInstMaxTrqLim.getValue());\
     , portMAX_DELAY )
-*/
+
     VeVDKR_tq_CAN0_TorqueRequest.setValue(trq * LeCRLR_p_TorqueSplitTarget);
     VeVDKR_tq_CAN1_TorqueRequest.setValue(trq * (1-LeCRLR_p_TorqueSplitTarget));
 

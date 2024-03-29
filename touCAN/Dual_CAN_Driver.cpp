@@ -104,7 +104,6 @@ void CANRxTask(void *pvParameters){
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
           x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
           params->VeCANR_tq_CANx_iBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
           break;
  
@@ -123,6 +122,7 @@ void CANRxTask(void *pvParameters){
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
+          params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
           params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_h_em_voltage_dc_link_mv_decode(params->EncodingData.pmz_h_msg.em_voltage_dc_link_mv));
           break;
