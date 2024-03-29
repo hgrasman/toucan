@@ -136,7 +136,6 @@ void CANRxTask(void *pvParameters){
           //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
           break;
       }
-      vTaskDelay(pdMS_TO_TICKS(1)); //ignore like half the frames on god jesus christ
     }
 
   }
