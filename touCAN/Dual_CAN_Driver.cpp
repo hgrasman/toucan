@@ -35,6 +35,7 @@ typedef struct CANTaskParams{
   BrokerData* VeCANR_e_CANxiBSGOpMode;
   BrokerData* VeCANR_I_CANxiBSGDCCurrent;
   BrokerData* VeCANR_tq_CANxiBSGTorqueDelivered;
+  BrokerData* VeCANR_pct_CANxiBSGInverterTemperature;
 }CANTaskParams;
 
 //structs to hold intermediate data
@@ -43,7 +44,6 @@ ValeoEncodingData ValeoEncodingCAN1;
 
 //Necessary globals interacted with by threads
 static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
-SemaphoreHandle_t xSemaphore_CANSPIMutex;
 static TaskHandle_t xTaskCAN0RxHandle;
 static TaskHandle_t xTaskCAN1RxHandle;
 CANTaskParams CAN0Params = {NULL}; //don't remove the {NULL} 
@@ -94,30 +94,28 @@ void CANRxTask(void *pvParameters){
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
           x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
-          //WRAP_SERIAL_MUTEX(Serial.println("A");, pdMS_TO_TICKS(5))
+          params->VeCANR_pct_CANxiBSGInverterTemperature->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
+          //em_voltage_dc_link
+          //em_voltage_dc_link_ext ??
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
           x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
-          //WRAP_SERIAL_MUTEX(Serial.println("C");, pdMS_TO_TICKS(5))
           params->VeCANR_rpm_CANxiBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_c_em_speed_decode(params->EncodingData.pmz_c_msg.em_speed));
           params->VeCANR_tq_CANxiBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
           break;
  
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
           x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
-          //WRAP_SERIAL_MUTEX(Serial.println("E");, pdMS_TO_TICKS(5))
           params->VeCANR_I_CANxiBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
           x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
-          //WRAP_SERIAL_MUTEX(Serial.println("G");, pdMS_TO_TICKS(5))
           break;
 
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
           x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
-          //WRAP_SERIAL_MUTEX(Serial.println("H");, pdMS_TO_TICKS(5))
           params->VeCANR_e_CANxiBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
           break;
 
@@ -243,14 +241,13 @@ uint8_t CAN_SetupTasks(void){
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
-  xSemaphore_CANSPIMutex = xSemaphoreCreateMutex();
-
   WRAP_SERIAL_MUTEX(Serial.println("CAN0 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
 
-    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0TorqueRequest, &VeCANR_rpm_CAN0iBSGRotorSpeed, 
-                  &VeCANR_e_CAN0iBSGOpMode, &VeCANR_I_CAN0iBSGDCCurrent, &VeCANR_tq_CAN0iBSGTorqueDelivered};
+    CAN0Params = {CAN0,ValeoEncodingCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
+                  &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
+                  &VeCANR_pct_CAN0_iBSGInverterTemperature};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN0 Rx Task" 
@@ -274,15 +271,16 @@ uint8_t CAN_SetupTasks(void){
       attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
 
   }else{
-    status |= CAN_SETUP_CAN0_FAILURE;
+    status |= CAN_SETUP_CAN0__FAILURE;
   }
 
   WRAP_SERIAL_MUTEX(Serial.println("CAN1 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
 
-    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1TorqueRequest, &VeCANR_rpm_CAN1iBSGRotorSpeed, 
-                  &VeCANR_e_CAN1iBSGOpMode, &VeCANR_I_CAN1iBSGDCCurrent, &VeCANR_tq_CAN1iBSGTorqueDelivered};
+    CAN1Params = {CAN1,ValeoEncodingCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
+                  &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
+                  &VeCANR_pct_CAN1_iBSGInverterTemperature};
     xTaskCreatePinnedToCore(
       CANRxTask
       ,  "CAN1 Rx Task" 
@@ -306,7 +304,7 @@ uint8_t CAN_SetupTasks(void){
       attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
 
   }else{
-    status |= CAN_SETUP_CAN1_FAILURE;
+    status |= CAN_SETUP_CAN1__FAILURE;
   }
 
   return(status);

@@ -40,25 +40,31 @@ bool BrokerData::dataInitialized(void){
       return (this->last_update_time >= 0);
 }
 
-SemaphoreHandle_t xSemaphore_SerialMutex;
+SemaphoreHandle_t xSemaphore_SerialMutex = xSemaphoreCreateMutex();
+SemaphoreHandle_t xSemaphore_I2CMutex = xSemaphoreCreateMutex();
+SemaphoreHandle_t xSemaphore_CANSPIMutex = xSemaphoreCreateMutex();
 
 //CRLR Controller Ring
 BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 
 //VDKR VDKart Ring
-BrokerData VeVDKR_tq_CAN0TorqueRequest = BrokerData();
-BrokerData VeVDKR_tq_CAN1TorqueRequest = BrokerData();
+BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
+BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();
 
 //CANR CAN driver Ring
-BrokerData VeCANR_rpm_CAN0iBSGRotorSpeed = BrokerData();
-BrokerData VeCANR_e_CAN0iBSGOpMode = BrokerData();
-BrokerData VeCANR_I_CAN0iBSGDCCurrent = BrokerData();
-BrokerData VeCANR_tq_CAN0iBSGTorqueDelivered = BrokerData();
+BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed = BrokerData();
+BrokerData VeCANR_e_CAN0_iBSGOpMode = BrokerData();
+BrokerData VeCANR_I_CAN0_iBSGDCCurrent = BrokerData();
+BrokerData VeCANR_tq_CAN0_iBSGTorqueDelivered = BrokerData();
+BrokerData VeCANR_pct_CAN0_iBSGInverterTemperature = BrokerData();
+BrokerData VeCANR_V_CAN0_iBSGVoltageDCLink = BrokerData();
 
-BrokerData VeCANR_rpm_CAN1iBSGRotorSpeed = BrokerData();
-BrokerData VeCANR_e_CAN1iBSGOpMode = BrokerData();
-BrokerData VeCANR_I_CAN1iBSGDCCurrent = BrokerData();
-BrokerData VeCANR_tq_CAN1iBSGTorqueDelivered = BrokerData();
+BrokerData VeCANR_rpm_CAN1_iBSGRotorSpeed = BrokerData();
+BrokerData VeCANR_e_CAN1_iBSGOpMode = BrokerData();
+BrokerData VeCANR_I_CAN1_iBSGDCCurrent = BrokerData();
+BrokerData VeCANR_tq_CAN1_iBSGTorqueDelivered = BrokerData();
+BrokerData VeCANR_pct_CAN1_iBSGInverterTemperature = BrokerData();
+BrokerData VeCANR_V_CAN1_iBSGVoltageDCLink = BrokerData();
 
 //SNSR Sensor Ring
 BrokerData VeSNSR_a_IMU6AxRaw = BrokerData();

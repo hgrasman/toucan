@@ -36,7 +36,7 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
     
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    WRAP_I2C_MUTEX(accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);, portMAX_DELAY)
     VeSNSR_a_IMU6AxRaw.setValue(IMU_DEFAULT_A_RES * (double)ax/IMU_MAX_INT);
     VeSNSR_a_IMU6AyRaw.setValue(IMU_DEFAULT_A_RES * (double)ay/IMU_MAX_INT);
     VeSNSR_a_IMU6AzRaw.setValue(IMU_DEFAULT_A_RES * (double)az/IMU_MAX_INT);

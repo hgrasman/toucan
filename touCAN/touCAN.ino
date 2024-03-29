@@ -18,7 +18,6 @@
 void setup() {
 
   // Initialize serial communication at 115200 bits per second:
-  xSemaphore_SerialMutex = xSemaphoreCreateMutex();
   WRAP_SERIAL_MUTEX(\
     delay(500);\
     Serial.begin(115200);\
@@ -27,18 +26,21 @@ void setup() {
     Serial.flush();\
     , portMAX_DELAY)
 
+  //Sensor Setup
   if (MPU6050_SetupTasks() == MCU6050_INIT_SUCCESS){
     WRAP_SERIAL_MUTEX(Serial.println("IMU INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
     WRAP_SERIAL_MUTEX(Serial.println("IMU INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
+  //Controls Setup
   if (VDKart_SetupTasks() == VDKART_SETUP_SUCCESS){
     WRAP_SERIAL_MUTEX(Serial.println("VDKART INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
     WRAP_SERIAL_MUTEX(Serial.println("VDKART INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
+  //CAN Setup
   if (CAN_SetupTasks() == CAN_SETUP_BOTH_SUCCESS){
     WRAP_SERIAL_MUTEX(Serial.println("CAN HARDWARE INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
