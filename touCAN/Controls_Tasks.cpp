@@ -36,7 +36,6 @@ void VDKartTask(void *pvParameters){
   double LeVDKR_rpm_CAN1_iBSGRotorSpeed;
   double LeVDKR_rpm_EncoderSpeed;
   double LeVDKR_phi_ApproxSWA;
-  double LeVDKR_P_PowerTarget;
   double LeVDKR_p_TorqueSplitTarget;
   double LeVDKR_a_AxFilt, LeVDKR_a_AyFilt, LeVDKR_a_AzFilt;  
   double LeVDKR_w_WxFilt, LeVDKR_w_WyFilt, LeVDKR_w_WzFilt;
@@ -60,57 +59,48 @@ void VDKartTask(void *pvParameters){
     LeVDKR_phi_ApproxSWA   = analogRead(STEER_IN_NML_PIN) / 4095;
     //TODO Safety
 
-    LeVDKR_rpm_EncoderSpeed = 0;
-
-
     //Get limits from the motor
     double LeVDKR_tq_CAN0_MinTrqLim = VeCANR_tq_CAN0_iBSGInstMinTrqLim.getValue();
     double LeVDKR_tq_CAN0_MaxTrqLim = VeCANR_tq_CAN0_iBSGInstMaxTrqLim.getValue();
     double LeVDKR_tq_CAN1_MinTrqLim = VeCANR_tq_CAN1_iBSGInstMinTrqLim.getValue();
     double LeVDKR_tq_CAN1_MaxTrqLim = VeCANR_tq_CAN1_iBSGInstMaxTrqLim.getValue();
 
-    //TODO get battery limits
+    //get battery limits TODO
 
     //stop the thing from spinning backward
-    double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed);
-    double LeVDKR_tq_MinTrqTaperR = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN1_iBSGRotorSpeed);
+    double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperL>0){LeVDKR_tq_MinTrqTaperL = 0;}
+    double LeVDKR_tq_MinTrqTaperR = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN1_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperR>0){LeVDKR_tq_MinTrqTaperR = 0;}
     if (LeVDKR_tq_CAN0_MinTrqLim < LeVDKR_tq_MinTrqTaperL){LeVDKR_tq_CAN0_MinTrqLim = LeVDKR_tq_MinTrqTaperL;}
     if (LeVDKR_tq_CAN1_MinTrqLim < LeVDKR_tq_MinTrqTaperR){LeVDKR_tq_CAN1_MinTrqLim = LeVDKR_tq_MinTrqTaperR;}
 
-    //calculate an overall max mechanical power
-    double LeVDKR_P_CombinedMaxPowr = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_CAN1_iBSGRotorSpeed) / NM_RPM_TO_W; //best the motor can do
-    double LeVDKR_P_CombinedMinPowr = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_CAN1_iBSGRotorSpeed) / NM_RPM_TO_W; //quite possibly 28kW
-    if (LeVDKR_P_CombinedMaxPowr > PDGP_POWER_LIMIT){LeVDKR_P_CombinedMaxPowr = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);}
-    if (LeVDKR_P_CombinedMinPowr < REGEN_POWER_LIMIT){LeVDKR_P_CombinedMinPowr = REGEN_POWER_LIMIT;} 
+    //Find limits
+    double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim + LeVDKR_tq_CAN1_MaxTrqLim;
+    double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim + LeVDKR_tq_CAN1_MinTrqLim;
+    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_CAN1_iBSGRotorSpeed) / NM_RPM_TO_W; //best the motor can do
+    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_CAN1_iBSGRotorSpeed) / NM_RPM_TO_W; //quite possibly 28kW
+    if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
+      LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
+      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_rpm_CAN1_iBSGRotorSpeed)/2);
+    }
+    if (LeVDKR_P_CombinedMinPower < REGEN_POWER_LIMIT){
+      LeVDKR_P_CombinedMinPower = REGEN_POWER_LIMIT;
+      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_rpm_CAN1_iBSGRotorSpeed)/2);
+    }
 
 
-
+    //#####################################
     //VDKArt goes here?
     LeVDKR_p_TorqueSplitTarget = .5;
+    //#####################################
 
 
+    //map the pedal and apply the torque split
+    double LeVDKR_tq_TotalTorqueDesired = LeVDKR_tq_CombinedMaxTrq*LeVDKR_p_PedalPosition + LeVDKR_tq_CombinedMinTrq*(1-LeVDKR_p_PedalPosition);
+    double LeVDKR_tq_TorqueL = LeVDKR_tq_TotalTorqueDesired*(1-LeVDKR_p_TorqueSplitTarget);
+    double LeVDKR_tq_TorqueR = LeVDKR_tq_TotalTorqueDesired*LeVDKR_p_TorqueSplitTarget;
 
-    //Reduce power due to efficiency
-    double LeVDKR_tq_TorqueL = 0;
-    double LeVDKR_tq_TorqueR = 0;
-    //Map pedal to capability
-    LeVDKR_P_PowerTarget = LeVDKR_P_CombinedMaxPowr*LeVDKR_p_PedalPosition + LeVDKR_P_CombinedMinPowr*(1-LeVDKR_p_PedalPosition);
-    for (int i =0; i<PEDAL_MAX_ITERATION; i++){
-
-      //Try to achieve torque split
-      double LeVDKR_rpm_AvgMotorSpeed = (LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_rpm_CAN1_iBSGRotorSpeed)/2;
-      double LeVDKR_tq_TotTrqGuess = (NM_RPM_TO_W * LeVDKR_P_PowerTarget) / LeVDKR_rpm_AvgMotorSpeed;
-      LeVDKR_tq_TorqueL = LeVDKR_tq_TotTrqGuess * (1-LeVDKR_p_TorqueSplitTarget); //0 all Left
-      LeVDKR_tq_TorqueR = LeVDKR_tq_TotTrqGuess * LeVDKR_p_TorqueSplitTarget; //1 all right
-
-      //check guess against real efficiency
-      double LeVDKR_P_ActualElectricalPower = 0; //SOMETHING SOMETHING torque split and the efficiency table
-      if (abs(LeVDKR_P_PowerTarget - LeVDKR_P_ActualElectricalPower) < POWER_CONVERGENCE_THRESHOLD){break;}
-
-      //Map pedal to capability
-      LeVDKR_P_PowerTarget *= (LeVDKR_P_PowerTarget/LeVDKR_P_ActualElectricalPower); //scale target based on efficiency
-
-    }
+    //calculate actual electrical power and scale
+    //TODO ###########################################################
 
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){
