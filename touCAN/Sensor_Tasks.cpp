@@ -70,10 +70,10 @@ typedef struct BMSRTaskParams{
   BrokerData* VeBMSR_T_CANx_BatteryMAXTemp;
   BrokerData* VeBMSR_I_CANx_BatteryCurrent;
 }BMSRTaskTaskParams;
-BMSRTaskTaskParams BMSRCAN0TaskParams = { BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_V_CAN0_BatteryVoltage, 
-                                          &VeBMSR_v_CAN0_BatteryMAXCell, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent};
-BMSRTaskTaskParams BMSRCAN1TaskParams = { BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_V_CAN1_BatteryVoltage,
-                                          &VeBMSR_v_CAN1_BatteryMAXCell, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent};
+BMSRTaskTaskParams BMSRCAN0TaskParams = { BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, 
+                                          &VeBMSR_V_CAN0_BatteryVoltage, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent};
+BMSRTaskTaskParams BMSRCAN1TaskParams = { BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, 
+                                          &VeBMSR_V_CAN1_BatteryVoltage, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent};
 //This task calculates its own metrics from raw battery data for use elsewhere
 //BMSR
 void BMSObserverTask(void *pvParameters){
@@ -173,6 +173,13 @@ void BMSObserverTask(void *pvParameters){
     if ((esp_timer_get_time() - LeBMSR_I_PackCurrentFreshness) > STALE_DATA_THRESHOLD){
       params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
     }
+
+    
+    params->VeBMSR_v_CANx_BatteryMINCell->setValue(3.8);
+    params->VeBMSR_v_CANx_BatteryMAXCell->setValue(3.9);
+    params->VeBMSR_V_CANx_BatteryVoltage->setValue(50.05);
+    params->VeBMSR_T_CANx_BatteryMAXTemp->setValue(45.0);
+    params->VeBMSR_I_CANx_BatteryCurrent->setValue(0);
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
