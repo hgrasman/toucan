@@ -12,6 +12,7 @@
 #define SENSOR_TASKS
 
 #include "dataBroker.h"
+#include "ControlsConfig.h"
 #include "Dual_CAN_Driver.h"
 #include "stdint.h"
 #include "I2Cdev.h"

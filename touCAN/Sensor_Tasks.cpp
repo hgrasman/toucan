@@ -57,40 +57,124 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   }
 }
 
+
 typedef struct BMSRTaskParams{
   BatteryBroker BatteryData;
   BrokerData* VeBMSR_v_CANx_BatteryMINCell;
   BrokerData* VeBMSR_v_CANx_BatteryMAXCell;
   BrokerData* VeBMSR_T_CANx_BatteryMAXTemp;
+  BrokerData* VeBMSR_I_CANx_BatteryCurrent;
 }BMSRTaskTaskParams;
-BMSRTaskTaskParams BMSRCAN0TaskParams = {BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, &VeBMSR_T_CAN0_BatteryMAXTemp};
-BMSRTaskTaskParams BMSRCAN1TaskParams = {BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, &VeBMSR_T_CAN1_BatteryMAXTemp};
-
+BMSRTaskTaskParams BMSRCAN0TaskParams = {BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent};
+BMSRTaskTaskParams BMSRCAN1TaskParams = {BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent};
 //This task calculates its own metrics from raw battery data for use elsewhere
 //BMSR
 void BMSObserverTask(void *pvParameters){
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
 
+  BMSRTaskTaskParams *params = (BMSRTaskTaskParams*) pvParameters;
+
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
+  double  LeBMSR_v_CellVoltages[16];
+  int64_t LeBMSR_t_CellVoltagesFreshness[16];
+  double  LeBMSR_T_ProbeTemps[11];
+  int64_t LeBMSR_t_ProbeTempsFreshness[11];
+  double  LeBMSR_I_PackCurrent;
+  int64_t LeBMSR_I_PackCurrentFreshness;
+
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
-    //READ ALL THE DATA, PICK A STATE
-    
+    //READ ALL THE DATA
+    LeBMSR_v_CellVoltages[0] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->getValue(&LeBMSR_t_CellVoltagesFreshness[0]);
+    LeBMSR_v_CellVoltages[1] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->getValue(&LeBMSR_t_CellVoltagesFreshness[1]);
+    LeBMSR_v_CellVoltages[2] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->getValue(&LeBMSR_t_CellVoltagesFreshness[2]);
+    LeBMSR_v_CellVoltages[3] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->getValue(&LeBMSR_t_CellVoltagesFreshness[3]);
+    LeBMSR_v_CellVoltages[4] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->getValue(&LeBMSR_t_CellVoltagesFreshness[4]);
+    LeBMSR_v_CellVoltages[5] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->getValue(&LeBMSR_t_CellVoltagesFreshness[5]);
+    LeBMSR_v_CellVoltages[6] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->getValue(&LeBMSR_t_CellVoltagesFreshness[6]);
+    LeBMSR_v_CellVoltages[7] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->getValue(&LeBMSR_t_CellVoltagesFreshness[7]);
+    LeBMSR_v_CellVoltages[8] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->getValue(&LeBMSR_t_CellVoltagesFreshness[8]);
+    LeBMSR_v_CellVoltages[9] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->getValue(&LeBMSR_t_CellVoltagesFreshness[9]);
+    LeBMSR_v_CellVoltages[10] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->getValue(&LeBMSR_t_CellVoltagesFreshness[10]);
+    LeBMSR_v_CellVoltages[11] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->getValue(&LeBMSR_t_CellVoltagesFreshness[11]);
+    LeBMSR_v_CellVoltages[12] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->getValue(&LeBMSR_t_CellVoltagesFreshness[12]);
+    LeBMSR_v_CellVoltages[13] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->getValue(&LeBMSR_t_CellVoltagesFreshness[13]);
+    LeBMSR_v_CellVoltages[14] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->getValue(&LeBMSR_t_CellVoltagesFreshness[14]);
+    LeBMSR_v_CellVoltages[15] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->getValue(&LeBMSR_t_CellVoltagesFreshness[15]);
+
+    LeBMSR_T_ProbeTemps[0] = params->BatteryData.VeCANR_T_CANx_BatteryTemp1->getValue(&LeBMSR_t_ProbeTempsFreshness[0]);
+    LeBMSR_T_ProbeTemps[1] = params->BatteryData.VeCANR_T_CANx_BatteryTemp2->getValue(&LeBMSR_t_ProbeTempsFreshness[1]);
+    LeBMSR_T_ProbeTemps[2] = params->BatteryData.VeCANR_T_CANx_BatteryTemp3->getValue(&LeBMSR_t_ProbeTempsFreshness[2]);
+    LeBMSR_T_ProbeTemps[3] = params->BatteryData.VeCANR_T_CANx_BatteryTemp4->getValue(&LeBMSR_t_ProbeTempsFreshness[3]);
+    LeBMSR_T_ProbeTemps[4] = params->BatteryData.VeCANR_T_CANx_BatteryTemp5->getValue(&LeBMSR_t_ProbeTempsFreshness[4]);
+    LeBMSR_T_ProbeTemps[5] = params->BatteryData.VeCANR_T_CANx_BatteryTemp6->getValue(&LeBMSR_t_ProbeTempsFreshness[5]);
+    LeBMSR_T_ProbeTemps[6] = params->BatteryData.VeCANR_T_CANx_BatteryTemp7->getValue(&LeBMSR_t_ProbeTempsFreshness[6]);
+    LeBMSR_T_ProbeTemps[7] = params->BatteryData.VeCANR_T_CANx_BatteryTemp8->getValue(&LeBMSR_t_ProbeTempsFreshness[7]);
+    LeBMSR_T_ProbeTemps[8] = params->BatteryData.VeCANR_T_CANx_BatteryTemp9->getValue(&LeBMSR_t_ProbeTempsFreshness[8]);
+    LeBMSR_T_ProbeTemps[9] = params->BatteryData.VeCANR_T_CANx_BatteryTemp10->getValue(&LeBMSR_t_ProbeTempsFreshness[9]);
+    LeBMSR_T_ProbeTemps[10] = params->BatteryData.VeCANR_T_CANx_BatteryTemp11->getValue(&LeBMSR_t_ProbeTempsFreshness[10]);
+
+    LeBMSR_I_PackCurrent = params->BatteryData.VeCANR_I_CANx_BatteryCurrent->getValue(&LeBMSR_I_PackCurrentFreshness);
+
+    //find min/max cell voltage
+    double LeBMSR_v_minVoltage = CELL_MAXIMUM_VOLTAGE;
+    double LeBMSR_v_maxVoltage = CELL_MINIMUM_VOLTAGE;
+    bool LeBMSR_b_VoltagesFresh = true;
+    for (int i = 0; i < USEDCELLS; i++){
+      if ((esp_timer_get_time() - LeBMSR_t_CellVoltagesFreshness[i]) > STALE_DATA_THRESHOLD){
+        LeBMSR_b_VoltagesFresh = false;
+        break;
+      }
+      if (LeBMSR_v_CellVoltages[i] < LeBMSR_v_minVoltage){
+        LeBMSR_v_minVoltage = LeBMSR_v_CellVoltages[i];
+      }
+      if (LeBMSR_v_CellVoltages[i] > LeBMSR_v_maxVoltage){
+        LeBMSR_v_maxVoltage = LeBMSR_v_CellVoltages[i];
+      }
+    }
+    if (LeBMSR_b_VoltagesFresh){ //let the staleness propogate after 50ms
+      params->VeBMSR_v_CANx_BatteryMINCell->setValue(LeBMSR_v_minVoltage);
+      params->VeBMSR_v_CANx_BatteryMAXCell->setValue(LeBMSR_v_maxVoltage);
+    }
+
+    //do the same for temperature
+    double LeBMSR_T_maxTemp = 0;
+    bool LeBMSR_b_TempsFresh = true;
+    for (int i = 0; i < 11; i++){
+      if ((esp_timer_get_time() - LeBMSR_t_ProbeTempsFreshness[i]) > STALE_DATA_THRESHOLD){
+        LeBMSR_b_TempsFresh = false;
+        break;
+      }
+      if (LeBMSR_T_ProbeTemps[i] > LeBMSR_T_maxTemp){
+        LeBMSR_T_maxTemp = LeBMSR_T_ProbeTemps[i];
+      }
+    }
+    if (LeBMSR_b_TempsFresh){ //let the staleness propogate after 50ms
+      params->VeBMSR_T_CANx_BatteryMAXTemp->setValue(LeBMSR_T_maxTemp);
+    }
+
+    //pretty much just pass current right now
+    if ((esp_timer_get_time() - LeBMSR_I_PackCurrentFreshness) > STALE_DATA_THRESHOLD){
+      params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
+    }
+
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }
 
+
+//Spawn threads
 uint8_t Sensing_SetupTasks(void){
 
   xTaskCreatePinnedToCore(
       BMSObserverTask
-      ,  "Battery Observer 0" 
+      ,  "Batt0 Obsrvr" 
       ,  2048        
       ,  &BMSRCAN0TaskParams
       ,  8  // Priority
@@ -100,7 +184,7 @@ uint8_t Sensing_SetupTasks(void){
 
   xTaskCreatePinnedToCore(
       BMSObserverTask
-      ,  "Battery Observer 1" 
+      ,  "Batt1 Obsrvr" 
       ,  2048        
       ,  &BMSRCAN1TaskParams
       ,  8  // Priority

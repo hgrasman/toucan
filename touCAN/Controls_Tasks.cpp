@@ -52,11 +52,6 @@ void VDKartTask(void *pvParameters){
 
     if (trq<0){trq = 0;}
 
-    WRAP_SERIAL_MUTEX(Serial.print(VeCANR_tq_CAN0_iBSGInstMinTrqLim.getValue());Serial.print(", ");\
-                      Serial.print(VeCANR_I_CAN0_BatteryCurrent.getValue());Serial.print(", ");\
-                      Serial.println(VeCANR_tq_CAN0_iBSGInstMaxTrqLim.getValue());\
-    , portMAX_DELAY )
-
     VeVDKR_tq_CAN0_TorqueRequest.setValue(trq * LeCRLR_p_TorqueSplitTarget);
     VeVDKR_tq_CAN1_TorqueRequest.setValue(trq * (1-LeCRLR_p_TorqueSplitTarget));
 
@@ -140,7 +135,7 @@ uint8_t Controls_SetupTasks(void){
 
   xTaskCreatePinnedToCore(
       HVPropTask
-      ,  "HV System Controls" 
+      ,  "HVPropCrlr" 
       ,  2048        
       ,  NULL
       ,  8  // Priority

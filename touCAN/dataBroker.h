@@ -45,10 +45,12 @@ extern BrokerData VeHVPR_e_CANx_OpModeRequest;
 extern BrokerData VeBMSR_v_CAN0_BatteryMINCell;
 extern BrokerData VeBMSR_v_CAN0_BatteryMAXCell;
 extern BrokerData VeBMSR_T_CAN0_BatteryMAXTemp;
+extern BrokerData VeBMSR_I_CAN0_BatteryCurrent;
 
 extern BrokerData VeBMSR_v_CAN1_BatteryMINCell;
 extern BrokerData VeBMSR_v_CAN1_BatteryMAXCell;
 extern BrokerData VeBMSR_T_CAN1_BatteryMAXTemp;
+extern BrokerData VeBMSR_I_CAN1_BatteryCurrent;
 
 //VDKR VDKart Ring
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest;
