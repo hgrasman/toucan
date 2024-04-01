@@ -34,10 +34,10 @@ void setup() {
   }
 
   //Controls Setup
-  if (VDKart_SetupTasks() == VDKART_SETUP_SUCCESS){
-    WRAP_SERIAL_MUTEX(Serial.println("VDKART INIT SUCCESS");, pdMS_TO_TICKS(5))
+  if (Controls_SetupTasks() == CONTROLS_SETUP_SUCCESS){
+    WRAP_SERIAL_MUTEX(Serial.println("CONTROLS INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
-    WRAP_SERIAL_MUTEX(Serial.println("VDKART INIT FAILURE");, pdMS_TO_TICKS(5))
+    WRAP_SERIAL_MUTEX(Serial.println("CONTROLS INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
   //CAN Setup

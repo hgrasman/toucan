@@ -47,8 +47,10 @@ SemaphoreHandle_t xSemaphore_CANSPIMutex = xSemaphoreCreateMutex();
 //CRLR Controller Ring
 BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 
+//HVPR high voltage propulsion
+BrokerData VeHVPR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
+
 //VDKR VDKart Ring
-BrokerData VeVDKR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
 BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();
 

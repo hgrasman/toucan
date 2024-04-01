@@ -14,9 +14,12 @@
 #include "x8578_can_db_client.h" //for enums
 #include "pins.h"
 
+/*
+  This task synthesizes information into state modes and torque requests, namely pedal position -> VDKArt -> torques
+  VDKR
+*/
 TaskHandle_t xTaskVDKartHandle;
-
-void VDKartTask(void *pvParameters){  // This is a task.
+void VDKartTask(void *pvParameters){
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
 
@@ -30,8 +33,6 @@ void VDKartTask(void *pvParameters){  // This is a task.
   double LeCRLR_a_AxFilt;
   double LeCRLR_a_AyFilt;
   double LeCRLR_a_AzFilt;  
-
-  VeVDKR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE);
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
@@ -64,7 +65,22 @@ void VDKartTask(void *pvParameters){  // This is a task.
   }
 }
 
-uint8_t VDKart_SetupTasks(void){
+//This task handles communications with the high voltage batteries, and controls the relays
+//HVPR
+void HVManagerTask(void *pvParameters){
+  TickType_t xLastWakeTime;
+  const TickType_t xPeriod = pdMS_TO_TICKS(10);
+
+    VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE);
+
+
+  xLastWakeTime = xTaskGetTickCount(); // Initialize
+  for(;;){
+
+  }
+}
+
+uint8_t Controls_SetupTasks(void){
 
   xTaskCreatePinnedToCore(
       VDKartTask
@@ -76,6 +92,6 @@ uint8_t VDKart_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-    return (VDKART_SETUP_SUCCESS);
+    return (CONTROLS_SETUP_SUCCESS);
   
 }

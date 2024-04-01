@@ -38,8 +38,10 @@ extern SemaphoreHandle_t xSemaphore_I2CMutex;
 //CRLR Controller Ring
 extern BrokerData VeCRLR_b_ControlReadyFlag;
 
+//HVPR high voltage propulsion
+extern BrokerData VeHVPR_e_CANx_OpModeRequest;
+
 //VDKR VDKart Ring
-extern BrokerData VeVDKR_e_CANx_OpModeRequest;
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest;
 extern BrokerData VeVDKR_tq_CAN1_TorqueRequest;
 
