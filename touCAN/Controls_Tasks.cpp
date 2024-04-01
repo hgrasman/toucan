@@ -28,7 +28,7 @@ void VDKartTask(void *pvParameters){
   }
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
-  double trq = 0;
+  double LeCRLR_tq_TorqueTarget = 0;
   double LeCRLR_a_AxFilt;
   double LeCRLR_a_AyFilt;
   double LeCRLR_a_AzFilt;  
@@ -40,20 +40,28 @@ void VDKartTask(void *pvParameters){
     LeCRLR_a_AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
     LeCRLR_a_AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
 
+    //get torque split from the other IMU
     double LeCRLR_p_TorqueSplitTarget = (LeCRLR_a_AxFilt*2+.5);
     if (LeCRLR_p_TorqueSplitTarget<0){LeCRLR_p_TorqueSplitTarget = 0;}
     if (LeCRLR_p_TorqueSplitTarget>1){LeCRLR_p_TorqueSplitTarget = 1;}
 
-    trq = -LeCRLR_a_AyFilt * 5;
+    LeCRLR_tq_TorqueTarget = -LeCRLR_a_AyFilt * 5; //get trq from imu rn
 
-    if (trq<.05 && trq>-.05){trq = 0;
-    }else if (trq>.05){trq -= .05;
-    }else if (trq<-.05){trq += .05;}
+    //deadband
+    if (LeCRLR_tq_TorqueTarget<.05 && LeCRLR_tq_TorqueTarget>-.05){LeCRLR_tq_TorqueTarget = 0;
+    }else if (LeCRLR_tq_TorqueTarget>.05){LeCRLR_tq_TorqueTarget -= .05;
+    }else if (LeCRLR_tq_TorqueTarget<-.05){LeCRLR_tq_TorqueTarget += .05;}
 
-    if (trq<0){trq = 0;}
+    if (LeCRLR_tq_TorqueTarget<0){LeCRLR_tq_TorqueTarget = 0;} //clamp at 0 for the moment
 
-    VeVDKR_tq_CAN0_TorqueRequest.setValue(trq * LeCRLR_p_TorqueSplitTarget);
-    VeVDKR_tq_CAN1_TorqueRequest.setValue(trq * (1-LeCRLR_p_TorqueSplitTarget));
+    //send torque request if prop system is active, otherwise zero
+    if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){
+      VeVDKR_tq_CAN0_TorqueRequest.setValue(LeCRLR_tq_TorqueTarget * LeCRLR_p_TorqueSplitTarget);
+      VeVDKR_tq_CAN1_TorqueRequest.setValue(LeCRLR_tq_TorqueTarget * (1-LeCRLR_p_TorqueSplitTarget));
+    }else{
+      VeVDKR_tq_CAN0_TorqueRequest.setValue(0);
+      VeVDKR_tq_CAN1_TorqueRequest.setValue(0);
+    }
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
@@ -96,6 +104,7 @@ void HVPropTask(void *pvParameters){
         if ((xTaskGetTickCount() - offStateTimer) > pdMS_TO_TICKS(OFF_STATE_TIMEOUT)){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(5))
 
         }
 
@@ -117,6 +126,7 @@ void HVPropTask(void *pvParameters){
         ){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(5))
 
         }
 
@@ -139,19 +149,20 @@ void HVPropTask(void *pvParameters){
     }
 
     //force into off state if safety conditions are not met
-    if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE && \
-        VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE && \
-        VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE && \
-        VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE && \
-        VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    && \
-        VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    && \
-        VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     && \
-        VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX \
+    if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
+        VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
+        VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
+        VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
+        VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
+        VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
+        VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
+        VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
     ){
-      
+      if (LeHVPR_e_HVTargetState != CeHVPR_e_HVTargetState_OFF){
+        WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
+      }
       LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
       offStateTimer = xTaskGetTickCount(); //start chill out timer
-
     }
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
