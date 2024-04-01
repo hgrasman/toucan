@@ -62,11 +62,14 @@ typedef struct BMSRTaskParams{
   BatteryBroker BatteryData;
   BrokerData* VeBMSR_v_CANx_BatteryMINCell;
   BrokerData* VeBMSR_v_CANx_BatteryMAXCell;
+  BrokerData* VeBMSR_V_CANx_BatteryVoltage;
   BrokerData* VeBMSR_T_CANx_BatteryMAXTemp;
   BrokerData* VeBMSR_I_CANx_BatteryCurrent;
 }BMSRTaskTaskParams;
-BMSRTaskTaskParams BMSRCAN0TaskParams = {BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent};
-BMSRTaskTaskParams BMSRCAN1TaskParams = {BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent};
+BMSRTaskTaskParams BMSRCAN0TaskParams = { BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_V_CAN0_BatteryVoltage, 
+                                          &VeBMSR_v_CAN0_BatteryMAXCell, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent};
+BMSRTaskTaskParams BMSRCAN1TaskParams = { BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_V_CAN1_BatteryVoltage,
+                                          &VeBMSR_v_CAN1_BatteryMAXCell, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent};
 //This task calculates its own metrics from raw battery data for use elsewhere
 //BMSR
 void BMSObserverTask(void *pvParameters){
@@ -91,22 +94,22 @@ void BMSObserverTask(void *pvParameters){
   for(;;){
 
     //READ ALL THE DATA
-    LeBMSR_v_CellVoltages[0] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->getValue(&LeBMSR_t_CellVoltagesFreshness[0]);
-    LeBMSR_v_CellVoltages[1] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->getValue(&LeBMSR_t_CellVoltagesFreshness[1]);
-    LeBMSR_v_CellVoltages[2] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->getValue(&LeBMSR_t_CellVoltagesFreshness[2]);
-    LeBMSR_v_CellVoltages[3] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->getValue(&LeBMSR_t_CellVoltagesFreshness[3]);
-    LeBMSR_v_CellVoltages[4] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->getValue(&LeBMSR_t_CellVoltagesFreshness[4]);
-    LeBMSR_v_CellVoltages[5] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->getValue(&LeBMSR_t_CellVoltagesFreshness[5]);
-    LeBMSR_v_CellVoltages[6] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->getValue(&LeBMSR_t_CellVoltagesFreshness[6]);
-    LeBMSR_v_CellVoltages[7] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->getValue(&LeBMSR_t_CellVoltagesFreshness[7]);
-    LeBMSR_v_CellVoltages[8] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->getValue(&LeBMSR_t_CellVoltagesFreshness[8]);
-    LeBMSR_v_CellVoltages[9] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->getValue(&LeBMSR_t_CellVoltagesFreshness[9]);
-    LeBMSR_v_CellVoltages[10] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->getValue(&LeBMSR_t_CellVoltagesFreshness[10]);
-    LeBMSR_v_CellVoltages[11] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->getValue(&LeBMSR_t_CellVoltagesFreshness[11]);
-    LeBMSR_v_CellVoltages[12] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->getValue(&LeBMSR_t_CellVoltagesFreshness[12]);
-    LeBMSR_v_CellVoltages[13] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->getValue(&LeBMSR_t_CellVoltagesFreshness[13]);
-    LeBMSR_v_CellVoltages[14] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->getValue(&LeBMSR_t_CellVoltagesFreshness[14]);
-    LeBMSR_v_CellVoltages[15] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->getValue(&LeBMSR_t_CellVoltagesFreshness[15]);
+    LeBMSR_v_CellVoltages[0] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->getValue(&LeBMSR_t_CellVoltagesFreshness[0]) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[1] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->getValue(&LeBMSR_t_CellVoltagesFreshness[1] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[2] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->getValue(&LeBMSR_t_CellVoltagesFreshness[2] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[3] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->getValue(&LeBMSR_t_CellVoltagesFreshness[3] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[4] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->getValue(&LeBMSR_t_CellVoltagesFreshness[4] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[5] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->getValue(&LeBMSR_t_CellVoltagesFreshness[5] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[6] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->getValue(&LeBMSR_t_CellVoltagesFreshness[6] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[7] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->getValue(&LeBMSR_t_CellVoltagesFreshness[7] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[8] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->getValue(&LeBMSR_t_CellVoltagesFreshness[8] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[9] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->getValue(&LeBMSR_t_CellVoltagesFreshness[9] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[10] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->getValue(&LeBMSR_t_CellVoltagesFreshness[10] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[11] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->getValue(&LeBMSR_t_CellVoltagesFreshness[11] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[12] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->getValue(&LeBMSR_t_CellVoltagesFreshness[12] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[13] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->getValue(&LeBMSR_t_CellVoltagesFreshness[13] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[14] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->getValue(&LeBMSR_t_CellVoltagesFreshness[14] ) / COUNTS_PER_VOLT;
+    LeBMSR_v_CellVoltages[15] = params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->getValue(&LeBMSR_t_CellVoltagesFreshness[15] ) / COUNTS_PER_VOLT;
 
     LeBMSR_T_ProbeTemps[0] = params->BatteryData.VeCANR_T_CANx_BatteryTemp1->getValue(&LeBMSR_t_ProbeTempsFreshness[0]);
     LeBMSR_T_ProbeTemps[1] = params->BatteryData.VeCANR_T_CANx_BatteryTemp2->getValue(&LeBMSR_t_ProbeTempsFreshness[1]);
@@ -120,11 +123,12 @@ void BMSObserverTask(void *pvParameters){
     LeBMSR_T_ProbeTemps[9] = params->BatteryData.VeCANR_T_CANx_BatteryTemp10->getValue(&LeBMSR_t_ProbeTempsFreshness[9]);
     LeBMSR_T_ProbeTemps[10] = params->BatteryData.VeCANR_T_CANx_BatteryTemp11->getValue(&LeBMSR_t_ProbeTempsFreshness[10]);
 
-    LeBMSR_I_PackCurrent = params->BatteryData.VeCANR_I_CANx_BatteryCurrent->getValue(&LeBMSR_I_PackCurrentFreshness);
+    LeBMSR_I_PackCurrent = params->BatteryData.VeCANR_I_CANx_BatteryCurrent->getValue(&LeBMSR_I_PackCurrentFreshness); //TODO conversions
 
     //find min/max cell voltage
     double LeBMSR_v_minVoltage = CELL_MAXIMUM_VOLTAGE;
     double LeBMSR_v_maxVoltage = CELL_MINIMUM_VOLTAGE;
+    double LeBMSR_V_packVoltage = 0;
     bool LeBMSR_b_VoltagesFresh = true;
     for (int i = 0; i < USEDCELLS; i++){
       if ((esp_timer_get_time() - LeBMSR_t_CellVoltagesFreshness[i]) > STALE_DATA_THRESHOLD){
@@ -137,10 +141,12 @@ void BMSObserverTask(void *pvParameters){
       if (LeBMSR_v_CellVoltages[i] > LeBMSR_v_maxVoltage){
         LeBMSR_v_maxVoltage = LeBMSR_v_CellVoltages[i];
       }
+      LeBMSR_V_packVoltage += LeBMSR_v_CellVoltages[i]; //accumulate series voltages
     }
     if (LeBMSR_b_VoltagesFresh){ //let the staleness propogate after 50ms
       params->VeBMSR_v_CANx_BatteryMINCell->setValue(LeBMSR_v_minVoltage);
       params->VeBMSR_v_CANx_BatteryMAXCell->setValue(LeBMSR_v_maxVoltage);
+      params->VeBMSR_V_CANx_BatteryVoltage->setValue(LeBMSR_V_packVoltage);
     }
 
     //do the same for temperature

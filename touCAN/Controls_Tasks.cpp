@@ -75,6 +75,7 @@ void HVPropTask(void *pvParameters){
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
   uint8_t LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
+  TickType_t offStateTimer = xTaskGetTickCount();
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
@@ -85,8 +86,14 @@ void HVPropTask(void *pvParameters){
         
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
 
-        //transition to precharge if everything is safe and talking
-        if (true){
+        //disable the HV system
+        digitalWrite(GATEKEEPER_1_REL_PIN, LOW);
+        digitalWrite(GATEKEEPER_1_PRE_PIN, LOW);
+        digitalWrite(GATEKEEPER_2_REL_PIN, LOW);
+        digitalWrite(GATEKEEPER_2_PRE_PIN, LOW);
+
+        //try to transition to precharge. will be stopped by safety limits
+        if ((xTaskGetTickCount() - offStateTimer) > pdMS_TO_TICKS(OFF_STATE_TIMEOUT)){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
 
@@ -97,23 +104,53 @@ void HVPropTask(void *pvParameters){
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
 
+        //Start the precharge relays
+        digitalWrite(GATEKEEPER_1_REL_PIN, LOW);
+        digitalWrite(GATEKEEPER_1_PRE_PIN, HIGH);
+        digitalWrite(GATEKEEPER_2_REL_PIN, LOW);
+        digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
+
         //transition to prop active once motors are up to voltage
+        if (abs(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN0_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
+            abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
+            abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD \
+        ){
+
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
+
+        }
 
         break;
       case CeHVPR_e_HVTargetState_PROPACTIVE:
+
+        //Engage the contactors
+        digitalWrite(GATEKEEPER_1_REL_PIN, HIGH);
+        digitalWrite(GATEKEEPER_1_PRE_PIN, HIGH);
+        digitalWrite(GATEKEEPER_2_REL_PIN, HIGH);
+        digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE); //ENABLE the motor
 
         break;
       default:
         WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println("BAD");, pdMS_TO_TICKS(100))
+        LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
         continue; //BAD BAD BAD BAD try again 
     }
 
     //force into off state if safety conditions are not met
-    if (true){
+    if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE && \
+        VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE && \
+        VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE && \
+        VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE && \
+        VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    && \
+        VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    && \
+        VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     && \
+        VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX \
+    ){
       
-      LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
+      LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
+      offStateTimer = xTaskGetTickCount(); //start chill out timer
 
     }
 
@@ -133,6 +170,10 @@ uint8_t Controls_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
+  pinMode(GATEKEEPER_1_REL_PIN, OUTPUT);
+  pinMode(GATEKEEPER_1_PRE_PIN, OUTPUT);
+  pinMode(GATEKEEPER_2_REL_PIN, OUTPUT);
+  pinMode(GATEKEEPER_2_PRE_PIN, OUTPUT);
   xTaskCreatePinnedToCore(
       HVPropTask
       ,  "HVPropCrlr" 
