@@ -1,8 +1,6 @@
 #ifndef IBSGCONFIG
 #define IBSGCONFIG
 
-#define PDGP_POWER_LIMIT 14000
-
 #define U_MHEV_TORQ_MIN_LIMIT -55
 #define U_MHEV_TORQ_MAX_LIMIT 55
 

@@ -41,6 +41,15 @@ extern BrokerData VeCRLR_b_ControlReadyFlag;
 //HVPR high voltage propulsion
 extern BrokerData VeHVPR_e_CANx_OpModeRequest;
 
+//BMSR battery management observer
+extern BrokerData VeBMSR_v_CAN0_BatteryMINCell;
+extern BrokerData VeBMSR_v_CAN0_BatteryMAXCell;
+extern BrokerData VeBMSR_T_CAN0_BatteryMAXTemp;
+
+extern BrokerData VeBMSR_v_CAN1_BatteryMINCell;
+extern BrokerData VeBMSR_v_CAN1_BatteryMAXCell;
+extern BrokerData VeBMSR_T_CAN1_BatteryMAXTemp;
+
 //VDKR VDKart Ring
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest;
 extern BrokerData VeVDKR_tq_CAN1_TorqueRequest;

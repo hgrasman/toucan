@@ -45,44 +45,12 @@ typedef struct CANEncodingData{
   bms_mc2_bms_data_g_t                    bms_g_msg;
 } CANEncodingData;
 
-//Struct for all the battery data
-typedef struct BatteryBroker{
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell1;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell2;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell3;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell4;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell5;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell6;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell7;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell8;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell9;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell10;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell11;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell12;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell13;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell14;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell15;
-  BrokerData* VeCANR_v_CANx_BatteryVoltageCell16;
-  BrokerData* VeCANR_T_CANx_BatteryTemp1;
-  BrokerData* VeCANR_T_CANx_BatteryTemp2;
-  BrokerData* VeCANR_T_CANx_BatteryTemp3;
-  BrokerData* VeCANR_T_CANx_BatteryTemp4;
-  BrokerData* VeCANR_T_CANx_BatteryTemp5;
-  BrokerData* VeCANR_T_CANx_BatteryTemp6;
-  BrokerData* VeCANR_T_CANx_BatteryTemp7;
-  BrokerData* VeCANR_T_CANx_BatteryTemp8;
-  BrokerData* VeCANR_T_CANx_BatteryTemp9;
-  BrokerData* VeCANR_T_CANx_BatteryTemp10;
-  BrokerData* VeCANR_T_CANx_BatteryTemp11;
-  BrokerData* VeCANR_I_CANx_BatteryCurrent;
-}BatteryBroker;
-
 //Struct for passing parameters to the CANTasks
 typedef struct CANTaskParams{
   MCP_CAN CANx;
   CANEncodingData EncodingData;
   BatteryBroker BatteryData;
-  BrokerData* VeVDKR_CANx_TorqueRequest;
+  BrokerData* VeVDKR_tq_CANx_TorqueRequest;
   BrokerData* VeHVPR_e_CANx_OpModeRequest;
   BrokerData* VeCANR_rpm_CANx_iBSGRotorSpeed;
   BrokerData* VeCANR_e_CANx_iBSGOpMode;
@@ -308,7 +276,7 @@ void CANTxTask(void *pvParameters){
   for (;;){
 
     //F Hybrid
-    double LeCANR_tq_TorqueRequest = params->VeVDKR_CANx_TorqueRequest->getValue();
+    double LeCANR_tq_TorqueRequest = params->VeVDKR_tq_CANx_TorqueRequest->getValue();
     double LeCANR_e_OpModeRequest = params->VeHVPR_e_CANx_OpModeRequest->getValue();
     PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
                    LeCANR_e_OpModeRequest,0,0,LeCANR_tq_TorqueRequest);

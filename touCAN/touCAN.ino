@@ -27,10 +27,10 @@ void setup() {
     , portMAX_DELAY)
 
   //Sensor Setup
-  if (MPU6050_SetupTasks() == MCU6050_INIT_SUCCESS){
-    WRAP_SERIAL_MUTEX(Serial.println("IMU INIT SUCCESS");, pdMS_TO_TICKS(5))
+  if (Sensing_SetupTasks() == SENSING_INIT_SUCCESS){
+    WRAP_SERIAL_MUTEX(Serial.println("SENSING INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
-    WRAP_SERIAL_MUTEX(Serial.println("IMU INIT FAILURE");, pdMS_TO_TICKS(5))
+    WRAP_SERIAL_MUTEX(Serial.println("SENSING INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
   //Controls Setup

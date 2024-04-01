@@ -12,13 +12,14 @@
 #define CONTROLS_TASKS
 
 #include "dataBroker.h"
+#include "ControlsConfig.h"
 #include "stdint.h"
 
 //This is the function handle which will be executed
 #define CONTROLS_SETUP_SUCCESS 0b00
 #define VDKART_SETUP_FAILURE   0b01
-#define BMSMS_SETUP_FAILURE    0b10
-#define BOTH_SETUP_FAILURE     0b11
+#define HVPROP_SETUP_FAILURE   0b10
+#define ALL_SETUP_FAILURE      0b11
 extern TaskHandle_t xTaskVDKartHandle;
 uint8_t Controls_SetupTasks(void);
 

@@ -26,7 +26,6 @@ void VDKartTask(void *pvParameters){
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
   }
-
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
   double trq = 0;
@@ -65,18 +64,65 @@ void VDKartTask(void *pvParameters){
   }
 }
 
-//This task handles communications with the high voltage batteries, and controls the relays
+//This task controls the relays and propulsion mode, and observes states
 //HVPR
-void HVManagerTask(void *pvParameters){
+#define CeHVPR_e_HVTargetState_OFF 0
+#define CeHVPR_e_HVTargetState_PRECHARGE 1
+#define CeHVPR_e_HVTargetState_PROPACTIVE 2
+void HVPropTask(void *pvParameters){
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
 
-    VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE);
+  VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_EPIC_PMZ_A_EM_OPERATING_MODE_EXT_STANDBY_CHOICE);
+  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
+    vTaskDelay(1);
+  }
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
+  uint8_t LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
+    //act on states
+    switch (LeHVPR_e_HVTargetState){
+      case CeHVPR_e_HVTargetState_OFF:
+        
+        VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
+
+        //transition to precharge if everything is safe and talking
+        if (true){
+
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
+
+        }
+
+        break;
+      case CeHVPR_e_HVTargetState_PRECHARGE:
+
+        VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
+
+        //transition to prop active once motors are up to voltage
+
+        break;
+      case CeHVPR_e_HVTargetState_PROPACTIVE:
+
+        VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE); //ENABLE the motor
+
+        break;
+      default:
+        WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println("BAD");, pdMS_TO_TICKS(100))
+        continue; //BAD BAD BAD BAD try again 
+    }
+
+    //force into off state if safety conditions are not met
+    if (true){
+      
+      LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
+
+    }
+
+    vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }
 
@@ -92,6 +138,16 @@ uint8_t Controls_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-    return (CONTROLS_SETUP_SUCCESS);
+  xTaskCreatePinnedToCore(
+      HVPropTask
+      ,  "HV System Controls" 
+      ,  2048        
+      ,  NULL
+      ,  8  // Priority
+      ,  NULL // Task handle
+      ,  tskNO_AFFINITY // run on whatever core
+      );
+
+  return (CONTROLS_SETUP_SUCCESS);
   
 }

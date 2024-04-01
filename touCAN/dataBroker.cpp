@@ -50,6 +50,15 @@ BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 //HVPR high voltage propulsion
 BrokerData VeHVPR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
 
+//BMSR battery management observer
+BrokerData VeBMSR_v_CAN0_BatteryMINCell = BrokerData();
+BrokerData VeBMSR_v_CAN0_BatteryMAXCell = BrokerData();
+BrokerData VeBMSR_T_CAN0_BatteryMAXTemp = BrokerData();
+
+BrokerData VeBMSR_v_CAN1_BatteryMINCell = BrokerData();
+BrokerData VeBMSR_v_CAN1_BatteryMAXCell = BrokerData();
+BrokerData VeBMSR_T_CAN1_BatteryMAXTemp = BrokerData();
+
 //VDKR VDKart Ring
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
 BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();

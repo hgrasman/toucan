@@ -57,7 +57,56 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   }
 }
 
-uint8_t MPU6050_SetupTasks(void){
+typedef struct BMSRTaskParams{
+  BatteryBroker BatteryData;
+  BrokerData* VeBMSR_v_CANx_BatteryMINCell;
+  BrokerData* VeBMSR_v_CANx_BatteryMAXCell;
+  BrokerData* VeBMSR_T_CANx_BatteryMAXTemp;
+}BMSRTaskTaskParams;
+BMSRTaskTaskParams BMSRCAN0TaskParams = {BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, &VeBMSR_T_CAN0_BatteryMAXTemp};
+BMSRTaskTaskParams BMSRCAN1TaskParams = {BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, &VeBMSR_T_CAN1_BatteryMAXTemp};
+
+//This task calculates its own metrics from raw battery data for use elsewhere
+//BMSR
+void BMSObserverTask(void *pvParameters){
+  TickType_t xLastWakeTime;
+  const TickType_t xPeriod = pdMS_TO_TICKS(10);
+
+  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
+    vTaskDelay(1);
+  }
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
+
+  xLastWakeTime = xTaskGetTickCount(); // Initialize
+  for(;;){
+
+    //READ ALL THE DATA, PICK A STATE
+    
+    vTaskDelayUntil(&xLastWakeTime, xPeriod);
+  }
+}
+
+uint8_t Sensing_SetupTasks(void){
+
+  xTaskCreatePinnedToCore(
+      BMSObserverTask
+      ,  "Battery Observer 0" 
+      ,  2048        
+      ,  &BMSRCAN0TaskParams
+      ,  8  // Priority
+      ,  NULL // Task handle
+      ,  tskNO_AFFINITY // run on whatever core
+      );
+
+  xTaskCreatePinnedToCore(
+      BMSObserverTask
+      ,  "Battery Observer 1" 
+      ,  2048        
+      ,  &BMSRCAN1TaskParams
+      ,  8  // Priority
+      ,  NULL // Task handle
+      ,  tskNO_AFFINITY // run on whatever core
+      );
 
   Wire.begin(); //start I2C on default pins
   Serial.println("I2C Controller Configured");
@@ -65,7 +114,7 @@ uint8_t MPU6050_SetupTasks(void){
   //default 2g and 250 deg/sec?: yes "namely +/- 2g and +/- 250 degrees/sec"
   accelgyro.initialize();
   if (!accelgyro.testConnection()){
-    return(MCU6050_INIT_FAILURE);
+    return(SENSING_INIT_FAILURE);
   }
   Serial.println("MCU6050 Initialized");
 
@@ -79,6 +128,6 @@ uint8_t MPU6050_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-  return(MCU6050_INIT_SUCCESS);
+  return(SENSING_INIT_SUCCESS);
   
 }
