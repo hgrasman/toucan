@@ -104,7 +104,7 @@ void HVPropTask(void *pvParameters){
         if ((xTaskGetTickCount() - offStateTimer) > pdMS_TO_TICKS(OFF_STATE_TIMEOUT)){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(5))
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(8))
 
         }
 
@@ -126,7 +126,7 @@ void HVPropTask(void *pvParameters){
         ){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(5))
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(8))
 
         }
 
@@ -155,6 +155,8 @@ void HVPropTask(void *pvParameters){
         VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
         VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
         VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
+        VeBMSR_V_CAN0_BatteryVoltage.getValue() > PACK_VOLTAGE_MIN     || \
+        VeBMSR_V_CAN1_BatteryVoltage.getValue() > PACK_VOLTAGE_MIN     || \
         VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
         VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
     ){
