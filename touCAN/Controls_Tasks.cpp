@@ -28,36 +28,65 @@ void VDKartTask(void *pvParameters){
   }
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
-  double LeCRLR_tq_TorqueTarget = 0;
-  double LeCRLR_a_AxFilt;
-  double LeCRLR_a_AyFilt;
-  double LeCRLR_a_AzFilt;  
+  //Locals
+  double LeVDKR_p_PedalPosition;
+  double LeVDKR_rpm_CAN0_iBSGRotorSpeed;
+  double LeVDKR_rpm_CAN1_iBSGRotorSpeed;
+  double LeVDKR_rpm_EncoderSpeed;
+  double LeVDKR_phi_ApproxSWA;
+  double LeVDKR_tq_TorqueTarget;
+  double LeVDKR_p_TorqueSplitTarget;
+  double LeVDKR_a_AxFilt;
+  double LeVDKR_a_AyFilt;
+  double LeVDKR_a_AzFilt;  
+  double LeVDKR_w_WxFilt;
+  double LeVDKR_w_WyFilt;
+  double LeVDKR_w_WzFilt; 
+
+  /*
+
+All IMU values (mostly the accelerations and yaw rate)
+Steering Angle*/
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
-    LeCRLR_a_AxFilt = VeSNSR_a_IMU6AxFilt.getValue();
-    LeCRLR_a_AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
-    LeCRLR_a_AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
+    //grab data from the broker
+    LeVDKR_a_AxFilt = VeSNSR_a_IMU6AxFilt.getValue();
+    LeVDKR_a_AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
+    LeVDKR_a_AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
+    LeVDKR_w_WxFilt = VeSNSR_w_IMU6WxFilt.getValue();
+    LeVDKR_w_WyFilt = VeSNSR_w_IMU6WyFilt.getValue();
+    LeVDKR_w_WzFilt = VeSNSR_w_IMU6WzFilt.getValue();
+
+
+
+
+
 
     //get torque split from the other IMU
-    double LeCRLR_p_TorqueSplitTarget = (LeCRLR_a_AxFilt*2+.5);
-    if (LeCRLR_p_TorqueSplitTarget<0){LeCRLR_p_TorqueSplitTarget = 0;}
-    if (LeCRLR_p_TorqueSplitTarget>1){LeCRLR_p_TorqueSplitTarget = 1;}
+    LeVDKR_p_TorqueSplitTarget = (LeVDKR_a_AxFilt*2+.5);
+    if (LeVDKR_p_TorqueSplitTarget<0){LeVDKR_p_TorqueSplitTarget = 0;}
+    if (LeVDKR_p_TorqueSplitTarget>1){LeVDKR_p_TorqueSplitTarget = 1;}
 
-    LeCRLR_tq_TorqueTarget = -LeCRLR_a_AyFilt * 5; //get trq from imu rn
+    LeVDKR_tq_TorqueTarget = -LeVDKR_a_AyFilt * 5; //get trq from imu rn
 
     //deadband
-    if (LeCRLR_tq_TorqueTarget<.05 && LeCRLR_tq_TorqueTarget>-.05){LeCRLR_tq_TorqueTarget = 0;
-    }else if (LeCRLR_tq_TorqueTarget>.05){LeCRLR_tq_TorqueTarget -= .05;
-    }else if (LeCRLR_tq_TorqueTarget<-.05){LeCRLR_tq_TorqueTarget += .05;}
+    if (LeVDKR_tq_TorqueTarget<.05 && LeVDKR_tq_TorqueTarget>-.05){LeVDKR_tq_TorqueTarget = 0;
+    }else if (LeVDKR_tq_TorqueTarget>.05){LeVDKR_tq_TorqueTarget -= .05;
+    }else if (LeVDKR_tq_TorqueTarget<-.05){LeVDKR_tq_TorqueTarget += .05;}
 
-    if (LeCRLR_tq_TorqueTarget<0){LeCRLR_tq_TorqueTarget = 0;} //clamp at 0 for the moment
+    if (LeVDKR_tq_TorqueTarget<0){LeVDKR_tq_TorqueTarget = 0;} //clamp at 0 for the moment
+
+
+
+
+
 
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){
-      VeVDKR_tq_CAN0_TorqueRequest.setValue(LeCRLR_tq_TorqueTarget * LeCRLR_p_TorqueSplitTarget);
-      VeVDKR_tq_CAN1_TorqueRequest.setValue(LeCRLR_tq_TorqueTarget * (1-LeCRLR_p_TorqueSplitTarget));
+      VeVDKR_tq_CAN0_TorqueRequest.setValue(LeVDKR_tq_TorqueTarget * LeVDKR_p_TorqueSplitTarget);
+      VeVDKR_tq_CAN1_TorqueRequest.setValue(LeVDKR_tq_TorqueTarget * (1-LeVDKR_p_TorqueSplitTarget));
     }else{
       VeVDKR_tq_CAN0_TorqueRequest.setValue(0);
       VeVDKR_tq_CAN1_TorqueRequest.setValue(0);

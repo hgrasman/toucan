@@ -150,5 +150,8 @@ extern BrokerData VeSNSR_w_IMU6WzRaw;
 extern BrokerData VeSNSR_a_IMU6AxFilt;
 extern BrokerData VeSNSR_a_IMU6AyFilt;
 extern BrokerData VeSNSR_a_IMU6AzFilt;
+extern BrokerData VeSNSR_w_IMU6WxFilt;
+extern BrokerData VeSNSR_w_IMU6WyFilt;
+extern BrokerData VeSNSR_w_IMU6WzFilt;
 
 #endif

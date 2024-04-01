@@ -13,8 +13,6 @@
 #include "Sensor_Tasks.h"
 #include "pins.h"
 
-#define IMU_A_FILT_STRENGTH 0.9
-
 MPU6050 accelgyro;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
@@ -22,6 +20,9 @@ int16_t gx, gy, gz;
 double LeSNSR_a_AxFilt = 0;
 double LeSNSR_a_AyFilt = 0;
 double LeSNSR_a_AzFilt = 0;
+double LeSNSR_w_WxFilt = 0;
+double LeSNSR_w_WyFilt = 0;
+double LeSNSR_w_WzFilt = 0;
 
 void MCU6050Task(void *pvParameters){  // This is a task.
   TickType_t xLastWakeTime;
@@ -48,6 +49,9 @@ void MCU6050Task(void *pvParameters){  // This is a task.
     LeSNSR_a_AxFilt = (VeSNSR_a_IMU6AxRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AxFilt*IMU_A_FILT_STRENGTH;
     LeSNSR_a_AyFilt = (VeSNSR_a_IMU6AyRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AyFilt*IMU_A_FILT_STRENGTH;
     LeSNSR_a_AzFilt = (VeSNSR_a_IMU6AzRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AzFilt*IMU_A_FILT_STRENGTH;
+    LeSNSR_w_WxFilt = (VeSNSR_w_IMU6WxRaw.getValue())*(1-IMU_W_FILT_STRENGTH) + LeSNSR_w_WxFilt*IMU_W_FILT_STRENGTH;
+    LeSNSR_w_WyFilt = (VeSNSR_w_IMU6WyRaw.getValue())*(1-IMU_W_FILT_STRENGTH) + LeSNSR_w_WyFilt*IMU_W_FILT_STRENGTH;
+    LeSNSR_w_WzFilt = (VeSNSR_w_IMU6WzRaw.getValue())*(1-IMU_W_FILT_STRENGTH) + LeSNSR_w_WzFilt*IMU_W_FILT_STRENGTH;
     VeSNSR_a_IMU6AxFilt.setValue(LeSNSR_a_AxFilt);
     VeSNSR_a_IMU6AyFilt.setValue(LeSNSR_a_AyFilt);
     VeSNSR_a_IMU6AzFilt.setValue(LeSNSR_a_AzFilt);

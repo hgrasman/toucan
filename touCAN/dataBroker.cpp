@@ -160,7 +160,9 @@ BrokerData VeSNSR_w_IMU6WzRaw = BrokerData();
 BrokerData VeSNSR_a_IMU6AxFilt = BrokerData();
 BrokerData VeSNSR_a_IMU6AyFilt = BrokerData();
 BrokerData VeSNSR_a_IMU6AzFilt = BrokerData();
-
+BrokerData VeSNSR_w_IMU6WxFilt = BrokerData();
+BrokerData VeSNSR_w_IMU6WyFilt = BrokerData();
+BrokerData VeSNSR_w_IMU6WzFilt = BrokerData();
 
 
 
