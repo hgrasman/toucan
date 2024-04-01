@@ -174,13 +174,6 @@ void BMSObserverTask(void *pvParameters){
       params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
     }
 
-    
-    params->VeBMSR_v_CANx_BatteryMINCell->setValue(3.8);
-    params->VeBMSR_v_CANx_BatteryMAXCell->setValue(3.9);
-    params->VeBMSR_V_CANx_BatteryVoltage->setValue(50.05);
-    params->VeBMSR_T_CANx_BatteryMAXTemp->setValue(45.0);
-    params->VeBMSR_I_CANx_BatteryCurrent->setValue(0);
-
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }

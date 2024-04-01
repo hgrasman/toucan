@@ -203,14 +203,12 @@ void HVPropTask(void *pvParameters){
         VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
         VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
         VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-        VeBMSR_V_CAN0_BatteryVoltage.getValue() > PACK_VOLTAGE_MIN     || \
-        VeBMSR_V_CAN1_BatteryVoltage.getValue() > PACK_VOLTAGE_MIN     || \
+        VeBMSR_V_CAN0_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
+        VeBMSR_V_CAN1_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
         VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
         VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
     ){
-      if (LeHVPR_e_HVTargetState != CeHVPR_e_HVTargetState_OFF){
-        WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
-      }
+      WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
       LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
       offStateTimer = xTaskGetTickCount(); //start chill out timer
     }
