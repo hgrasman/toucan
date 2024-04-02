@@ -55,8 +55,8 @@ void VDKartTask(void *pvParameters){
     LeVDKR_rpm_CAN1_iBSGRotorSpeed = VeCANR_rpm_CAN1_iBSGRotorSpeed.getValue();
 
     //get the pedal and wheel values
-    LeVDKR_p_PedalPosition = analogRead(PEDAL_IN_NML_PIN) / 4095;
-    LeVDKR_phi_ApproxSWA   = analogRead(STEER_IN_NML_PIN) / 4095;
+    LeVDKR_p_PedalPosition = (double) analogRead(PEDAL_IN_NML_PIN) / 4095.0;
+    LeVDKR_phi_ApproxSWA   = (double) analogRead(STEER_IN_NML_PIN) / 4095.0;
     //TODO Safety
 
     //Get limits from the motor
@@ -76,21 +76,28 @@ void VDKartTask(void *pvParameters){
     //Find limits
     double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim + LeVDKR_tq_CAN1_MaxTrqLim;
     double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim + LeVDKR_tq_CAN1_MinTrqLim;
-    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_CAN1_iBSGRotorSpeed) / NM_RPM_TO_W; //best the motor can do
-    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_CAN1_iBSGRotorSpeed) / NM_RPM_TO_W; //quite possibly 28kW
+
+    //Calculate max power and limit -> recalculate max torque. At very low rpm, use constant min rpm for this calculation
+    double LeVDKR_rpm_MaxPowerClampedSpeedL = LeVDKR_rpm_CAN0_iBSGRotorSpeed;
+    double LeVDKR_rpm_MaxPowerClampedSpeedR = LeVDKR_rpm_CAN1_iBSGRotorSpeed;
+    if(LeVDKR_rpm_MaxPowerClampedSpeedL < POWER_LIMIT_MINRPM){LeVDKR_rpm_MaxPowerClampedSpeedL = POWER_LIMIT_MINRPM;}
+    if(LeVDKR_rpm_MaxPowerClampedSpeedR < POWER_LIMIT_MINRPM){LeVDKR_rpm_MaxPowerClampedSpeedR = POWER_LIMIT_MINRPM;}
+    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR) / NM_RPM_TO_W; //best the motor can do
+    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR) / NM_RPM_TO_W; //quite possibly 28kW
     if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
       LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
-      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_rpm_CAN1_iBSGRotorSpeed)/2);
+      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_rpm_MaxPowerClampedSpeedR)/2);
     }
     if (LeVDKR_P_CombinedMinPower < REGEN_POWER_LIMIT){
       LeVDKR_P_CombinedMinPower = REGEN_POWER_LIMIT;
-      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_CAN0_iBSGRotorSpeed + LeVDKR_rpm_CAN1_iBSGRotorSpeed)/2);
+      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_rpm_MaxPowerClampedSpeedR)/2);
     }
+
 
 
     //#####################################
     //VDKArt goes here?
-    LeVDKR_p_TorqueSplitTarget = .5;
+    LeVDKR_p_TorqueSplitTarget = 0;
     //#####################################
 
 
@@ -101,6 +108,14 @@ void VDKartTask(void *pvParameters){
 
     //calculate actual electrical power and scale
     //TODO ###########################################################
+
+    WRAP_SERIAL_MUTEX(\
+                      Serial.print(LeVDKR_p_PedalPosition); Serial.print(", ");\
+                      Serial.print(LeVDKR_tq_CAN0_MinTrqLim); Serial.print(", ");\
+                      Serial.print(LeVDKR_tq_CAN0_MaxTrqLim); Serial.print(", ");\
+                      Serial.print(LeVDKR_tq_MinTrqTaperL); Serial.print(", ");\
+                      Serial.print(LeVDKR_tq_CombinedMaxTrq); Serial.println("");\
+                      , pdMS_TO_TICKS(100))
 
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){
@@ -188,6 +203,13 @@ void HVPropTask(void *pvParameters){
         digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE); //ENABLE the motor
+
+        //baby the motor
+        if (VeCANR_e_CAN0_iBSGOpMode.getValue() == X8578_CAN_DB_CLIENT_EPIC_PMZ_A_EM_OPERATING_MODE_EXT_NOT__CAPABLE_CHOICE){
+          //we accidentally hit a motor limit
+          VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //turn it off
+          //hopefully it turns on again next time around
+        }
 
         break;
       default:

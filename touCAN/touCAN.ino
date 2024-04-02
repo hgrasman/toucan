@@ -49,11 +49,12 @@ void setup() {
   }
 
   //SD Setup
+  /*
   if (Logging_SetupTasks() == LOGGING_SETUP_SUCCESS){
     WRAP_SERIAL_MUTEX(Serial.println("SD INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
     WRAP_SERIAL_MUTEX(Serial.println("SD INIT FAILURE");, pdMS_TO_TICKS(5))
-  }
+  }*/
 
   WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
   VeCRLR_b_ControlReadyFlag.setValue(0);
