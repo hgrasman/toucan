@@ -30,7 +30,7 @@ class BrokerData {
 //Exclusive hardware access
 #define WRAP_SERIAL_MUTEX(x,y) if(xSemaphoreTake( xSemaphore_SerialMutex, y) == pdTRUE ){ x xSemaphoreGive( xSemaphore_SerialMutex );}
 extern SemaphoreHandle_t xSemaphore_SerialMutex;
-//CAN is often multiline so no define
+#define WRAP_SPI_MUTEX(x,y) if(xSemaphoreTake( xSemaphore_CANSPIMutex, y) == pdTRUE ){ x xSemaphoreGive( xSemaphore_CANSPIMutex );}
 extern SemaphoreHandle_t xSemaphore_CANSPIMutex;
 #define WRAP_I2C_MUTEX(x,y) if(xSemaphoreTake( xSemaphore_I2CMutex, y) == pdTRUE ){ x xSemaphoreGive( xSemaphore_I2CMutex );}
 extern SemaphoreHandle_t xSemaphore_I2CMutex;

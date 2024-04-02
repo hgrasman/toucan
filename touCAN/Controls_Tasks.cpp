@@ -208,7 +208,9 @@ void HVPropTask(void *pvParameters){
         VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
         VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
     ){
-      WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
+      if (LeHVPR_e_HVTargetState != CeHVPR_e_HVTargetState_OFF){
+        WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
+      }
       LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
       offStateTimer = xTaskGetTickCount(); //start chill out timer
     }

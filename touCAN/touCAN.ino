@@ -12,6 +12,7 @@
 #include "Dual_CAN_Driver.h"
 #include "Controls_Tasks.h"
 #include "Sensor_Tasks.h"
+#include "Logging.h"
 #include "dataBroker.h"
 
 // The setup function runs once when you press reset or power on the board.
@@ -45,6 +46,13 @@ void setup() {
     WRAP_SERIAL_MUTEX(Serial.println("CAN HARDWARE INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
     WRAP_SERIAL_MUTEX(Serial.println("CAN HARDWARE INIT FAILURE");, pdMS_TO_TICKS(5))
+  }
+
+  //SD Setup
+  if (Logging_SetupTasks() == LOGGING_SETUP_SUCCESS){
+    WRAP_SERIAL_MUTEX(Serial.println("SD INIT SUCCESS");, pdMS_TO_TICKS(5))
+  }else{
+    WRAP_SERIAL_MUTEX(Serial.println("SD INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
   WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
