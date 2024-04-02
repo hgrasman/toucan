@@ -73,32 +73,34 @@ void VDKartTask(void *pvParameters){
     if (LeVDKR_tq_CAN0_MinTrqLim < LeVDKR_tq_MinTrqTaperL){LeVDKR_tq_CAN0_MinTrqLim = LeVDKR_tq_MinTrqTaperL;}
     if (LeVDKR_tq_CAN1_MinTrqLim < LeVDKR_tq_MinTrqTaperR){LeVDKR_tq_CAN1_MinTrqLim = LeVDKR_tq_MinTrqTaperR;}
 
+
+    //#####################################
+    //VDKArt goes here?
+    LeVDKR_p_TorqueSplitTarget = .9;
+    //#####################################
+
+
     //Find limits
-    double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim + LeVDKR_tq_CAN1_MaxTrqLim;
-    double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim + LeVDKR_tq_CAN1_MinTrqLim;
+    double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_p_TorqueSplitTarget;
+    double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_p_TorqueSplitTarget;
 
     //Calculate max power and limit -> recalculate max torque. At very low rpm, use constant min rpm for this calculation
     double LeVDKR_rpm_MaxPowerClampedSpeedL = LeVDKR_rpm_CAN0_iBSGRotorSpeed;
     double LeVDKR_rpm_MaxPowerClampedSpeedR = LeVDKR_rpm_CAN1_iBSGRotorSpeed;
     if(LeVDKR_rpm_MaxPowerClampedSpeedL < POWER_LIMIT_MINRPM){LeVDKR_rpm_MaxPowerClampedSpeedL = POWER_LIMIT_MINRPM;}
     if(LeVDKR_rpm_MaxPowerClampedSpeedR < POWER_LIMIT_MINRPM){LeVDKR_rpm_MaxPowerClampedSpeedR = POWER_LIMIT_MINRPM;}
-    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR) / NM_RPM_TO_W; //best the motor can do
-    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR) / NM_RPM_TO_W; //quite possibly 28kW
+    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) \
+                                        + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget) / NM_RPM_TO_W; //best the motor can do
+    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) \
+                                        + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget) / NM_RPM_TO_W; //quite possibly 28kW
     if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
       LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
-      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_rpm_MaxPowerClampedSpeedR)/2);
+      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget));
     }
     if (LeVDKR_P_CombinedMinPower < REGEN_POWER_LIMIT){
       LeVDKR_P_CombinedMinPower = REGEN_POWER_LIMIT;
-      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL + LeVDKR_rpm_MaxPowerClampedSpeedR)/2);
+      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget));
     }
-
-
-
-    //#####################################
-    //VDKArt goes here?
-    LeVDKR_p_TorqueSplitTarget = 0;
-    //#####################################
 
 
     //map the pedal and apply the torque split
@@ -110,10 +112,10 @@ void VDKartTask(void *pvParameters){
     //TODO ###########################################################
 
     WRAP_SERIAL_MUTEX(\
-                      Serial.print(LeVDKR_p_PedalPosition); Serial.print(", ");\
+                      Serial.print(LeVDKR_rpm_CAN0_iBSGRotorSpeed); Serial.print(", ");\
                       Serial.print(LeVDKR_tq_CAN0_MinTrqLim); Serial.print(", ");\
                       Serial.print(LeVDKR_tq_CAN0_MaxTrqLim); Serial.print(", ");\
-                      Serial.print(LeVDKR_tq_MinTrqTaperL); Serial.print(", ");\
+                      Serial.print(LeVDKR_P_CombinedMaxPower); Serial.print(", ");\
                       Serial.print(LeVDKR_tq_CombinedMaxTrq); Serial.println("");\
                       , pdMS_TO_TICKS(100))
 
