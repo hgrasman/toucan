@@ -36,6 +36,7 @@ void VDKartTask(void *pvParameters){
   double LeVDKR_rpm_CAN1_iBSGRotorSpeed;
   double LeVDKR_rpm_EncoderSpeed;
   double LeVDKR_phi_ApproxSWA;
+  double LeVDKR_phi_SWASensorError;
   double LeVDKR_p_TorqueSplitTarget;
   double LeVDKR_a_AxFilt, LeVDKR_a_AyFilt, LeVDKR_a_AzFilt;  
   double LeVDKR_w_WxFilt, LeVDKR_w_WyFilt, LeVDKR_w_WzFilt;
@@ -55,9 +56,13 @@ void VDKartTask(void *pvParameters){
     LeVDKR_rpm_CAN1_iBSGRotorSpeed = VeCANR_rpm_CAN1_iBSGRotorSpeed.getValue();
 
     //get the pedal and wheel values
+    double LeVDKR_p_SWAPositionNML = (double) analogRead(STEER_IN_NML_PIN) / 4095.0;
+    double LeVDKR_p_SWAPositionINV = (double) analogRead(STEER_IN_INV_PIN) / 4095.0;
+    LeVDKR_phi_SWASensorError = 1 - (LeVDKR_p_SWAPositionNML+LeVDKR_p_SWAPositionINV);
+    LeVDKR_phi_ApproxSWA   = (LeVDKR_p_SWAPositionNML - LeVDKR_p_SWAPositionINV);
+    
+
     LeVDKR_p_PedalPosition = (double) analogRead(PEDAL_IN_NML_PIN) / 4095.0;
-    LeVDKR_phi_ApproxSWA   = (double) analogRead(STEER_IN_NML_PIN) / 4095.0;
-    //TODO Safety
 
     //Get limits from the motor
     double LeVDKR_tq_CAN0_MinTrqLim = VeCANR_tq_CAN0_iBSGInstMinTrqLim.getValue();
@@ -76,7 +81,7 @@ void VDKartTask(void *pvParameters){
 
     //#####################################
     //VDKArt goes here?
-    LeVDKR_p_TorqueSplitTarget = .9;
+    LeVDKR_p_TorqueSplitTarget = .5;
     //#####################################
 
 
@@ -111,12 +116,19 @@ void VDKartTask(void *pvParameters){
     //calculate actual electrical power and scale
     //TODO ###########################################################
 
-    WRAP_SERIAL_MUTEX(\
+    /*WRAP_SERIAL_MUTEX(\
                       Serial.print(LeVDKR_rpm_CAN0_iBSGRotorSpeed); Serial.print(", ");\
                       Serial.print(LeVDKR_tq_CAN0_MinTrqLim); Serial.print(", ");\
                       Serial.print(LeVDKR_tq_CAN0_MaxTrqLim); Serial.print(", ");\
                       Serial.print(LeVDKR_P_CombinedMaxPower); Serial.print(", ");\
                       Serial.print(LeVDKR_tq_CombinedMaxTrq); Serial.println("");\
+                      , pdMS_TO_TICKS(100))*/
+
+    WRAP_SERIAL_MUTEX(\
+                      Serial.print(1); Serial.print(", ");\
+                      Serial.print(-1); Serial.print(", ");\
+                      Serial.print(LeVDKR_phi_SWASensorError); Serial.print(", ");\
+                      Serial.print(LeVDKR_phi_ApproxSWA); Serial.println("");\
                       , pdMS_TO_TICKS(100))
 
     //send torque request if prop system is active, otherwise zero
