@@ -61,7 +61,6 @@ void VDKartTask(void *pvParameters){
     LeVDKR_phi_SWASensorError = 1 - (LeVDKR_p_SWAPositionNML+LeVDKR_p_SWAPositionINV);
     LeVDKR_phi_ApproxSWA   = (LeVDKR_p_SWAPositionNML - LeVDKR_p_SWAPositionINV);
     
-
     LeVDKR_p_PedalPosition = (double) analogRead(PEDAL_IN_NML_PIN) / 4095.0;
 
     //Get limits from the motor
@@ -79,10 +78,14 @@ void VDKartTask(void *pvParameters){
     if (LeVDKR_tq_CAN1_MinTrqLim < LeVDKR_tq_MinTrqTaperR){LeVDKR_tq_CAN1_MinTrqLim = LeVDKR_tq_MinTrqTaperR;}
 
 
-    //#####################################
-    //VDKArt goes here?
-    LeVDKR_p_TorqueSplitTarget = .5;
-    //#####################################
+    if (abs(LeVDKR_phi_SWASensorError) > SWA_ERROR_THRESHOLD){
+      LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
+    }else{
+      //TORQUE SPLIT
+      LeVDKR_p_TorqueSplitTarget = .9;
+    }
+
+    double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
 
 
     //Find limits
@@ -124,12 +127,19 @@ void VDKartTask(void *pvParameters){
                       Serial.print(LeVDKR_tq_CombinedMaxTrq); Serial.println("");\
                       , pdMS_TO_TICKS(100))*/
 
-    WRAP_SERIAL_MUTEX(\
+    /*WRAP_SERIAL_MUTEX(\
                       Serial.print(1); Serial.print(", ");\
                       Serial.print(-1); Serial.print(", ");\
                       Serial.print(LeVDKR_phi_SWASensorError); Serial.print(", ");\
                       Serial.print(LeVDKR_phi_ApproxSWA); Serial.println("");\
-                      , pdMS_TO_TICKS(100))
+                      , pdMS_TO_TICKS(100))*/
+
+    /*WRAP_SERIAL_MUTEX(\
+                      Serial.print(1); Serial.print(", ");\
+                      Serial.print(-1); Serial.print(", ");\
+                      Serial.print(LeVDKR_p_TorqueSplitTargetFilt); Serial.print(", ");\
+                      Serial.print(LeVDKR_p_TorqueSplitTarget); Serial.println("");\
+                      , pdMS_TO_TICKS(100))*/
 
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){

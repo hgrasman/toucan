@@ -25,6 +25,11 @@
 
 #define COUNTS_PER_VOLT (UINT16_MAX/5)
 
+#define SWA_ERROR_THRESHOLD .15
+#define SWA_ERROR_RETURN_FILT .98
+#define VECTOR_RATE_FILT .92
+#define VECTOR_CENTER_SPLIT .5
+
 #define OFF_STATE_TIMEOUT 500
 
 //State machine comparisons
