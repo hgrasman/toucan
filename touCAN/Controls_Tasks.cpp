@@ -78,43 +78,43 @@ void VDKartTask(void *pvParameters){
     if (LeVDKR_tq_CAN1_MinTrqLim < LeVDKR_tq_MinTrqTaperR){LeVDKR_tq_CAN1_MinTrqLim = LeVDKR_tq_MinTrqTaperR;}
 
 
+    //VDKART split. Return to Default if swa errors
     if (abs(LeVDKR_phi_SWASensorError) > SWA_ERROR_THRESHOLD){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = .9;
+      LeVDKR_p_TorqueSplitTarget = .5;
     }
-
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
 
 
     //Find limits
-    double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_p_TorqueSplitTarget;
-    double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_p_TorqueSplitTarget;
+    double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_p_TorqueSplitTargetFilt;
+    double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_p_TorqueSplitTargetFilt;
 
     //Calculate max power and limit -> recalculate max torque. At very low rpm, use constant min rpm for this calculation
     double LeVDKR_rpm_MaxPowerClampedSpeedL = LeVDKR_rpm_CAN0_iBSGRotorSpeed;
     double LeVDKR_rpm_MaxPowerClampedSpeedR = LeVDKR_rpm_CAN1_iBSGRotorSpeed;
     if(LeVDKR_rpm_MaxPowerClampedSpeedL < POWER_LIMIT_MINRPM){LeVDKR_rpm_MaxPowerClampedSpeedL = POWER_LIMIT_MINRPM;}
     if(LeVDKR_rpm_MaxPowerClampedSpeedR < POWER_LIMIT_MINRPM){LeVDKR_rpm_MaxPowerClampedSpeedR = POWER_LIMIT_MINRPM;}
-    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) \
-                                        + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget) / NM_RPM_TO_W; //best the motor can do
-    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) \
-                                        + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget) / NM_RPM_TO_W; //quite possibly 28kW
+    double LeVDKR_P_CombinedMaxPower = (LeVDKR_tq_CAN0_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) \
+                                        + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt) / NM_RPM_TO_W; //best the motor can do
+    double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) \
+                                        + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt) / NM_RPM_TO_W; //quite possibly 28kW
     if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
       LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
-      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget));
+      LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
     }
     if (LeVDKR_P_CombinedMinPower < REGEN_POWER_LIMIT){
       LeVDKR_P_CombinedMinPower = REGEN_POWER_LIMIT;
-      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTarget) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTarget));
+      LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
     }
 
 
     //map the pedal and apply the torque split
     double LeVDKR_tq_TotalTorqueDesired = LeVDKR_tq_CombinedMaxTrq*LeVDKR_p_PedalPosition + LeVDKR_tq_CombinedMinTrq*(1-LeVDKR_p_PedalPosition);
-    double LeVDKR_tq_TorqueL = LeVDKR_tq_TotalTorqueDesired*(1-LeVDKR_p_TorqueSplitTarget);
-    double LeVDKR_tq_TorqueR = LeVDKR_tq_TotalTorqueDesired*LeVDKR_p_TorqueSplitTarget;
+    double LeVDKR_tq_TorqueL = LeVDKR_tq_TotalTorqueDesired*(1-LeVDKR_p_TorqueSplitTargetFilt);
+    double LeVDKR_tq_TorqueR = LeVDKR_tq_TotalTorqueDesired*LeVDKR_p_TorqueSplitTargetFilt;
 
     //calculate actual electrical power and scale
     //TODO ###########################################################
