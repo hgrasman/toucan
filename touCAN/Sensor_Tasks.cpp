@@ -69,11 +69,15 @@ typedef struct BMSRTaskParams{
   BrokerData* VeBMSR_V_CANx_BatteryVoltage;
   BrokerData* VeBMSR_T_CANx_BatteryMAXTemp;
   BrokerData* VeBMSR_I_CANx_BatteryCurrent;
+  BrokerData* VeBMSR_V_CANx_SSVObserved;
+  BrokerData* VeBMSR_V_CANx_SSVESREstimated;
 }BMSRTaskTaskParams;
 BMSRTaskTaskParams BMSRCAN0TaskParams = { BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, 
-                                          &VeBMSR_V_CAN0_BatteryVoltage, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent};
+                                          &VeBMSR_V_CAN0_BatteryVoltage, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent,
+                                          &VeBMSR_V_CAN0_SSVObserved, &VeBMSR_V_CAN0_SSVESREstimated};
 BMSRTaskTaskParams BMSRCAN1TaskParams = { BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, 
-                                          &VeBMSR_V_CAN1_BatteryVoltage, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent};
+                                          &VeBMSR_V_CAN1_BatteryVoltage, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent,
+                                          &VeBMSR_V_CAN1_SSVObserved, &VeBMSR_V_CAN1_SSVESREstimated};
 //This task calculates its own metrics from raw battery data for use elsewhere
 //BMSR
 void BMSObserverTask(void *pvParameters){
@@ -173,6 +177,16 @@ void BMSObserverTask(void *pvParameters){
     if (LeBMSR_I_PackCurrentFreshness < STALE_DATA_THRESHOLD){
       params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
     }
+
+    //Observe SSV at low current
+    if (abs(LeBMSR_I_PackCurrent) < SSV_LEARN_MAX_I){
+      params->VeBMSR_V_CANx_SSVObserved->setValue(params->VeBMSR_V_CANx_SSVObserved->getValue()*SSV_LEARN_STRENGTH + LeBMSR_V_packVoltage*(1-SSV_LEARN_STRENGTH));
+    } 
+
+    //estimate esr under load. learn most near low current
+    double LeBMSR_p_SSVESRLearnStrength = (SSV_EST_MAX_I - abs(LeBMSR_I_PackCurrent))/SSV_EST_MAX_I * SSV_EST_MAX_STRENGTH;
+    double LeBMSR_V_ESRProjectedSSV = LeBMSR_V_packVoltage + PACK_ESR_EST*LeBMSR_I_PackCurrent; 
+    params->VeBMSR_V_CANx_SSVESREstimated->setValue(params->VeBMSR_V_CANx_SSVESREstimated->getValue()*(1-LeBMSR_p_SSVESRLearnStrength) + LeBMSR_V_ESRProjectedSSV*LeBMSR_p_SSVESRLearnStrength);
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }

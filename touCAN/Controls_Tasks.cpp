@@ -69,8 +69,6 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_tq_CAN1_MinTrqLim = VeCANR_tq_CAN1_iBSGInstMinTrqLim.getValue();
     double LeVDKR_tq_CAN1_MaxTrqLim = VeCANR_tq_CAN1_iBSGInstMaxTrqLim.getValue();
 
-    //get battery limits TODO
-
     //stop the thing from spinning backward
     double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperL>0){LeVDKR_tq_MinTrqTaperL = 0;}
     double LeVDKR_tq_MinTrqTaperR = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN1_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperR>0){LeVDKR_tq_MinTrqTaperR = 0;}

@@ -20,6 +20,7 @@
 #define PACK_VOLTAGE_MIN PACK_CELLS_P*CELL_MINIMUM_VOLTAGE
 #define PACK_VOLTAGE_MIN PACK_CELLS_P*CELL_MAXIMUM_VOLTAGE
 
+//strengths for imu filtering
 #define IMU_A_FILT_STRENGTH 0.9
 #define IMU_W_FILT_STRENGTH 0.9
 
@@ -30,9 +31,11 @@
 #define SWA_ERROR_RETURN_FILT .98
 #define SWA_RANGE_DEG 180
 
+//rate limit and return to center if SWA fails
 #define VECTOR_RATE_FILT .90
 #define VECTOR_CENTER_SPLIT .5
 
+//state machine standby time
 #define OFF_STATE_TIMEOUT 500
 
 //State machine comparisons
@@ -40,6 +43,12 @@
 #define PRECHARGE_END_AGREEMENT 1.0
 #define BATTERY_AGREEMENT_THRESHOLD .1
 #define USEDCELLS 13
+
+//BMSR
+#define SSV_LEARN_MAX_I 2 //small error even with bad esr estimate 
+#define SSV_LEARN_STRENGTH .99 //slow
+#define SSV_EST_MAX_I 350
+#define SSV_EST_MAX_STRENGTH .25
 
 
 #endif

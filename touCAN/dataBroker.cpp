@@ -51,17 +51,21 @@ BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 BrokerData VeHVPR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
 
 //BMSR battery management observer
-BrokerData VeBMSR_v_CAN0_BatteryMINCell = BrokerData();
-BrokerData VeBMSR_v_CAN0_BatteryMAXCell = BrokerData();
-BrokerData VeBMSR_V_CAN0_BatteryVoltage = BrokerData();
-BrokerData VeBMSR_T_CAN0_BatteryMAXTemp = BrokerData();
-BrokerData VeBMSR_I_CAN0_BatteryCurrent = BrokerData();
+BrokerData VeBMSR_v_CAN0_BatteryMINCell  = BrokerData();
+BrokerData VeBMSR_v_CAN0_BatteryMAXCell  = BrokerData();
+BrokerData VeBMSR_V_CAN0_BatteryVoltage  = BrokerData();
+BrokerData VeBMSR_T_CAN0_BatteryMAXTemp  = BrokerData();
+BrokerData VeBMSR_I_CAN0_BatteryCurrent  = BrokerData();
+BrokerData VeBMSR_V_CAN0_SSVObserved     = BrokerData();
+BrokerData VeBMSR_V_CAN0_SSVESREstimated = BrokerData();
 
-BrokerData VeBMSR_v_CAN1_BatteryMINCell = BrokerData();
-BrokerData VeBMSR_v_CAN1_BatteryMAXCell = BrokerData();
-BrokerData VeBMSR_V_CAN1_BatteryVoltage = BrokerData();
-BrokerData VeBMSR_T_CAN1_BatteryMAXTemp = BrokerData();
-BrokerData VeBMSR_I_CAN1_BatteryCurrent = BrokerData();
+BrokerData VeBMSR_v_CAN1_BatteryMINCell  = BrokerData();
+BrokerData VeBMSR_v_CAN1_BatteryMAXCell  = BrokerData();
+BrokerData VeBMSR_V_CAN1_BatteryVoltage  = BrokerData();
+BrokerData VeBMSR_T_CAN1_BatteryMAXTemp  = BrokerData();
+BrokerData VeBMSR_I_CAN1_BatteryCurrent  = BrokerData();
+BrokerData VeBMSR_V_CAN1_SSVObserved     = BrokerData();
+BrokerData VeBMSR_V_CAN1_SSVESREstimated = BrokerData();
 
 //VDKR VDKart Ring
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
