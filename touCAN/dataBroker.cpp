@@ -36,6 +36,12 @@ double BrokerData::getValue(int64_t* time_Variable) {
       return (this->value);
 }
 
+double BrokerData::getValue(int64_t* time_Variable, int64_t* last_time) { 
+      *time_Variable = esp_timer_get_time() - this->last_update_time;
+      *last_time = this->last_update_time;
+      return (this->value);
+}
+
 bool BrokerData::dataInitialized(void){
       return (this->last_update_time >= 0);
 }

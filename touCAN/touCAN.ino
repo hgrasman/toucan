@@ -15,8 +15,6 @@
 #include "Logging.h"
 #include "dataBroker.h"
 
-#define CLOCK_FREQ_MHZ 240
-
 // The setup function runs once when you press reset or power on the board.
 void setup() {
 

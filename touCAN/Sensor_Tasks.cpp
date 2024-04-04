@@ -178,7 +178,7 @@ void BMSObserverTask(void *pvParameters){
       params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
     }
 
-    //Observe SSV at low current
+    //update observation at low current
     if (abs(LeBMSR_I_PackCurrent) < SSV_LEARN_MAX_I){
       params->VeBMSR_V_CANx_SSVObserved->setValue(params->VeBMSR_V_CANx_SSVObserved->getValue()*SSV_LEARN_STRENGTH + LeBMSR_V_packVoltage*(1-SSV_LEARN_STRENGTH));
     } 
@@ -187,6 +187,7 @@ void BMSObserverTask(void *pvParameters){
     double LeBMSR_p_SSVESRLearnStrength = (SSV_EST_MAX_I - abs(LeBMSR_I_PackCurrent))/SSV_EST_MAX_I * SSV_EST_MAX_STRENGTH;
     double LeBMSR_V_ESRProjectedSSV = LeBMSR_V_packVoltage + PACK_ESR_EST*LeBMSR_I_PackCurrent; 
     params->VeBMSR_V_CANx_SSVESREstimated->setValue(params->VeBMSR_V_CANx_SSVESREstimated->getValue()*(1-LeBMSR_p_SSVESRLearnStrength) + LeBMSR_V_ESRProjectedSSV*LeBMSR_p_SSVESRLearnStrength);
+
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
