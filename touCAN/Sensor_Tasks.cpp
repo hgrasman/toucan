@@ -135,7 +135,7 @@ void BMSObserverTask(void *pvParameters){
     double LeBMSR_V_packVoltage = 0;
     bool LeBMSR_b_VoltagesFresh = true;
     for (int i = 0; i < USEDCELLS; i++){
-      if ((esp_timer_get_time() - LeBMSR_t_CellVoltagesFreshness[i]) > STALE_DATA_THRESHOLD){
+      if (LeBMSR_t_CellVoltagesFreshness[i] > STALE_DATA_THRESHOLD){
         LeBMSR_b_VoltagesFresh = false;
         break;
       }
@@ -157,7 +157,7 @@ void BMSObserverTask(void *pvParameters){
     double LeBMSR_T_maxTemp = 0;
     bool LeBMSR_b_TempsFresh = true;
     for (int i = 0; i < 11; i++){
-      if ((esp_timer_get_time() - LeBMSR_t_ProbeTempsFreshness[i]) > STALE_DATA_THRESHOLD){
+      if (LeBMSR_t_ProbeTempsFreshness[i] > STALE_DATA_THRESHOLD){
         LeBMSR_b_TempsFresh = false;
         break;
       }
@@ -170,15 +170,9 @@ void BMSObserverTask(void *pvParameters){
     }
 
     //pretty much just pass current right now
-    if ((esp_timer_get_time() - LeBMSR_I_PackCurrentFreshness) > STALE_DATA_THRESHOLD){
+    if (LeBMSR_I_PackCurrentFreshness < STALE_DATA_THRESHOLD){
       params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
     }
-
-    params->VeBMSR_v_CANx_BatteryMINCell->setValue(3.3);
-    params->VeBMSR_v_CANx_BatteryMAXCell->setValue(3.4);
-    params->VeBMSR_V_CANx_BatteryVoltage->setValue(43.55);
-    params->VeBMSR_T_CANx_BatteryMAXTemp->setValue(30);
-    params->VeBMSR_I_CANx_BatteryCurrent->setValue(0);
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }

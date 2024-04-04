@@ -32,7 +32,7 @@ double BrokerData::getValue() {
 }
 
 double BrokerData::getValue(int64_t* time_Variable) { 
-      *time_Variable = this->last_update_time;
+      *time_Variable = esp_timer_get_time() - this->last_update_time;
       return (this->value);
 }
 
