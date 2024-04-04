@@ -81,10 +81,9 @@ void VDKartTask(void *pvParameters){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = LeVDKR_phi_ApproxSWA/SWA_RANGE_DEG+.5; //HARD CODED split from sensor
+      LeVDKR_p_TorqueSplitTarget = .5; //HARD CODED split from sensor
     }
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
-
 
     //Find limits
     double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_p_TorqueSplitTargetFilt;
@@ -117,12 +116,12 @@ void VDKartTask(void *pvParameters){
     //calculate actual electrical power and scale
     //TODO ###########################################################
 
-    /*WRAP_SERIAL_MUTEX(\
-                      Serial.print(LeVDKR_p_PedalPosition); Serial.print(", ");\
-                      Serial.print(analogRead(WSS_HALL_FRONTR)/4095); Serial.print(", ");\
-                      Serial.print(LeVDKR_tq_CAN0_MaxTrqLim); Serial.print(", ");\
-                      Serial.print(LeVDKR_p_TorqueSplitTarget); Serial.println("");\
-                      , pdMS_TO_TICKS(100))*/
+    int64_t test, test2;
+    WRAP_SERIAL_MUTEX(\
+                      Serial.print(VeSNSR_w_IMU6WxRaw.getValue(&test, &test2)); Serial.print(", ");\
+                      Serial.print(VeSNSR_w_IMU6WyRaw.getValue(&test, &test2)); Serial.print(", ");\
+                      Serial.print(VeSNSR_w_IMU6WzRaw.getValue(&test, &test2)); Serial.println("");\
+                      , pdMS_TO_TICKS(100))
 
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){

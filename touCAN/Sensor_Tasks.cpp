@@ -38,12 +38,12 @@ void MCU6050Task(void *pvParameters){  // This is a task.
   for(;;){
     
     WRAP_I2C_MUTEX(accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);, portMAX_DELAY)
-    VeSNSR_a_IMU6AxRaw.setValue(IMU_DEFAULT_A_RES * (double)ax/IMU_MAX_INT);
-    VeSNSR_a_IMU6AyRaw.setValue(IMU_DEFAULT_A_RES * (double)ay/IMU_MAX_INT);
-    VeSNSR_a_IMU6AzRaw.setValue(IMU_DEFAULT_A_RES * (double)az/IMU_MAX_INT);
-    VeSNSR_w_IMU6WxRaw.setValue(IMU_DEFAULT_W_RES * (double)gx/IMU_MAX_INT);
-    VeSNSR_w_IMU6WyRaw.setValue(IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
-    VeSNSR_w_IMU6WzRaw.setValue(IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
+    VeSNSR_a_IMU6AxRaw.setValue(-IMU_DEFAULT_A_RES * (double)ay/IMU_MAX_INT);
+    VeSNSR_a_IMU6AyRaw.setValue(IMU_DEFAULT_A_RES * (double)ax/IMU_MAX_INT);
+    VeSNSR_a_IMU6AzRaw.setValue(-IMU_DEFAULT_A_RES * (double)az/IMU_MAX_INT);
+    VeSNSR_w_IMU6WxRaw.setValue(-IMU_DEFAULT_W_RES * (double)gy/IMU_MAX_INT);
+    VeSNSR_w_IMU6WyRaw.setValue(-IMU_DEFAULT_W_RES * (double)gx/IMU_MAX_INT);
+    VeSNSR_w_IMU6WzRaw.setValue(-IMU_DEFAULT_W_RES * (double)gz/IMU_MAX_INT);
 
     //calculate filtered data
     LeSNSR_a_AxFilt = (VeSNSR_a_IMU6AxRaw.getValue())*(1-IMU_A_FILT_STRENGTH) + LeSNSR_a_AxFilt*IMU_A_FILT_STRENGTH;
