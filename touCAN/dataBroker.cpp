@@ -14,17 +14,21 @@
 
 BrokerData::BrokerData(){
       this->value = 0;
-      last_update_time = -1; //data not valid
+      this->last_update_time = -1; //data not valid
+      this->access_mutex = xSemaphoreCreateMutex();
 }
 
 BrokerData::BrokerData(double initial_value){
       this->value = initial_value;
-      last_update_time = -1; //data not valid
+      this->last_update_time = esp_timer_get_time();
+      this->access_mutex = xSemaphoreCreateMutex();
 }
 
 void BrokerData::setValue(double new_value) {
+      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
       this->value = new_value;
       this->last_update_time = esp_timer_get_time();
+      xSemaphoreGive( this->access_mutex );
 }
 
 double BrokerData::getValue() { 
@@ -32,14 +36,20 @@ double BrokerData::getValue() {
 }
 
 double BrokerData::getValue(int64_t* time_Variable) { 
+      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
       *time_Variable = esp_timer_get_time() - this->last_update_time;
-      return (this->value);
+      double atomic = this->value;
+      xSemaphoreGive( this->access_mutex );
+      return (atomic);
 }
 
 double BrokerData::getValue(int64_t* time_Variable, int64_t* last_time) { 
+      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
       *time_Variable = esp_timer_get_time() - this->last_update_time;
       *last_time = this->last_update_time;
-      return (this->value);
+      double atomic = this->value;
+      xSemaphoreGive( this->access_mutex );
+      return (atomic);
 }
 
 bool BrokerData::dataInitialized(void){

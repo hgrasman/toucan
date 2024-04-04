@@ -21,10 +21,12 @@ class BrokerData {
     void setValue(double new_value);
     double getValue(void);  
     double getValue(int64_t* time_Variable);  
+    double getValue(int64_t* time_Variable, int64_t* last_time);
     bool dataInitialized(void); 
   private:    
     volatile double value;
     volatile int64_t last_update_time;
+    volatile SemaphoreHandle_t access_mutex;
 };
 
 //Exclusive hardware access
