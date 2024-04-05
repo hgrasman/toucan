@@ -225,7 +225,9 @@ uint8_t Sensing_SetupTasks(void){
   if (!accelgyro.testConnection()){
     return(SENSING_INIT_FAILURE);
   }
-  Serial.println("MCU6050 Initialized");
+  accelgyro.CalibrateAccel(3);
+  accelgyro.CalibrateGyro(2);
+  Serial.println("MCU6050 Initialized and Calibrated");
 
   xTaskCreatePinnedToCore(
       MCU6050Task

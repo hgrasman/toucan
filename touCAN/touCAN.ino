@@ -13,10 +13,15 @@
 #include "Controls_Tasks.h"
 #include "Sensor_Tasks.h"
 #include "Logging.h"
+#include "Pins.h"
 #include "dataBroker.h"
 
 // The setup function runs once when you press reset or power on the board.
 void setup() {
+
+  //disable gps as LED indicator of setup time
+  digitalWrite(GPS_ENABLE_PIN, LOW);
+  pinMode(GPS_ENABLE_PIN, OUTPUT);
 
   // Initialize serial communication at 115200 bits per second:
   WRAP_SERIAL_MUTEX(\
@@ -57,6 +62,7 @@ void setup() {
   }*/
 
   WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
+  digitalWrite(GPS_ENABLE_PIN, HIGH); //Turn on GPS to show setup is complete
   VeCRLR_b_ControlReadyFlag.setValue(0);
 
 

@@ -118,6 +118,9 @@ void VDKartTask(void *pvParameters){
 
     int64_t test, test2;
     WRAP_SERIAL_MUTEX(\
+                      Serial.print(VeSNSR_a_IMU6AxRaw.getValue(&test, &test2)); Serial.print(", ");\
+                      Serial.print(VeSNSR_a_IMU6AyRaw.getValue(&test, &test2)); Serial.print(", ");\
+                      Serial.print(VeSNSR_a_IMU6AzRaw.getValue(&test, &test2)); Serial.print(", ");\
                       Serial.print(VeSNSR_w_IMU6WxRaw.getValue(&test, &test2)); Serial.print(", ");\
                       Serial.print(VeSNSR_w_IMU6WyRaw.getValue(&test, &test2)); Serial.print(", ");\
                       Serial.print(VeSNSR_w_IMU6WzRaw.getValue(&test, &test2)); Serial.println("");\
