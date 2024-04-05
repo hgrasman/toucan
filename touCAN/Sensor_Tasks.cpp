@@ -213,15 +213,16 @@ void BMSObserverTask(void *pvParameters){
     params->VeBPER_V_CANx_SSVESREstimated->setValue(params->VeBPER_V_CANx_SSVESREstimated->getValue()*(1-LeBPER_p_SSVESRLearnStrength) + LeBPER_V_ESRProjectedSSV*LeBPER_p_SSVESRLearnStrength);
 
     //estimate ESR under heavy load 
+    double LeBPER_R_ProjectedESR = (params->VeBPER_V_CANx_SSVObserved->getValue() - LeBMSR_V_packVoltage)/LeBMSR_I_PackCurrent;
     if (abs(LeBMSR_I_PackCurrent) < ESR_LEARN_MIN_I){
       LeBPER_p_ESRLearnStrength = 0;
     }else if ((abs(LeBMSR_I_PackCurrent) > ESR_LEARN_MAX_I)){
       LeBPER_p_ESRLearnStrength = 1;
+      params->VeBPER_R_CANx_ESRObserved->setValue(params->VeBPER_R_CANx_ESRObserved->getValue()*(1-LeBPER_p_ESRLearnStrength) + LeBPER_R_ProjectedESR*LeBPER_p_ESRLearnStrength);
     }else{
       LeBPER_p_ESRLearnStrength = (((abs(LeBMSR_I_PackCurrent)-ESR_LEARN_MAX_I) / (ESR_LEARN_MAX_I-ESR_LEARN_MIN_I))+1) * ESR_EST_MAX_STRENGTH;
+      params->VeBPER_R_CANx_ESRObserved->setValue(params->VeBPER_R_CANx_ESRObserved->getValue()*(1-LeBPER_p_ESRLearnStrength) + LeBPER_R_ProjectedESR*LeBPER_p_ESRLearnStrength);
     }
-    double LeBPER_R_ProjectedESR = (params->VeBPER_V_CANx_SSVObserved->getValue() - LeBMSR_V_packVoltage)/LeBMSR_I_PackCurrent;
-    params->VeBPER_R_CANx_ESRObserved->setValue(params->VeBPER_R_CANx_ESRObserved->getValue()*(1-LeBPER_p_ESRLearnStrength) + LeBPER_R_ProjectedESR*LeBPER_p_ESRLearnStrength);
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
