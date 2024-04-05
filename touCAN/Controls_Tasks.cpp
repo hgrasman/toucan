@@ -85,7 +85,10 @@ void VDKartTask(void *pvParameters){
     }
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
 
-    //Find limits
+
+    //THE FOLLOWING MAPS THE PEDAL INTELLIGENTLY TO THE LIMITS OF THE RACE, MOTORS, BATTERY
+    //
+    //Find mechanical power limits reported by the motor
     double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_p_TorqueSplitTargetFilt;
     double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_p_TorqueSplitTargetFilt;
 
@@ -98,6 +101,8 @@ void VDKartTask(void *pvParameters){
                                         + LeVDKR_tq_CAN1_MaxTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt) / NM_RPM_TO_W; //best the motor can do
     double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) \
                                         + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt) / NM_RPM_TO_W; //quite possibly 28kW
+
+    //limit mechanical power according to competition rules/safety margin
     if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
       LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
       LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
@@ -107,6 +112,11 @@ void VDKartTask(void *pvParameters){
       LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
     }
 
+    //estimate electrical power limit for battery undervoltage protection
+    double LeVDKR_V_SSVObservedAvg = (VeBMSR_V_CAN0_SSVObserved.getValue() + VeBMSR_V_CAN1_SSVObserved.getValue())/2;
+    double LeVDKR_R_ESRObservedAvg = (VeBMSR_V_CAN0_ESRObserved.getValue() + VeBMSR_V_CAN1_ESRObserved.getValue())/2;
+    double LeVDKR_P_SSVLimitedPower = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MIN) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
+    double LeVDKR_P_SSVLimitedRegen = ((PACK_VOLTAGE_MAX - LeVDKR_V_SSVObservedAvg) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
 
     //map the pedal and apply the torque split
     double LeVDKR_tq_TotalTorqueDesired = LeVDKR_tq_CombinedMaxTrq*LeVDKR_p_PedalPosition + LeVDKR_tq_CombinedMinTrq*(1-LeVDKR_p_PedalPosition);

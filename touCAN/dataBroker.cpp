@@ -74,6 +74,7 @@ BrokerData VeBMSR_T_CAN0_BatteryMAXTemp  = BrokerData();
 BrokerData VeBMSR_I_CAN0_BatteryCurrent  = BrokerData();
 BrokerData VeBMSR_V_CAN0_SSVObserved     = BrokerData();
 BrokerData VeBMSR_V_CAN0_SSVESREstimated = BrokerData();
+BrokerData VeBMSR_V_CAN0_ESRObserved     = BrokerData();
 
 BrokerData VeBMSR_v_CAN1_BatteryMINCell  = BrokerData();
 BrokerData VeBMSR_v_CAN1_BatteryMAXCell  = BrokerData();
@@ -82,6 +83,7 @@ BrokerData VeBMSR_T_CAN1_BatteryMAXTemp  = BrokerData();
 BrokerData VeBMSR_I_CAN1_BatteryCurrent  = BrokerData();
 BrokerData VeBMSR_V_CAN1_SSVObserved     = BrokerData();
 BrokerData VeBMSR_V_CAN1_SSVESREstimated = BrokerData();
+BrokerData VeBMSR_V_CAN1_ESRObserved     = BrokerData();
 
 //VDKR VDKart Ring
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
