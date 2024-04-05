@@ -116,7 +116,8 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_V_SSVObservedAvg = (VeBMSR_V_CAN0_SSVObserved.getValue() + VeBMSR_V_CAN1_SSVObserved.getValue())/2;
     double LeVDKR_R_ESRObservedAvg = (VeBMSR_V_CAN0_ESRObserved.getValue() + VeBMSR_V_CAN1_ESRObserved.getValue())/2;
     double LeVDKR_P_SSVLimitedPower = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MIN) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
-    double LeVDKR_P_SSVLimitedRegen = ((PACK_VOLTAGE_MAX - LeVDKR_V_SSVObservedAvg) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
+    double LeVDKR_P_SSVLimitedRegen = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MAX) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
+    //TODO USE THESE
 
     //map the pedal and apply the torque split
     double LeVDKR_tq_TotalTorqueDesired = LeVDKR_tq_CombinedMaxTrq*LeVDKR_p_PedalPosition + LeVDKR_tq_CombinedMinTrq*(1-LeVDKR_p_PedalPosition);
