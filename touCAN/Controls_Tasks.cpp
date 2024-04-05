@@ -115,8 +115,8 @@ void VDKartTask(void *pvParameters){
     //estimate electrical power limit for battery undervoltage protection
     double LeVDKR_V_SSVObservedAvg = (VeBMSR_V_CAN0_SSVObserved.getValue() + VeBMSR_V_CAN1_SSVObserved.getValue())/2;
     double LeVDKR_R_ESRObservedAvg = (VeBMSR_V_CAN0_ESRObserved.getValue() + VeBMSR_V_CAN1_ESRObserved.getValue())/2;
-    double LeVDKR_P_SSVLimitedPower = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MIN) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
-    double LeVDKR_P_SSVLimitedRegen = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MAX) / LeVDKR_R_ESRObservedAvg)*LeVDKR_V_SSVObservedAvg;
+    double LeVDKR_P_SSVLimitedPower = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MIN) / LeVDKR_R_ESRObservedAvg)*PACK_VOLTAGE_MIN;
+    double LeVDKR_P_SSVLimitedRegen = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MAX) / LeVDKR_R_ESRObservedAvg)*PACK_VOLTAGE_MAX;
     //TODO USE THESE
 
     //map the pedal and apply the torque split
