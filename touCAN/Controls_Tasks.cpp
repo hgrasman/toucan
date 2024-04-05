@@ -113,8 +113,8 @@ void VDKartTask(void *pvParameters){
     }
 
     //estimate electrical power limit for battery undervoltage protection
-    double LeVDKR_V_SSVObservedAvg = (VeBMSR_V_CAN0_SSVObserved.getValue() + VeBMSR_V_CAN1_SSVObserved.getValue())/2;
-    double LeVDKR_R_ESRObservedAvg = (VeBMSR_V_CAN0_ESRObserved.getValue() + VeBMSR_V_CAN1_ESRObserved.getValue())/2;
+    double LeVDKR_V_SSVObservedAvg = (VeBPER_V_CAN0_SSVObserved.getValue() + VeBPER_V_CAN1_SSVObserved.getValue())/2;
+    double LeVDKR_R_ESRObservedAvg = (VeBPER_R_CAN0_ESRObserved.getValue() + VeBPER_R_CAN1_ESRObserved.getValue())/2;
     double LeVDKR_P_SSVLimitedPower = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MIN) / LeVDKR_R_ESRObservedAvg)*PACK_VOLTAGE_MIN;
     double LeVDKR_P_SSVLimitedRegen = ((LeVDKR_V_SSVObservedAvg - PACK_VOLTAGE_MAX) / LeVDKR_R_ESRObservedAvg)*PACK_VOLTAGE_MAX;
     //TODO USE THESE
@@ -129,12 +129,12 @@ void VDKartTask(void *pvParameters){
 
     int64_t test, test2;
     WRAP_SERIAL_MUTEX(\
-                      Serial.print(VeSNSR_a_IMU6AxRaw.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(VeSNSR_a_IMU6AyRaw.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(VeSNSR_a_IMU6AzRaw.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(VeSNSR_w_IMU6WxRaw.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(VeSNSR_w_IMU6WyRaw.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(VeSNSR_w_IMU6WzRaw.getValue(&test, &test2)); Serial.println("");\
+                      Serial.print(VeBPER_V_CAN0_SSVObserved.getValue(&test, &test2)); Serial.print(", ");\
+                      Serial.print(VeBPER_R_CAN0_ESRObserved.getValue(&test, &test2)); Serial.print(", ");\
+                      Serial.print(LeVDKR_P_SSVLimitedPower); Serial.print(", ");\
+                      Serial.print(LeVDKR_P_SSVLimitedRegen); Serial.print(", ");\
+                      Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
+                      Serial.print(""); Serial.println("");\
                       , pdMS_TO_TICKS(100))
 
     //send torque request if prop system is active, otherwise zero
