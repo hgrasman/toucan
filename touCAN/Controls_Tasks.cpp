@@ -127,15 +127,6 @@ void VDKartTask(void *pvParameters){
     //calculate actual electrical power and scale
     //TODO ###########################################################
 
-    int64_t test, test2;
-    WRAP_SERIAL_MUTEX(\
-                      Serial.print(VeBMSR_V_CAN0_BatteryVoltage.getValue()); Serial.print(", ");\
-                      Serial.print(LeVDKR_V_SSVObservedAvg); Serial.print(", ");\
-                      Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
-                      Serial.print(LeVDKR_R_ESRObservedAvg*1000); Serial.print(", ");\
-                      Serial.print(""); Serial.println("");\
-                      , pdMS_TO_TICKS(100))
-
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){
       VeVDKR_tq_CAN0_TorqueRequest.setValue(LeVDKR_tq_TorqueL);
@@ -144,6 +135,14 @@ void VDKartTask(void *pvParameters){
       VeVDKR_tq_CAN0_TorqueRequest.setValue(0);
       VeVDKR_tq_CAN1_TorqueRequest.setValue(0);
     }
+
+    /*WRAP_SERIAL_MUTEX(\
+                      Serial.print(VeBMSR_V_CAN0_BatteryVoltage.getValue()); Serial.print(", ");\
+                      Serial.print(LeVDKR_V_SSVObservedAvg); Serial.print(", ");\
+                      Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
+                      Serial.print(LeVDKR_R_ESRObservedAvg*1000); Serial.print(", ");\
+                      Serial.print(""); Serial.println("");\
+                      , pdMS_TO_TICKS(100))*/
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
