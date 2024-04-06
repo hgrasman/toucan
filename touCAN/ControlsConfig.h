@@ -14,7 +14,7 @@
 
 #define PACK_CELLS_P 9
 #define PACK_CELLS_S 13
-#define PACK_ESR_EST 0.010 
+#define PACK_ESR_EST 0.020 
 #define PACK_MAXIMUM_TEMP CELL_MAXIMUM_TEMP
 #define PACK_CURRENT_MAX PACK_CELLS_P*CELL_MAXIMUM_CURRENT
 #define PACK_VOLTAGE_MIN PACK_CELLS_S*CELL_MINIMUM_VOLTAGE
@@ -45,7 +45,7 @@
 #define USEDCELLS 13
 
 //BMSR
-#define SSV_LEARN_MAX_I 2 //small error even with bad esr estimate 
+#define SSV_LEARN_MAX_I 2.5 //small error even with bad esr estimate 
 #define SSV_LEARN_STRENGTH .99 //slow
 #define SSV_EST_MAX_I 350
 #define SSV_EST_MAX_STRENGTH .05

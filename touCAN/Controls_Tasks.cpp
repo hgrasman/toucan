@@ -129,11 +129,11 @@ void VDKartTask(void *pvParameters){
 
     int64_t test, test2;
     WRAP_SERIAL_MUTEX(\
-                      Serial.print(VeBPER_V_CAN0_SSVObserved.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(VeBPER_R_CAN0_ESRObserved.getValue(&test, &test2)); Serial.print(", ");\
-                      Serial.print(LeVDKR_P_SSVLimitedPower); Serial.print(", ");\
-                      Serial.print(LeVDKR_P_SSVLimitedRegen); Serial.print(", ");\
+                      Serial.print(LeVDKR_V_SSVObservedAvg); Serial.print(", ");\
                       Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
+                      Serial.print(LeVDKR_R_ESRObservedAvg); Serial.print(", ");\
+                      Serial.print(LeVDKR_P_SSVLimitedRegen/1000); Serial.print(", ");\
+                      Serial.print(LeVDKR_P_SSVLimitedPower/1000); Serial.print(", ");\
                       Serial.print(""); Serial.println("");\
                       , pdMS_TO_TICKS(100))
 
