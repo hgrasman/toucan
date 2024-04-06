@@ -52,7 +52,7 @@
 
 #define ESR_LEARN_MIN_I 50
 #define ESR_LEARN_MAX_I 350
-#define ESR_EST_MAX_STRENGTH .05 //slow
+#define ESR_EST_MAX_STRENGTH .025 //slow
 
 
 #endif

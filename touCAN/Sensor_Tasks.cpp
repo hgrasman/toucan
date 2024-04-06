@@ -101,11 +101,6 @@ void BMSObserverTask(void *pvParameters){
   double  LeBPER_p_SSVESRLearnStrength;
   double  LeBPER_p_ESRLearnStrength;
 
-  double test_SSV = 42;
-  double test_current = 0;
-  double test_esr = .026;
-
-
   params->VeBPER_V_CANx_SSVObserved->setDefault(PACK_VOLTAGE_MIN);
   params->VeBPER_V_CANx_SSVESREstimated->setDefault(PACK_VOLTAGE_MIN);
   params->VeBPER_R_CANx_ESRObserved->setDefault(PACK_ESR_EST);
@@ -190,13 +185,6 @@ void BMSObserverTask(void *pvParameters){
     }
 
 
-    //TEST BPER
-    LeBMSR_V_packVoltage = test_SSV-test_current*test_esr;
-    LeBMSR_I_PackCurrent = test_current;
-    test_current = (test_current + .5);
-    if (test_current > 100){test_current = -50;}
-
-
     //BATTERY PARAMETER ESTIMATION
     //Observes SSV at low current, estimates during current using set ESR, Estimates ESR at load 
     //update observation at low current
@@ -204,7 +192,7 @@ void BMSObserverTask(void *pvParameters){
       params->VeBPER_V_CANx_SSVObserved->setValue(params->VeBPER_V_CANx_SSVObserved->getValue()*SSV_LEARN_STRENGTH + LeBMSR_V_packVoltage*(1-SSV_LEARN_STRENGTH));
     } 
 
-    //estimate esr under load. learn most near low current
+    //estimate SSV under load. learn most near low current
     if (abs(LeBMSR_I_PackCurrent) <= SSV_EST_MAX_I){
       LeBPER_p_SSVESRLearnStrength = (SSV_EST_MAX_I - abs(LeBMSR_I_PackCurrent))/SSV_EST_MAX_I * SSV_EST_MAX_STRENGTH;
     }else{
