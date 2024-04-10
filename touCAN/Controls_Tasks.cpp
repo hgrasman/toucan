@@ -165,6 +165,7 @@ void HVPropTask(void *pvParameters){
 
   uint8_t LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
   TickType_t offStateTimer = xTaskGetTickCount();
+  TickType_t preStateTimer = xTaskGetTickCount();
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
@@ -186,7 +187,7 @@ void HVPropTask(void *pvParameters){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
           WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(8))
-
+          preStateTimer = xTaskGetTickCount();
         }
 
         break;
@@ -195,12 +196,8 @@ void HVPropTask(void *pvParameters){
         //force into off state if safety conditions are not met
         if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
             VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-            VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-            VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
             VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
             VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-            VeBMSR_V_CAN0_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
-            VeBMSR_V_CAN1_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
             VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
             VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
         ){
@@ -223,7 +220,8 @@ void HVPropTask(void *pvParameters){
         //transition to prop active once motors are up to voltage
         if (abs(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN0_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
             abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
-            abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD \
+            abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD &&\
+            ((xTaskGetTickCount() - preStateTimer) > pdMS_TO_TICKS(PRE_STATE_TIMEOUT)) \
         ){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
@@ -274,23 +272,6 @@ void HVPropTask(void *pvParameters){
         WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println("BAD");, pdMS_TO_TICKS(100))
         LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
         continue; //BAD BAD BAD BAD try again 
-    }
-
-    //force into off state if safety conditions are not met
-    if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-        VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-        VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-        VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-        VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-        VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-        VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
-        VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
-    ){
-      if (LeHVPR_e_HVTargetState != CeHVPR_e_HVTargetState_OFF){
-        WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
-      }
-      LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
-      offStateTimer = xTaskGetTickCount(); //start chill out timer
     }
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);

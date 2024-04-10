@@ -37,6 +37,7 @@
 
 //state machine standby time
 #define OFF_STATE_TIMEOUT 500
+#define PRE_STATE_TIMEOUT 1000
 
 //State machine comparisons
 #define STALE_DATA_THRESHOLD 50000
