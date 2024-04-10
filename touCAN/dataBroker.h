@@ -165,4 +165,6 @@ extern BrokerData VeSNSR_w_IMU6WxFilt;
 extern BrokerData VeSNSR_w_IMU6WyFilt;
 extern BrokerData VeSNSR_w_IMU6WzFilt;
 
+extern BrokerData VeWSSR_c_WSSCounts;
+
 #endif

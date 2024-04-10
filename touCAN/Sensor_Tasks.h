@@ -31,6 +31,8 @@
 #define CeBMSR_e_RPACK    0b10
 #define CeBMSR_e_BOTHPACK 0b11
 
+#define CeWSSR_n_WSS_COUNTS_PER_REV 4
+
 uint8_t Sensing_SetupTasks(void);
 
 #endif

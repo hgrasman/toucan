@@ -24,6 +24,10 @@ double LeSNSR_w_WxFilt = 0;
 double LeSNSR_w_WyFilt = 0;
 double LeSNSR_w_WzFilt = 0;
 
+ICACHE_RAM_ATTR void WSSInterrupt(void){
+  VeWSSR_c_WSSCounts.setValue(VeWSSR_c_WSSCounts.getValue() + 1);
+}
+
 void MCU6050Task(void *pvParameters){  // This is a task.
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
@@ -230,6 +234,9 @@ void BMSObserverTask(void *pvParameters){
 
 //Spawn threads
 uint8_t Sensing_SetupTasks(void){
+
+  //WSSR
+  attachInterrupt(digitalPinToInterrupt(WSS_HALL_FRONTR), WSSInterrupt, FALLING);
 
   xTaskCreatePinnedToCore(
       BMSObserverTask

@@ -199,6 +199,8 @@ BrokerData VeSNSR_w_IMU6WxFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WyFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WzFilt = BrokerData();
 
+BrokerData VeWSSR_c_WSSCounts = BrokerData();
+
 
 
 

@@ -81,7 +81,7 @@ void VDKartTask(void *pvParameters){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = .5; //HARD CODED split from sensor
+      LeVDKR_p_TorqueSplitTarget = .5; //TORQUE SPLIT
     }
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
 
@@ -136,13 +136,14 @@ void VDKartTask(void *pvParameters){
       VeVDKR_tq_CAN1_TorqueRequest.setValue(0);
     }
 
-    /*WRAP_SERIAL_MUTEX(\
-                      Serial.print(VeBMSR_V_CAN0_BatteryVoltage.getValue()); Serial.print(", ");\
-                      Serial.print(LeVDKR_V_SSVObservedAvg); Serial.print(", ");\
+    int64_t timestamp;
+    int64_t dummy;
+    WRAP_SERIAL_MUTEX(\
+                      Serial.print(VeWSSR_c_WSSCounts.getValue(&dummy, &timestamp)); Serial.print(", ");\
+                      Serial.print(timestamp); Serial.print(", ");\
                       Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
-                      Serial.print(LeVDKR_R_ESRObservedAvg*1000); Serial.print(", ");\
                       Serial.print(""); Serial.println("");\
-                      , pdMS_TO_TICKS(100))*/
+                      , pdMS_TO_TICKS(100))
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
