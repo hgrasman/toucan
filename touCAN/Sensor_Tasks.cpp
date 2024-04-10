@@ -29,15 +29,18 @@ int64_t LeWSSR_t_TimeStamp = 0;
 bool LeWSSR_b_dataFlag = false;
 void IRAM_ATTR WSSInterrupt(void){
   LeWSSR_c_WSSCounts++;
-  LeWSSR_c_TimeStamp = esp_timer_get_time();
+  LeWSSR_t_TimeStamp = esp_timer_get_time();
   LeWSSR_b_dataFlag = true;
 }
 
 void WSSRTask(void *pvParameters){
+  TickType_t xLastWakeTime;
+  const TickType_t xPeriod = pdMS_TO_TICKS(10);
   for (;;){
     if (LeWSSR_b_dataFlag){
       VeWSSR_c_WSSCounts.setValue(LeWSSR_c_WSSCounts, LeWSSR_t_TimeStamp);
       LeWSSR_b_dataFlag = false;
+      vTaskDelayUntil(&xLastWakeTime, xPeriod);
     }
   }
 }
@@ -252,6 +255,15 @@ uint8_t Sensing_SetupTasks(void){
   //WSSR
   pinMode(WSS_HALL_FRONTR, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(WSS_HALL_FRONTR), WSSInterrupt, FALLING);
+  xTaskCreatePinnedToCore(
+      WSSRTask
+      ,  "WSSR" 
+      ,  2048        
+      ,  NULL
+      ,  7  // Priority
+      ,  NULL // Task handle
+      ,  tskNO_AFFINITY // run on whatever core
+      );
 
   xTaskCreatePinnedToCore(
       BMSObserverTask
