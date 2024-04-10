@@ -19,6 +19,7 @@ class BrokerData {
     BrokerData();
     BrokerData(double initial_value);
     void setValue(double new_value);
+    void setValue(double new_value, int64_t timestamp);
     bool setDefault(double default_value);
     double getValue(void);  
     double getValue(int64_t* time_Variable);  

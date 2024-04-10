@@ -31,6 +31,13 @@ void BrokerData::setValue(double new_value) {
       xSemaphoreGive( this->access_mutex );
 }
 
+void setValue(double new_value, int64_t timestamp){
+  xSemaphoreTake( this->access_mutex , portMAX_DELAY);
+      this->value = new_value;
+      this->last_update_time = timestamp;
+  xSemaphoreGive( this->access_mutex );
+}
+
 bool BrokerData::setDefault(double default_value) {
       bool status = false;
       xSemaphoreTake( this->access_mutex , portMAX_DELAY);

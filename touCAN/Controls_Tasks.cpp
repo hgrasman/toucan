@@ -141,7 +141,6 @@ void VDKartTask(void *pvParameters){
     WRAP_SERIAL_MUTEX(\
                       Serial.print(VeWSSR_c_WSSCounts.getValue(&dummy, &timestamp)); Serial.print(", ");\
                       Serial.print(timestamp); Serial.print(", ");\
-                      Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
                       Serial.print(""); Serial.println("");\
                       , pdMS_TO_TICKS(100))
 
