@@ -136,13 +136,11 @@ void VDKartTask(void *pvParameters){
       VeVDKR_tq_CAN1_TorqueRequest.setValue(0);
     }
 
-    int64_t timestamp;
-    int64_t dummy;
-    WRAP_SERIAL_MUTEX(\
+    /*WRAP_SERIAL_MUTEX(\
                       Serial.print(VeWSSR_c_WSSCounts.getValue(&dummy, &timestamp)); Serial.print(", ");\
                       Serial.print(timestamp); Serial.print(", ");\
                       Serial.print(""); Serial.println("");\
-                      , pdMS_TO_TICKS(100))
+                      , pdMS_TO_TICKS(100))*/
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
