@@ -81,7 +81,7 @@ void VDKartTask(void *pvParameters){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = .5; //TORQUE SPLIT
+      LeVDKR_p_TorqueSplitTarget = 0; //TORQUE SPLIT
     }
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
 
@@ -217,7 +217,7 @@ void HVPropTask(void *pvParameters){
 
         //transition to prop active once motors are up to voltage
         if (abs(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN0_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
-            abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
+            //abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && 
             abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD &&\
             ((xTaskGetTickCount() - preStateTimer) > pdMS_TO_TICKS(PRE_STATE_TIMEOUT)) \
         ){
