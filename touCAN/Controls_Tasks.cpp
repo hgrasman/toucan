@@ -250,6 +250,16 @@ void HVPropTask(void *pvParameters){
           break;
         }
 
+        //if manual switch cuts relays, put it back in precharge
+        if (VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() < PACK_VOLTAGE_MIN && \
+            VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() < PACK_VOLTAGE_MIN && \
+        ){
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Prop Switch Precharge");, pdMS_TO_TICKS(8))
+          preStateTimer = xTaskGetTickCount();
+          break;
+        }
+
         //Engage the contactors
         digitalWrite(GATEKEEPER_1_REL_PIN, HIGH);
         digitalWrite(GATEKEEPER_1_PRE_PIN, HIGH);
