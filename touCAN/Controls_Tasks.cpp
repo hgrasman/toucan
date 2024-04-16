@@ -238,7 +238,11 @@ void HVPropTask(void *pvParameters){
         TimoutReached      = (xTaskGetTickCount() - preStateTimer) > pdMS_TO_TICKS(PRE_STATE_TIMEOUT);
         BatteriesBalanced  = abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD;
 #ifdef ENABLE_REDUNDANT_BMS
-        bmsCheck = TimoutReached;      
+        if (VeBMSR_b_CAN0_BMSReporting.getValue() && VeBMSR_b_CAN1_BMSReporting.getValue()){
+          bmsCheck = BatteriesBalanced;
+        }else{
+          bmsCheck = TimoutReached;
+        }     
 #else
         bmsCheck = BatteriesBalanced;
 #endif

@@ -69,15 +69,16 @@ typedef struct BMSRTaskParams{
   BrokerData* VeBMSR_V_CANx_BatteryVoltage;
   BrokerData* VeBMSR_T_CANx_BatteryMAXTemp;
   BrokerData* VeBMSR_I_CANx_BatteryCurrent;
+  BrokerData* VeBMSR_b_CANx_BMSReporting;;
   BrokerData* VeBPER_V_CANx_SSVObserved;
   BrokerData* VeBPER_V_CANx_SSVESREstimated;
   BrokerData* VeBPER_R_CANx_ESRObserved;
 }BMSRTaskTaskParams;
 BMSRTaskTaskParams BMSRCAN0TaskParams = { BatteryDataCAN0, &VeBMSR_v_CAN0_BatteryMINCell, &VeBMSR_v_CAN0_BatteryMAXCell, 
-                                          &VeBMSR_V_CAN0_BatteryVoltage, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent,
+                                          &VeBMSR_V_CAN0_BatteryVoltage, &VeBMSR_T_CAN0_BatteryMAXTemp, &VeBMSR_I_CAN0_BatteryCurrent, &VeBMSR_b_CAN0_BMSReporting,
                                           &VeBPER_V_CAN0_SSVObserved, &VeBPER_V_CAN0_SSVESREstimated, &VeBPER_R_CAN0_ESRObserved};
 BMSRTaskTaskParams BMSRCAN1TaskParams = { BatteryDataCAN1, &VeBMSR_v_CAN1_BatteryMINCell, &VeBMSR_v_CAN1_BatteryMAXCell, 
-                                          &VeBMSR_V_CAN1_BatteryVoltage, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent,
+                                          &VeBMSR_V_CAN1_BatteryVoltage, &VeBMSR_T_CAN1_BatteryMAXTemp, &VeBMSR_I_CAN1_BatteryCurrent, &VeBMSR_b_CAN1_BMSReporting,
                                           &VeBPER_V_CAN1_SSVObserved, &VeBPER_V_CAN1_SSVESREstimated, &VeBPER_R_CAN1_ESRObserved};
 //This task calculates its own metrics from raw battery data for use elsewhere
 //BMSR
@@ -144,6 +145,8 @@ void BMSObserverTask(void *pvParameters){
     double LeBMSR_v_maxVoltage = CELL_MINIMUM_VOLTAGE;
     double LeBMSR_V_packVoltage = 0;
     bool LeBMSR_b_VoltagesFresh = true;
+    bool LeBMSR_b_TempsFresh = true;
+    bool LeBMSR_b_CurrentFresh = true;
     for (int i = 0; i < USEDCELLS; i++){
       if (LeBMSR_t_CellVoltagesFreshness[i] > STALE_DATA_THRESHOLD){
         LeBMSR_b_VoltagesFresh = false;
@@ -172,7 +175,6 @@ void BMSObserverTask(void *pvParameters){
 
     //do the same for temperature
     double LeBMSR_T_maxTemp = 0;
-    bool LeBMSR_b_TempsFresh = true;
     for (int i = 0; i < 11; i++){
       if (LeBMSR_t_ProbeTempsFreshness[i] > STALE_DATA_THRESHOLD){
         LeBMSR_b_TempsFresh = false;
@@ -187,9 +189,13 @@ void BMSObserverTask(void *pvParameters){
     }
 
     //pretty much just pass current right now
-    if (LeBMSR_I_PackCurrentFreshness < STALE_DATA_THRESHOLD){
+    LeBMSR_b_CurrentFresh  = LeBMSR_I_PackCurrentFreshness < STALE_DATA_THRESHOLD;
+    if (LeBMSR_b_CurrentFresh){
       params->VeBMSR_I_CANx_BatteryCurrent->setValue(LeBMSR_I_PackCurrent);
     }
+
+    //if the battery is properly reporting
+    params->VeBMSR_b_CANx_BMSReporting->setValue(LeBMSR_b_VoltagesFresh && LeBMSR_b_TempsFresh && LeBMSR_b_CurrentFresh);
 
 
     //BATTERY PARAMETER ESTIMATION
