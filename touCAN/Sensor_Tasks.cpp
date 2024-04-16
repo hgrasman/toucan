@@ -162,6 +162,13 @@ void BMSObserverTask(void *pvParameters){
       params->VeBMSR_v_CANx_BatteryMAXCell->setValue(LeBMSR_v_maxVoltage);
       params->VeBMSR_V_CANx_BatteryVoltage->setValue(LeBMSR_V_packVoltage);
     }
+#ifdef ENABLE_REDUNDANT_BMS
+    else{
+      params->VeBMSR_v_CANx_BatteryMINCell->setValue((VeCANR_V_CAN0_iBSGVoltageDCLink.getValue()/PACK_CELLS_S)-.01);
+      params->VeBMSR_v_CANx_BatteryMAXCell->setValue((VeCANR_V_CAN0_iBSGVoltageDCLink.getValue()/PACK_CELLS_S)+.01);
+      params->VeBMSR_V_CANx_BatteryVoltage->setValue(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue());
+    }
+#endif
 
     //do the same for temperature
     double LeBMSR_T_maxTemp = 0;
