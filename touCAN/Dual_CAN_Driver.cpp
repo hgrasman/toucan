@@ -138,15 +138,15 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
-    if( !ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(100))){
+    if( !ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(1000))){
       //WRAP_SERIAL_MUTEX(Serial.println("CAN stuck waiting.");, pdMS_TO_TICKS(5)) 
     }
 
-    while(params->CANx.checkReceive() == CAN_MSGAVAIL){
-      if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
-        params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data); //get data
-        xSemaphoreGive( xSemaphore_CANSPIMutex );
-      }
+    bool canAvailable;
+    WRAP_SPI_MUTEX(canAvailable = params->CANx.checkReceive() == CAN_MSGAVAIL;, portMAX_DELAY)
+
+    while(canAvailable){
+      WRAP_SPI_MUTEX(params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data);, portMAX_DELAY) //get data
       //do something with the data
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
@@ -244,6 +244,7 @@ void CANRxTask(void *pvParameters){
           //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
           break;
       }
+      WRAP_SPI_MUTEX(canAvailable = params->CANx.checkReceive() == CAN_MSGAVAIL;, portMAX_DELAY)
     }
 
   }
