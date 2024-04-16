@@ -75,16 +75,18 @@ void VDKartTask(void *pvParameters){
     if (LeVDKR_tq_CAN0_MinTrqLim < LeVDKR_tq_MinTrqTaperL){LeVDKR_tq_CAN0_MinTrqLim = LeVDKR_tq_MinTrqTaperL;}
     if (LeVDKR_tq_CAN1_MinTrqLim < LeVDKR_tq_MinTrqTaperR){LeVDKR_tq_CAN1_MinTrqLim = LeVDKR_tq_MinTrqTaperR;}
 
-
+#ifdef DUAL_MOTOR_CART
     //VDKART split. Return to Default if swa errors or input data out of date
     if (abs(LeVDKR_phi_SWASensorError) > SWA_ERROR_THRESHOLD){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = .5; //HARD CODED split from sensor
+      LeVDKR_p_TorqueSplitTarget = .5; 
     }
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
-
+#else
+    double LeVDKR_p_TorqueSplitTargetFilt = 0; //quick and dirty way to put all the power to 1mc
+#endif
 
     //THE FOLLOWING MAPS THE PEDAL INTELLIGENTLY TO THE LIMITS OF THE RACE, MOTORS, BATTERY
     //

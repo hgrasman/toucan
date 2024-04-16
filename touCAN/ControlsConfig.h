@@ -1,6 +1,10 @@
 #ifndef CONTROLCONFIG
 #define CONTROLCONFIG
 
+#include "iBSG_config.h"
+
+#define DUAL_MOTOR_CART
+
 #define PDGP_POWER_LIMIT 14000
 #define POWER_LIMIT_MARGIN 500
 #define POWER_LIMIT_MINRPM 100
