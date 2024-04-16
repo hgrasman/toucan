@@ -167,9 +167,20 @@ void HVPropTask(void *pvParameters){
 
   uint8_t LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
   TickType_t offStateTimer = xTaskGetTickCount();
+  TickType_t preStateTimer;
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
+
+    bool Motor0PreCharged;
+    bool Motor1PreCharged;
+    bool TimoutReached;
+    bool BatteriesBalanced;
+    bool bmsCheck;
+    bool MotorCheck;
+    bool Motor0Powered;
+    bool Motor1Powered;
+    bool MotorPowerCondition;
 
     //act on states
     switch (LeHVPR_e_HVTargetState){
@@ -207,11 +218,10 @@ void HVPropTask(void *pvParameters){
             VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
             VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
         ){
-          if (LeHVPR_e_HVTargetState != CeHVPR_e_HVTargetState_OFF){
-            WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
-          }
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Precharge Not Ready");, pdMS_TO_TICKS(5))
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
           offStateTimer = xTaskGetTickCount(); //start chill out timer
+          break;
         }
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
@@ -223,20 +233,24 @@ void HVPropTask(void *pvParameters){
         digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
 
         //transition to prop active once motors are up to voltage
-        if (abs(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN0_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
-#ifdef DUAL_MOTOR_CART
-            abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT && \
-#endif
+        Motor0PreCharged   = abs(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN0_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT;
+        Motor1PreCharged   = abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT;
+        TimoutReached      = (xTaskGetTickCount() - preStateTimer) > pdMS_TO_TICKS(PRE_STATE_TIMEOUT);
+        BatteriesBalanced  = abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD;
 #ifdef ENABLE_REDUNDANT_BMS
-            (xTaskGetTickCount() - preStateTimer) > pdMS_TO_TICKS(PRE_STATE_TIMEOUT) && \
+        bmsCheck = TimoutReached;      
 #else
-            abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD && \
+        bmsCheck = BatteriesBalanced;
 #endif
-        true){
-
+#ifdef DUAL_MOTOR_CART
+        MotorCheck = Motor0PreCharged && Motor1PreCharged;      
+#else
+        MotorCheck = Motor0PreCharged;
+#endif
+        if (bmsCheck && MotorCheck){
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
           WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(8))
-
+          break;
         }
 
         break;
@@ -254,11 +268,25 @@ void HVPropTask(void *pvParameters){
             VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
             VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
         ){
-          if (LeHVPR_e_HVTargetState != CeHVPR_e_HVTargetState_OFF){
-            WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
-          }
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
           offStateTimer = xTaskGetTickCount(); //start chill out timer
+          break;
+        }
+
+        //if manual switch cuts relays, put it back in precharge
+        Motor0Powered = VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() < PACK_VOLTAGE_MIN;
+        Motor1Powered = VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() < PACK_VOLTAGE_MIN;
+#ifdef DUAL_MOTOR_CART
+        MotorPowerCondition = Motor0Powered && Motor1Powered;
+#else
+        MotorPowerCondition = Motor0Powered;
+#endif
+        if (MotorPowerCondition){
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
+          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Contactors Open, Pre Charge");, pdMS_TO_TICKS(8))
+          preStateTimer = xTaskGetTickCount();
+          break;
         }
 
         //Engage the contactors

@@ -3,7 +3,7 @@
 
 #include "iBSG_config.h"
 
-#define DUAL_MOTOR_CART
+//#define DUAL_MOTOR_CART
 #define ENABLE_REDUNDANT_BMS
 
 #define PDGP_POWER_LIMIT 14000
