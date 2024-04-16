@@ -110,7 +110,7 @@ static TaskHandle_t xTaskCAN0RxHandle;
 static TaskHandle_t xTaskCAN1RxHandle;
 static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
 //ISRs for each CAN interrupt with a macro bc I'm lazy
-#define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
+/*#define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
 ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
   taskENTER_CRITICAL_ISR(&CAN_INT_spinlock);\
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;\
@@ -119,7 +119,7 @@ ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
   taskEXIT_CRITICAL_ISR(&CAN_INT_spinlock);\
 }
 CREATE_CANx_ISR(CAN0_RX_ISR, xTaskCAN0RxHandle)
-CREATE_CANx_ISR(CAN1_RX_ISR, xTaskCAN1RxHandle)
+CREATE_CANx_ISR(CAN1_RX_ISR, xTaskCAN1RxHandle)*/
 
 /*
   This function defines a receive thread for the CAN hardware defined by pvParameters.
@@ -138,9 +138,7 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
-    if( !ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(1000))){
-      //WRAP_SERIAL_MUTEX(Serial.println("CAN stuck waiting.");, pdMS_TO_TICKS(5)) 
-    }
+    //vTaskDelay(1); //check every ms
 
     bool canAvailable;
     WRAP_SPI_MUTEX(canAvailable = params->CANx.checkReceive() == CAN_MSGAVAIL;, portMAX_DELAY)
@@ -381,7 +379,7 @@ uint8_t CAN_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-      attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
+      //attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
 
   }else{
     status |= CAN_SETUP_CAN0_FAILURE;
@@ -411,7 +409,7 @@ uint8_t CAN_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-      attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
+      //attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
 
   }else{
     status |= CAN_SETUP_CAN1_FAILURE;
