@@ -383,7 +383,6 @@ uint8_t CAN_SetupTasks(void){
     status |= CAN_SETUP_CAN0_FAILURE;
   }
 
-#ifdef DUAL_MOTOR_CART
   WRAP_SERIAL_MUTEX(Serial.println("CAN1 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN1.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN1.setMode(MCP_NORMAL);
@@ -413,7 +412,6 @@ uint8_t CAN_SetupTasks(void){
   }else{
     status |= CAN_SETUP_CAN1_FAILURE;
   }
-#endif
 
   return(status);
 
