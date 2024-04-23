@@ -24,9 +24,6 @@ void LoggingTask(void *pvParameters){
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
   const TickType_t xFlushPeriod = pdMS_TO_TICKS(100);
 
-  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
-    vTaskDelay(1);
-  }
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
   //populate the header
