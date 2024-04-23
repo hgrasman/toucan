@@ -53,13 +53,14 @@ void setup() {
     WRAP_SERIAL_MUTEX(Serial.println("CAN HARDWARE INIT FAILURE");, pdMS_TO_TICKS(5))
   }
 
+#ifdef ENABLE_LOGGING
   //SD Setup
-  /*
   if (Logging_SetupTasks() == LOGGING_SETUP_SUCCESS){
     WRAP_SERIAL_MUTEX(Serial.println("SD INIT SUCCESS");, pdMS_TO_TICKS(5))
   }else{
     WRAP_SERIAL_MUTEX(Serial.println("SD INIT FAILURE");, pdMS_TO_TICKS(5))
-  }*/
+  }
+#endif
 
   WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
   digitalWrite(GPS_ENABLE_PIN, HIGH); //Turn on GPS to show setup is complete
