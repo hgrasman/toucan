@@ -65,7 +65,7 @@ def GenerateCallBack():
     
     #flush logic
     config.write("""#define LOG_RATE 100
-#define FLUSH_RATE 10
+#define FLUSH_RATE 100
 uint8_t flushCounter = 0;
 
 """)

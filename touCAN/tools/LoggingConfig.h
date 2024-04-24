@@ -7,8 +7,8 @@
 
 #include "FS.h"
 
-#define LOG_RATE 100 //about 80ms lowest or the SD runs out of room
-#define FLUSH_RATE 100
+#define LOG_RATE 100
+#define FLUSH_RATE 10
 uint8_t flushCounter = 0;
 
 struct loggingData{

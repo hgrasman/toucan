@@ -47,7 +47,7 @@ void LoggingQueueTask(void *pvParameters){
     xLastWakeTime = xTaskGetTickCount(); // Initialize
     for (;;){
 
-      logging_queue_data();
+      logging_queue_data(); //run using 100% of SPI bus down time -> log data
 
       xTaskDelayUntil( &xLastWakeTime, xPeriod );
     }
@@ -82,7 +82,7 @@ uint8_t Logging_SetupTasks(void){
       ,  "SD Logger Queuer" 
       ,  4096        
       ,  NULL 
-      ,  8  // Priority
+      ,  7  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
   );
