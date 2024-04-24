@@ -15,7 +15,7 @@ label = Label(window,
               font = ("Times New Roman", 10),  
               padx = 120, pady = 10) 
 label.pack() 
-listbx = Listbox(window, selectmode = "multiple",  
+listbx = Listbox(window, selectmode=EXTENDED,  
                yscrollcommand = yscrollbar.set) 
   
 # Widget expands horizontally and  
@@ -26,6 +26,7 @@ listbx.pack(padx = 10, pady = 10,
   
 # Attach listbox to vertical scrollbar 
 yscrollbar.config(command = listbx.yview) 
+
 
 def RefreshCallBack():
    listbx.delete(0,'end')
@@ -42,6 +43,8 @@ def RefreshCallBack():
 B = Button(window, text ="Refresh", command = RefreshCallBack)
 B.place(x=10,y=15)
 selectedItems = []
+
+
 def GenerateCallBack():
    # Get the indices of all the selected items
    selectedIndices = listbx.curselection()
@@ -114,9 +117,9 @@ uint8_t flushCounter = 0;
     config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
     
     config.write("#endif")
-
 B = Button(window, text ="Generate Logger Code", command = GenerateCallBack)
 B.place(x=70,y=15)
+
 
 RefreshCallBack()
 
