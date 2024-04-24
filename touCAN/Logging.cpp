@@ -21,7 +21,7 @@ File logfile; //used for logging
 
 void LoggingTask(void *pvParameters){
   TickType_t xLastWakeTime;
-  const TickType_t xPeriod = pdMS_TO_TICKS(10);
+  const TickType_t xPeriod = pdMS_TO_TICKS(LOG_RATE);
 
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 

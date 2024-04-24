@@ -7,7 +7,8 @@
 
 #include "FS.h"
 
-#define FLUSH_RATE 50
+#define LOG_RATE 100
+#define FLUSH_RATE 10
 uint8_t flushCounter = 0;
 
 inline void logging_flush_buffer(File logfile){
@@ -18,7 +19,7 @@ inline void logging_flush_buffer(File logfile){
 }
 
 inline void logging_write_header(File logfile){
-WRAP_SPI_MUTEX(logfile.print("LeSDLR_t_currentTime");, portMAX_DELAY)
+WRAP_SPI_MUTEX(logfile.print("LeSDLR_t_currentTimeMs");, portMAX_DELAY)
 WRAP_SPI_MUTEX(logfile.print(", VeCRLR_b_ControlReadyFlag");, portMAX_DELAY)
 WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_CANx_OpModeRequest");, portMAX_DELAY)
 WRAP_SPI_MUTEX(logfile.print(", VeBMSR_v_CAN0_BatteryMINCell");, portMAX_DELAY)
@@ -74,7 +75,7 @@ WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)
 }
 
 inline void logging_write_line(File logfile){
-double LeSDLR_t_currentTime = (double)esp_timer_get_time() / 100000.0;
+double LeSDLR_t_currentTime = (double)esp_timer_get_time() / 1000.0;
 double LeSDLR_b_ControlReadyFlag = VeCRLR_b_ControlReadyFlag.getValue();
 double LeSDLR_e_CANx_OpModeRequest = VeHVPR_e_CANx_OpModeRequest.getValue();
 double LeSDLR_v_CAN0_BatteryMINCell = VeBMSR_v_CAN0_BatteryMINCell.getValue();

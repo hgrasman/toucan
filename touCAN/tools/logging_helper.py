@@ -55,7 +55,8 @@ def GenerateCallBack():
     config.write("#ifndef LOGGING_CONFIG\n#define LOGGING_CONFIG\n\n#include \"FS.h\"\n\n")
     
     #flush logic
-    config.write("""#define FLUSH_RATE 50
+    config.write("""#define LOG_RATE 100
+#define FLUSH_RATE 10
 uint8_t flushCounter = 0;
 
 inline void logging_flush_buffer(File logfile){
@@ -69,7 +70,7 @@ inline void logging_flush_buffer(File logfile){
     
     #populate header function
     config.write("inline void logging_write_header(File logfile){\n")
-    config.write("WRAP_SPI_MUTEX(logfile.print(\"LeSDLR_t_currentTime\");, portMAX_DELAY)\n")
+    config.write("WRAP_SPI_MUTEX(logfile.print(\"LeSDLR_t_currentTimeMs\");, portMAX_DELAY)\n")
     for item in selectedItems:
         config.write("WRAP_SPI_MUTEX(logfile.print(\", {}\");, portMAX_DELAY)\n".format(item))
     config.write("WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\nWRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)\n}\n\n")
@@ -77,13 +78,13 @@ inline void logging_flush_buffer(File logfile){
     #populate logger write function
     config.write("inline void logging_write_line(File logfile){\n")
     local = []
-    config.write("double LeSDLR_t_currentTime = (double)esp_timer_get_time() / 100000.0;\n")
+    config.write("double LeSDLR_t_currentTime = (double)esp_timer_get_time() / 1000.0;\n")
     for item in selectedItems:
         new_local = "LeSDLR" + item[6:]
         config.write("double {} = {}.getValue();\n".format(new_local, item))
         local.append(new_local)
     config.write("\nWRAP_SPI_MUTEX(\\\n")
-    config.write("logfile.print(LeSDLR_t_currentTime);\\\n")
+    config.write("logfile.print(LeSDLR_t_currentTimeMs);\\\n")
     for item in local:
         config.write("logfile.print(\", \"); logfile.print({});\\\n".format(item))
     config.write("logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
