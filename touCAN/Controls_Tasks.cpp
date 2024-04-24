@@ -315,6 +315,8 @@ void HVPropTask(void *pvParameters){
         continue; //BAD BAD BAD BAD try again 
     }
 
+    VeHVPR_e_HVTargetState.setValue(LeHVPR_e_HVTargetState);
+
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
 }

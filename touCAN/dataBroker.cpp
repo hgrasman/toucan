@@ -76,6 +76,7 @@ BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 
 //HVPR high voltage propulsion
 BrokerData VeHVPR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
+BrokerData VeHVPR_e_HVTargetState      = BrokerData();
 
 //BMSR battery management observer
 BrokerData VeBMSR_v_CAN0_BatteryMINCell  = BrokerData();

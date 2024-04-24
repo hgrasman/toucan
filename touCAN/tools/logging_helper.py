@@ -78,15 +78,15 @@ inline void logging_flush_buffer(File logfile){
     #populate logger write function
     config.write("inline void logging_write_line(File logfile){\n")
     local = []
-    config.write("double LeSDLR_t_currentTime = (double)esp_timer_get_time() / 1000.0;\n")
+    config.write("double LeSDLR_t_currentTimeMs = (double)esp_timer_get_time() / 1000.0;\n")
     for item in selectedItems:
         new_local = "LeSDLR" + item[6:]
         config.write("double {} = {}.getValue();\n".format(new_local, item))
         local.append(new_local)
     config.write("\nWRAP_SPI_MUTEX(\\\n")
-    config.write("logfile.print(LeSDLR_t_currentTimeMs);\\\n")
+    config.write("logfile.print(LeSDLR_t_currentTimeMs, 4);\\\n")
     for item in local:
-        config.write("logfile.print(\", \"); logfile.print({});\\\n".format(item))
+        config.write("logfile.print(\", \"); logfile.print({}, 4);\\\n".format(item))
     config.write("logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
     
     config.write("#endif")
