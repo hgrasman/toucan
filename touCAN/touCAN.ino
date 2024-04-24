@@ -62,6 +62,8 @@ void setup() {
   }
 #endif
 
+  delay(5);
+
   WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
   digitalWrite(GPS_ENABLE_PIN, HIGH); //Turn on GPS to show setup is complete
   VeCRLR_b_ControlReadyFlag.setValue(0); //tell the threads to figure themselves out
