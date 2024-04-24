@@ -127,6 +127,12 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_tq_TorqueL = LeVDKR_tq_TotalTorqueDesired*(1-LeVDKR_p_TorqueSplitTargetFilt);
     double LeVDKR_tq_TorqueR = LeVDKR_tq_TotalTorqueDesired*LeVDKR_p_TorqueSplitTargetFilt;
 
+    //limits again (per motor basis)
+    if (LeVDKR_tq_TorqueL<LeVDKR_tq_CAN0_MinTrqLim){LeVDKR_tq_TorqueL=LeVDKR_tq_CAN0_MinTrqLim;}
+    if (LeVDKR_tq_TorqueR<LeVDKR_tq_CAN1_MinTrqLim){LeVDKR_tq_TorqueR=LeVDKR_tq_CAN1_MinTrqLim;}
+    if (LeVDKR_tq_TorqueL>LeVDKR_tq_CAN0_MaxTrqLim){LeVDKR_tq_TorqueL=LeVDKR_tq_CAN0_MaxTrqLim;}
+    if (LeVDKR_tq_TorqueR>LeVDKR_tq_CAN1_MaxTrqLim){LeVDKR_tq_TorqueR=LeVDKR_tq_CAN1_MaxTrqLim;}
+
     //calculate actual electrical power and scale
     //TODO ###########################################################
 
