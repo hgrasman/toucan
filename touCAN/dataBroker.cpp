@@ -127,7 +127,7 @@ BrokerData VeCANR_pct_CAN1_iBSGMotorTempRate = BrokerData();
 BrokerData VeCANR_tq_CAN1_iBSGInstMinTrqLim = BrokerData();
 BrokerData VeCANR_tq_CAN1_iBSGInstMaxTrqLim = BrokerData();
 
-BrokerData VeCANR_I_CAN0_BatteryCurrent = BrokerData();
+BrokerData VeCANR_I_CAN0_BatteryCurrentRaw = BrokerData();
 BrokerData VeCANR_v_CAN0_BatteryVoltageCell1 = BrokerData();
 BrokerData VeCANR_v_CAN0_BatteryVoltageCell2 = BrokerData();
 BrokerData VeCANR_v_CAN0_BatteryVoltageCell3 = BrokerData();
@@ -156,7 +156,7 @@ BrokerData VeCANR_T_CAN0_BatteryTemp9 = BrokerData();
 BrokerData VeCANR_T_CAN0_BatteryTemp10 = BrokerData();
 BrokerData VeCANR_T_CAN0_BatteryTemp11 = BrokerData();
 
-BrokerData VeCANR_I_CAN1_BatteryCurrent = BrokerData();
+BrokerData VeCANR_I_CAN1_BatteryCurrentRaw = BrokerData();
 BrokerData VeCANR_v_CAN1_BatteryVoltageCell1 = BrokerData();
 BrokerData VeCANR_v_CAN1_BatteryVoltageCell2 = BrokerData();
 BrokerData VeCANR_v_CAN1_BatteryVoltageCell3 = BrokerData();

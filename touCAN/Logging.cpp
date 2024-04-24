@@ -22,7 +22,6 @@ File logfile; //used for logging
 void LoggingTask(void *pvParameters){
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
-  const TickType_t xFlushPeriod = pdMS_TO_TICKS(100);
 
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
@@ -30,15 +29,10 @@ void LoggingTask(void *pvParameters){
   logging_write_header(logfile); // from LoggingConfig.h
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
-  uint8_t counter = 0;
   for(;;){
 
     logging_write_line(logfile); //from LoggingConfig.h
-
-    if (counter++ >= xFlushPeriod/xPeriod){
-      WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY) 
-      counter = 0;
-    }
+    logging_flush_buffer(logfile); //check if it's time to flush
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
@@ -46,7 +40,7 @@ void LoggingTask(void *pvParameters){
 
 uint8_t Logging_SetupTasks(void){
   
-  if(!SD.begin(SD_SPI_CS_PIN)){
+  if(!SD.begin(SD_SPI_CS_PIN, SPI, 50000000, "/sd", 1, false)){
     WRAP_SERIAL_MUTEX(Serial.println("SD Mount Failed");, pdMS_TO_TICKS(100))
     return (LOGGING_SETUP_FAILURE);
   }

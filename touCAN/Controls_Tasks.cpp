@@ -198,7 +198,7 @@ void HVPropTask(void *pvParameters){
         if ((xTaskGetTickCount() - offStateTimer) > pdMS_TO_TICKS(OFF_STATE_TIMEOUT)){
 
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(8))
+          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(8))
           preStateTimer = xTaskGetTickCount(); //start timer
 
         }
@@ -218,7 +218,7 @@ void HVPropTask(void *pvParameters){
             VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
             VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
         ){
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Precharge Not Ready");, pdMS_TO_TICKS(5))
+          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Precharge Not Ready");, pdMS_TO_TICKS(5))
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
           offStateTimer = xTaskGetTickCount(); //start chill out timer
           break;
@@ -253,7 +253,7 @@ void HVPropTask(void *pvParameters){
 #endif
         if (bmsCheck && MotorCheck){
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(8))
+          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(8))
           break;
         }
 
@@ -272,7 +272,7 @@ void HVPropTask(void *pvParameters){
             VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
             VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
         ){
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
+          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
           offStateTimer = xTaskGetTickCount(); //start chill out timer
           break;
@@ -288,7 +288,7 @@ void HVPropTask(void *pvParameters){
 #endif
         if (MotorPowerCondition){
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
-          WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Contactors Open, Pre Charge");, pdMS_TO_TICKS(8))
+          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Contactors Open, Pre Charge");, pdMS_TO_TICKS(8))
           preStateTimer = xTaskGetTickCount();
           break;
         }

@@ -54,19 +54,39 @@ def GenerateCallBack():
     config.write("\n//Generated {} with logging_helper.py for EV Kartz Kettering University\n//Henry Grasman\n\n".format(datetime.now()))
     config.write("#ifndef LOGGING_CONFIG\n#define LOGGING_CONFIG\n\n#include \"FS.h\"\n\n")
     
+    #flush logic
+    config.write("""#define FLUSH_RATE 50
+uint8_t flushCounter = 0;
+
+inline void logging_flush_buffer(File logfile){
+  if (flushCounter++ > FLUSH_RATE){
+    WRAP_SPI_MUTEX(logfile.flush();, portMAX_DELAY)
+    flushCounter = 0;
+  }
+}
+
+""")
+    
     #populate header function
     config.write("inline void logging_write_header(File logfile){\n")
-    config.write("WRAP_SPI_MUTEX(logfile.print(\"Time\");, portMAX_DELAY)\n")
+    config.write("WRAP_SPI_MUTEX(logfile.print(\"LeSDLR_t_currentTime\");, portMAX_DELAY)\n")
     for item in selectedItems:
         config.write("WRAP_SPI_MUTEX(logfile.print(\", {}\");, portMAX_DELAY)\n".format(item))
-    config.write("WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\n}\n\n")
+    config.write("WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\nWRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)\n}\n\n")
     
     #populate logger write function
     config.write("inline void logging_write_line(File logfile){\n")
-    config.write("WRAP_SPI_MUTEX(logfile.print((double)esp_timer_get_time() / 100000.0);, portMAX_DELAY)\n")
+    local = []
+    config.write("double LeSDLR_t_currentTime = (double)esp_timer_get_time() / 100000.0;\n")
     for item in selectedItems:
-        config.write("WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print({}.getValue());, portMAX_DELAY)\n".format(item))
-    config.write("WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\n}\n\n")
+        new_local = "LeSDLR" + item[6:]
+        config.write("double {} = {}.getValue();\n".format(new_local, item))
+        local.append(new_local)
+    config.write("\nWRAP_SPI_MUTEX(\\\n")
+    config.write("logfile.print(LeSDLR_t_currentTime);\\\n")
+    for item in local:
+        config.write("logfile.print(\", \"); logfile.print({});\\\n".format(item))
+    config.write("logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
     
     config.write("#endif")
 

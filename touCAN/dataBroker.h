@@ -94,7 +94,7 @@ extern BrokerData VeCANR_pct_CAN1_iBSGMotorTempRate;
 extern BrokerData VeCANR_tq_CAN1_iBSGInstMinTrqLim;
 extern BrokerData VeCANR_tq_CAN1_iBSGInstMaxTrqLim;
 
-extern BrokerData VeCANR_I_CAN0_BatteryCurrent;
+extern BrokerData VeCANR_I_CAN0_BatteryCurrentRaw;
 extern BrokerData VeCANR_v_CAN0_BatteryVoltageCell1;
 extern BrokerData VeCANR_v_CAN0_BatteryVoltageCell2;
 extern BrokerData VeCANR_v_CAN0_BatteryVoltageCell3;
@@ -123,7 +123,7 @@ extern BrokerData VeCANR_T_CAN0_BatteryTemp9;
 extern BrokerData VeCANR_T_CAN0_BatteryTemp10;
 extern BrokerData VeCANR_T_CAN0_BatteryTemp11;
 
-extern BrokerData VeCANR_I_CAN1_BatteryCurrent;
+extern BrokerData VeCANR_I_CAN1_BatteryCurrentRaw;
 extern BrokerData VeCANR_v_CAN1_BatteryVoltageCell1;
 extern BrokerData VeCANR_v_CAN1_BatteryVoltageCell2;
 extern BrokerData VeCANR_v_CAN1_BatteryVoltageCell3;
