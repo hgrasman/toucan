@@ -23,7 +23,7 @@
 TaskHandle_t xTaskVDKartHandle;
 void VDKartTask(void *pvParameters){
   TickType_t xLastWakeTime;
-  const TickType_t xPeriod = pdMS_TO_TICKS(10);
+  const TickType_t xPeriod = pdMS_TO_TICKS(5);
 
   while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
     vTaskDelay(1);
