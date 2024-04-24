@@ -1,5 +1,5 @@
 
-//Generated 2024-04-24 10:51:23.222578 with logging_helper_2.py for EV Kartz Kettering University
+//Generated 2024-04-24 10:55:54.028636 with logging_helper_2.py for EV Kartz Kettering University
 //Henry Grasman
 
 #ifndef LOGGING_CONFIG
@@ -13,9 +13,9 @@ uint8_t flushCounter = 0;
 
 struct loggingData{
   double LeSDLR_t_currentTime;
-  double LeSDLR_V_CAN0_BatteryVoltage;
-  double LeSDLR_T_CAN1_BatteryMAXTemp;
-  double LeSDLR_V_CAN1_SSVESREstimated;
+  double LeSDLR_a_IMU6AxFilt;
+  double LeSDLR_a_IMU6AyFilt;
+  double LeSDLR_a_IMU6AzFilt;
 }loggingMessage;
 
 QueueHandle_t loggingQueue = xQueueCreate( 16, sizeof( struct loggingData * ) );
@@ -29,27 +29,27 @@ inline void logging_flush_buffer(File logfile){
 
 inline bool logging_queue_data(void){
   loggingMessage.LeSDLR_t_currentTime = (double)esp_timer_get_time() / 1000000.0;
-  loggingMessage.LeSDLR_V_CAN0_BatteryVoltage = VeBMSR_V_CAN0_BatteryVoltage.getValue();
-  loggingMessage.LeSDLR_T_CAN1_BatteryMAXTemp = VeBMSR_T_CAN1_BatteryMAXTemp.getValue();
-  loggingMessage.LeSDLR_V_CAN1_SSVESREstimated = VeBPER_V_CAN1_SSVESREstimated.getValue();
+  loggingMessage.LeSDLR_a_IMU6AxFilt = VeSNSR_a_IMU6AxFilt.getValue();
+  loggingMessage.LeSDLR_a_IMU6AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
+  loggingMessage.LeSDLR_a_IMU6AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
 
   return (xQueueSend( loggingQueue, ( void * ) &loggingMessage, portMAX_DELAY ) == pdTRUE);
 }
 
 inline void logging_write_header(File logfile){
   WRAP_SPI_MUTEX(logfile.print("LeSDLR_t_currentTime");, portMAX_DELAY)
-  WRAP_SPI_MUTEX(logfile.print(", VeBMSR_V_CAN0_BatteryVoltage");, portMAX_DELAY)
-  WRAP_SPI_MUTEX(logfile.print(", VeBMSR_T_CAN1_BatteryMAXTemp");, portMAX_DELAY)
-  WRAP_SPI_MUTEX(logfile.print(", VeBPER_V_CAN1_SSVESREstimated");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AxFilt");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AyFilt");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AzFilt");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print("\n");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)
 }
 
 inline void logging_write_line(File logfile, struct loggingData *pdataToLog){
   WRAP_SPI_MUTEX(logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);, portMAX_DELAY)
-  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_V_CAN0_BatteryVoltage, 4);, portMAX_DELAY)
-  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryMAXTemp, 4);, portMAX_DELAY)
-  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_V_CAN1_SSVESREstimated, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AxFilt, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AyFilt, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AzFilt, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print("\n");,portMAX_DELAY)
 }
 

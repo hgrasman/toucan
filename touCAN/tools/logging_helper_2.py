@@ -103,7 +103,7 @@ uint8_t flushCounter = 0;
     config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\n  WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)\n}\n\n")
     
     #populate logger write function
-    config.write("inline void logging_write_line(File logfile){\n")
+    config.write("inline void logging_write_line(File logfile, struct loggingData *pdataToLog){\n")
     config.write("  WRAP_SPI_MUTEX(logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);, portMAX_DELAY)\n")
     for item in local:
         config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->{}, 4);, portMAX_DELAY)\n".format(item))
