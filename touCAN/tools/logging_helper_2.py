@@ -70,10 +70,11 @@ uint8_t flushCounter = 0;
     config.write("struct loggingData{\n  double LeSDLR_t_currentTime;\n")
     for item in local:
         config.write("  double {};\n".format(item))
-    config.write("}loggingMessage;\n\n")
+    config.write("  double LeSDLR_t_endTime;\n")
+    config.write("}loggingMessage, dataToLog;\n\n")
     
     #queue
-    config.write("""QueueHandle_t loggingQueue = xQueueCreate( 16, sizeof( struct loggingData * ) );
+    config.write("""QueueHandle_t loggingQueue = xQueueCreate( 16, sizeof( struct loggingData ) );
 
 """)
 
@@ -93,6 +94,7 @@ uint8_t flushCounter = 0;
     for item in selectedItems:
         new_local = "LeSDLR" + item[6:]
         config.write("  loggingMessage.{} = {}.getValue();\n".format(new_local, item))
+    config.write("  loggingMessage.LeSDLR_t_endTime = (double)esp_timer_get_time() / 1000000.0;\n")
     config.write("\n  return (xQueueSend( loggingQueue, ( void * ) &loggingMessage, portMAX_DELAY ) == pdTRUE);\n}\n\n")
     
     #populate header function
@@ -100,6 +102,7 @@ uint8_t flushCounter = 0;
     config.write("  WRAP_SPI_MUTEX(logfile.print(\"LeSDLR_t_currentTime\");, portMAX_DELAY)\n")
     for item in selectedItems:
         config.write("  WRAP_SPI_MUTEX(logfile.print(\", {}\");, portMAX_DELAY)\n".format(item))
+    config.write("  WRAP_SPI_MUTEX(logfile.print(\", LeSDLR_t_endTime\");, portMAX_DELAY)\n")
     config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\n  WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)\n}\n\n")
     
     #populate logger write function
@@ -107,6 +110,7 @@ uint8_t flushCounter = 0;
     config.write("  WRAP_SPI_MUTEX(logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);, portMAX_DELAY)\n")
     for item in local:
         config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->{}, 4);, portMAX_DELAY)\n".format(item))
+    config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->LeSDLR_t_endTime, 4);, portMAX_DELAY)\n")
     config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
     
     config.write("#endif")

@@ -11,7 +11,11 @@
 #define POWER_LIMIT_MARGIN 500
 #define POWER_LIMIT_MINRPM 100
 #define REGEN_POWER_LIMIT -5000
-#define REGEN_TAPER_FUNC(rpm) -(log(rpm/100 + 1.0)*65.0)
+#define REGEN_IDLE_FORWARD_TQ .5
+#define REGEN_LIMIT_MAX_REV_DAMPING 5
+inline double REGEN_TAPER_FUNC(double rpm){
+  return (-(log(rpm/1000+1)*50.0) + REGEN_IDLE_FORWARD_TQ);
+} 
 
 #define CELL_MINIMUM_VOLTAGE 2.8
 #define CELL_MAXIMUM_VOLTAGE 4.25

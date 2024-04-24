@@ -20,7 +20,6 @@
 File logfile; //used for logging
 
 void LoggingTask(void *pvParameters){
-  struct loggingData *pdataToLog;
 
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
@@ -30,9 +29,9 @@ void LoggingTask(void *pvParameters){
   for(;;){
 
     //block on queue, run as fast as possible
-    if( xQueueReceive( loggingQueue, &( pdataToLog ), portMAX_DELAY ) ) 
+    if( xQueueReceive( loggingQueue, &( dataToLog ), portMAX_DELAY ) ) 
      {
-        logging_write_line(logfile, pdataToLog); //from LoggingConfig.h
+        logging_write_line(logfile, &dataToLog); //from LoggingConfig.h
      }
 
     logging_flush_buffer(logfile); //check if it's time to flush
@@ -83,7 +82,7 @@ uint8_t Logging_SetupTasks(void){
       ,  "SD Logger Queuer" 
       ,  4096        
       ,  NULL 
-      ,  9  // Priority
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
   );

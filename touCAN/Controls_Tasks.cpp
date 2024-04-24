@@ -70,10 +70,11 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_tq_CAN1_MaxTrqLim = VeCANR_tq_CAN1_iBSGInstMaxTrqLim.getValue();
 
     //stop the thing from spinning backward
-    double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperL>0){LeVDKR_tq_MinTrqTaperL = 0;}
-    double LeVDKR_tq_MinTrqTaperR = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN1_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperR>0){LeVDKR_tq_MinTrqTaperR = 0;}
+    double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperL>REGEN_LIMIT_MAX_REV_DAMPING){LeVDKR_tq_MinTrqTaperL = REGEN_LIMIT_MAX_REV_DAMPING;}
+    double LeVDKR_tq_MinTrqTaperR = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN1_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperR>REGEN_LIMIT_MAX_REV_DAMPING){LeVDKR_tq_MinTrqTaperR = REGEN_LIMIT_MAX_REV_DAMPING;}
     if (LeVDKR_tq_CAN0_MinTrqLim < LeVDKR_tq_MinTrqTaperL){LeVDKR_tq_CAN0_MinTrqLim = LeVDKR_tq_MinTrqTaperL;}
     if (LeVDKR_tq_CAN1_MinTrqLim < LeVDKR_tq_MinTrqTaperR){LeVDKR_tq_CAN1_MinTrqLim = LeVDKR_tq_MinTrqTaperR;}
+    
 
 #ifdef DUAL_MOTOR_CART
     //VDKART split. Return to Default if swa errors or input data out of date
