@@ -20,22 +20,38 @@
 File logfile; //used for logging
 
 void LoggingTask(void *pvParameters){
-  TickType_t xLastWakeTime;
-  const TickType_t xPeriod = pdMS_TO_TICKS(LOG_RATE);
+  struct loggingData *pdataToLog;
 
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
   //populate the header
   logging_write_header(logfile); // from LoggingConfig.h
 
-  xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
-    logging_write_line(logfile); //from LoggingConfig.h
-    logging_flush_buffer(logfile); //check if it's time to flush
+    //block on queue, run as fast as possible
+    if( xQueueReceive( loggingQueue, &( pdataToLog ), portMAX_DELAY ) ) 
+     {
+        logging_write_line(logfile, pdataToLog); //from LoggingConfig.h
+     }
 
-    vTaskDelayUntil(&xLastWakeTime, xPeriod);
+    logging_flush_buffer(logfile); //check if it's time to flush
   }
+}
+
+void LoggingQueueTask(void *pvParameters){
+  TickType_t xLastWakeTime;
+  const TickType_t xPeriod = pdMS_TO_TICKS(LOG_RATE);
+
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
+
+    xLastWakeTime = xTaskGetTickCount(); // Initialize
+    for (;;){
+
+      logging_queue_data();
+
+      xTaskDelayUntil( &xLastWakeTime, xPeriod );
+    }
 }
 
 uint8_t Logging_SetupTasks(void){
@@ -54,10 +70,20 @@ uint8_t Logging_SetupTasks(void){
 
   xTaskCreatePinnedToCore(
       LoggingTask
-      ,  "SD Logger" 
+      ,  "SD Logger Writer" 
       ,  4096        
       ,  NULL 
-      ,  8  // Priority
+      ,  7  // Priority
+      ,  NULL // Task handle
+      ,  tskNO_AFFINITY // run on whatever core
+  );
+
+  xTaskCreatePinnedToCore(
+      LoggingQueueTask
+      ,  "SD Logger Queuer" 
+      ,  4096        
+      ,  NULL 
+      ,  9  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
   );
