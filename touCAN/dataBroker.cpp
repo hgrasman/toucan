@@ -77,6 +77,10 @@ BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
 //HVPR high voltage propulsion
 BrokerData VeHVPR_e_CANx_OpModeRequest = BrokerData(); //THESE SHOULD BE SYNCHRONIZED
 BrokerData VeHVPR_e_HVTargetState      = BrokerData();
+BrokerData VeHVPR_e_Pre1RelayState     = BrokerData();
+BrokerData VeHVPR_e_Rel1RelayState     = BrokerData();
+BrokerData VeHVPR_e_Pre2RelayState     = BrokerData();
+BrokerData VeHVPR_e_Rel2RelayState     = BrokerData();
 
 //BMSR battery management observer
 BrokerData VeBMSR_v_CAN0_BatteryMINCell  = BrokerData();
@@ -104,6 +108,7 @@ BrokerData VeBPER_R_CAN1_ESRObserved     = BrokerData();
 //VDKR VDKart Ring
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
 BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();
+BrokerData VeVDKR_e_MotorStateRequest   = BrokerData();
 
 //CANR CAN driver Ring
 BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed = BrokerData();

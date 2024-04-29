@@ -1,5 +1,5 @@
 
-//Generated 2024-04-24 14:47:51.697787 with logging_helper_2.py for EV Kartz Kettering University
+//Generated 2024-04-29 12:46:04.980592 with logging_helper_2.py for EV Kartz Kettering University
 //Henry Grasman
 
 #ifndef LOGGING_CONFIG
@@ -8,7 +8,7 @@
 #include "FS.h"
 
 #define LOG_RATE 100
-#define FLUSH_RATE 10
+#define FLUSH_RATE 100
 uint8_t flushCounter = 0;
 
 struct loggingData{
@@ -16,6 +16,10 @@ struct loggingData{
   double LeSDLR_b_ControlReadyFlag;
   double LeSDLR_e_CANx_OpModeRequest;
   double LeSDLR_e_HVTargetState;
+  double LeSDLR_e_Pre1RelayState;
+  double LeSDLR_e_Rel1RelayState;
+  double LeSDLR_e_Pre2RelayState;
+  double LeSDLR_e_Rel2RelayState;
   double LeSDLR_v_CAN0_BatteryMINCell;
   double LeSDLR_v_CAN0_BatteryMAXCell;
   double LeSDLR_V_CAN0_BatteryVoltage;
@@ -57,13 +61,74 @@ struct loggingData{
   double LeSDLR_tq_CAN1_iBSGInstMinTrqLim;
   double LeSDLR_tq_CAN1_iBSGInstMaxTrqLim;
   double LeSDLR_I_CAN0_BatteryCurrentRaw;
+  double LeSDLR_v_CAN0_BatteryVoltageCell1;
+  double LeSDLR_v_CAN0_BatteryVoltageCell2;
+  double LeSDLR_v_CAN0_BatteryVoltageCell3;
+  double LeSDLR_v_CAN0_BatteryVoltageCell4;
+  double LeSDLR_v_CAN0_BatteryVoltageCell5;
+  double LeSDLR_v_CAN0_BatteryVoltageCell6;
+  double LeSDLR_v_CAN0_BatteryVoltageCell7;
+  double LeSDLR_v_CAN0_BatteryVoltageCell8;
+  double LeSDLR_v_CAN0_BatteryVoltageCell9;
+  double LeSDLR_v_CAN0_BatteryVoltageCell10;
+  double LeSDLR_v_CAN0_BatteryVoltageCell11;
+  double LeSDLR_v_CAN0_BatteryVoltageCell12;
+  double LeSDLR_v_CAN0_BatteryVoltageCell13;
+  double LeSDLR_v_CAN0_BatteryVoltageCell14;
+  double LeSDLR_v_CAN0_BatteryVoltageCell15;
+  double LeSDLR_v_CAN0_BatteryVoltageCell16;
+  double LeSDLR_T_CAN0_BatteryTemp1;
+  double LeSDLR_T_CAN0_BatteryTemp2;
+  double LeSDLR_T_CAN0_BatteryTemp3;
+  double LeSDLR_T_CAN0_BatteryTemp4;
+  double LeSDLR_T_CAN0_BatteryTemp5;
+  double LeSDLR_T_CAN0_BatteryTemp6;
+  double LeSDLR_T_CAN0_BatteryTemp7;
+  double LeSDLR_T_CAN0_BatteryTemp8;
+  double LeSDLR_T_CAN0_BatteryTemp9;
+  double LeSDLR_T_CAN0_BatteryTemp10;
+  double LeSDLR_T_CAN0_BatteryTemp11;
   double LeSDLR_I_CAN1_BatteryCurrentRaw;
+  double LeSDLR_v_CAN1_BatteryVoltageCell1;
+  double LeSDLR_v_CAN1_BatteryVoltageCell2;
+  double LeSDLR_v_CAN1_BatteryVoltageCell3;
+  double LeSDLR_v_CAN1_BatteryVoltageCell4;
+  double LeSDLR_v_CAN1_BatteryVoltageCell5;
+  double LeSDLR_v_CAN1_BatteryVoltageCell6;
+  double LeSDLR_v_CAN1_BatteryVoltageCell7;
+  double LeSDLR_v_CAN1_BatteryVoltageCell8;
+  double LeSDLR_v_CAN1_BatteryVoltageCell9;
+  double LeSDLR_v_CAN1_BatteryVoltageCell10;
+  double LeSDLR_v_CAN1_BatteryVoltageCell11;
+  double LeSDLR_v_CAN1_BatteryVoltageCell12;
+  double LeSDLR_v_CAN1_BatteryVoltageCell13;
+  double LeSDLR_v_CAN1_BatteryVoltageCell14;
+  double LeSDLR_v_CAN1_BatteryVoltageCell15;
+  double LeSDLR_v_CAN1_BatteryVoltageCell16;
+  double LeSDLR_T_CAN1_BatteryTemp1;
+  double LeSDLR_T_CAN1_BatteryTemp2;
+  double LeSDLR_T_CAN1_BatteryTemp3;
+  double LeSDLR_T_CAN1_BatteryTemp4;
+  double LeSDLR_T_CAN1_BatteryTemp5;
+  double LeSDLR_T_CAN1_BatteryTemp6;
+  double LeSDLR_T_CAN1_BatteryTemp7;
+  double LeSDLR_T_CAN1_BatteryTemp8;
+  double LeSDLR_T_CAN1_BatteryTemp9;
+  double LeSDLR_T_CAN1_BatteryTemp10;
+  double LeSDLR_T_CAN1_BatteryTemp11;
+  double LeSDLR_a_IMU6AxRaw;
+  double LeSDLR_a_IMU6AyRaw;
+  double LeSDLR_a_IMU6AzRaw;
+  double LeSDLR_w_IMU6WxRaw;
+  double LeSDLR_w_IMU6WyRaw;
+  double LeSDLR_w_IMU6WzRaw;
   double LeSDLR_a_IMU6AxFilt;
   double LeSDLR_a_IMU6AyFilt;
   double LeSDLR_a_IMU6AzFilt;
   double LeSDLR_w_IMU6WxFilt;
   double LeSDLR_w_IMU6WyFilt;
   double LeSDLR_w_IMU6WzFilt;
+  double LeSDLR_e_BatterySelectionTarget;
   double LeSDLR_t_endTime;
 }loggingMessage, dataToLog;
 
@@ -81,6 +146,10 @@ inline bool logging_queue_data(void){
   loggingMessage.LeSDLR_b_ControlReadyFlag = VeCRLR_b_ControlReadyFlag.getValue();
   loggingMessage.LeSDLR_e_CANx_OpModeRequest = VeHVPR_e_CANx_OpModeRequest.getValue();
   loggingMessage.LeSDLR_e_HVTargetState = VeHVPR_e_HVTargetState.getValue();
+  loggingMessage.LeSDLR_e_Pre1RelayState = VeHVPR_e_Pre1RelayState.getValue();
+  loggingMessage.LeSDLR_e_Rel1RelayState = VeHVPR_e_Rel1RelayState.getValue();
+  loggingMessage.LeSDLR_e_Pre2RelayState = VeHVPR_e_Pre2RelayState.getValue();
+  loggingMessage.LeSDLR_e_Rel2RelayState = VeHVPR_e_Rel2RelayState.getValue();
   loggingMessage.LeSDLR_v_CAN0_BatteryMINCell = VeBMSR_v_CAN0_BatteryMINCell.getValue();
   loggingMessage.LeSDLR_v_CAN0_BatteryMAXCell = VeBMSR_v_CAN0_BatteryMAXCell.getValue();
   loggingMessage.LeSDLR_V_CAN0_BatteryVoltage = VeBMSR_V_CAN0_BatteryVoltage.getValue();
@@ -122,13 +191,74 @@ inline bool logging_queue_data(void){
   loggingMessage.LeSDLR_tq_CAN1_iBSGInstMinTrqLim = VeCANR_tq_CAN1_iBSGInstMinTrqLim.getValue();
   loggingMessage.LeSDLR_tq_CAN1_iBSGInstMaxTrqLim = VeCANR_tq_CAN1_iBSGInstMaxTrqLim.getValue();
   loggingMessage.LeSDLR_I_CAN0_BatteryCurrentRaw = VeCANR_I_CAN0_BatteryCurrentRaw.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell1 = VeCANR_v_CAN0_BatteryVoltageCell1.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell2 = VeCANR_v_CAN0_BatteryVoltageCell2.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell3 = VeCANR_v_CAN0_BatteryVoltageCell3.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell4 = VeCANR_v_CAN0_BatteryVoltageCell4.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell5 = VeCANR_v_CAN0_BatteryVoltageCell5.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell6 = VeCANR_v_CAN0_BatteryVoltageCell6.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell7 = VeCANR_v_CAN0_BatteryVoltageCell7.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell8 = VeCANR_v_CAN0_BatteryVoltageCell8.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell9 = VeCANR_v_CAN0_BatteryVoltageCell9.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell10 = VeCANR_v_CAN0_BatteryVoltageCell10.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell11 = VeCANR_v_CAN0_BatteryVoltageCell11.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell12 = VeCANR_v_CAN0_BatteryVoltageCell12.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell13 = VeCANR_v_CAN0_BatteryVoltageCell13.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell14 = VeCANR_v_CAN0_BatteryVoltageCell14.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell15 = VeCANR_v_CAN0_BatteryVoltageCell15.getValue();
+  loggingMessage.LeSDLR_v_CAN0_BatteryVoltageCell16 = VeCANR_v_CAN0_BatteryVoltageCell16.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp1 = VeCANR_T_CAN0_BatteryTemp1.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp2 = VeCANR_T_CAN0_BatteryTemp2.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp3 = VeCANR_T_CAN0_BatteryTemp3.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp4 = VeCANR_T_CAN0_BatteryTemp4.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp5 = VeCANR_T_CAN0_BatteryTemp5.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp6 = VeCANR_T_CAN0_BatteryTemp6.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp7 = VeCANR_T_CAN0_BatteryTemp7.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp8 = VeCANR_T_CAN0_BatteryTemp8.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp9 = VeCANR_T_CAN0_BatteryTemp9.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp10 = VeCANR_T_CAN0_BatteryTemp10.getValue();
+  loggingMessage.LeSDLR_T_CAN0_BatteryTemp11 = VeCANR_T_CAN0_BatteryTemp11.getValue();
   loggingMessage.LeSDLR_I_CAN1_BatteryCurrentRaw = VeCANR_I_CAN1_BatteryCurrentRaw.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell1 = VeCANR_v_CAN1_BatteryVoltageCell1.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell2 = VeCANR_v_CAN1_BatteryVoltageCell2.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell3 = VeCANR_v_CAN1_BatteryVoltageCell3.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell4 = VeCANR_v_CAN1_BatteryVoltageCell4.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell5 = VeCANR_v_CAN1_BatteryVoltageCell5.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell6 = VeCANR_v_CAN1_BatteryVoltageCell6.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell7 = VeCANR_v_CAN1_BatteryVoltageCell7.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell8 = VeCANR_v_CAN1_BatteryVoltageCell8.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell9 = VeCANR_v_CAN1_BatteryVoltageCell9.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell10 = VeCANR_v_CAN1_BatteryVoltageCell10.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell11 = VeCANR_v_CAN1_BatteryVoltageCell11.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell12 = VeCANR_v_CAN1_BatteryVoltageCell12.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell13 = VeCANR_v_CAN1_BatteryVoltageCell13.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell14 = VeCANR_v_CAN1_BatteryVoltageCell14.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell15 = VeCANR_v_CAN1_BatteryVoltageCell15.getValue();
+  loggingMessage.LeSDLR_v_CAN1_BatteryVoltageCell16 = VeCANR_v_CAN1_BatteryVoltageCell16.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp1 = VeCANR_T_CAN1_BatteryTemp1.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp2 = VeCANR_T_CAN1_BatteryTemp2.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp3 = VeCANR_T_CAN1_BatteryTemp3.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp4 = VeCANR_T_CAN1_BatteryTemp4.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp5 = VeCANR_T_CAN1_BatteryTemp5.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp6 = VeCANR_T_CAN1_BatteryTemp6.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp7 = VeCANR_T_CAN1_BatteryTemp7.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp8 = VeCANR_T_CAN1_BatteryTemp8.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp9 = VeCANR_T_CAN1_BatteryTemp9.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp10 = VeCANR_T_CAN1_BatteryTemp10.getValue();
+  loggingMessage.LeSDLR_T_CAN1_BatteryTemp11 = VeCANR_T_CAN1_BatteryTemp11.getValue();
+  loggingMessage.LeSDLR_a_IMU6AxRaw = VeSNSR_a_IMU6AxRaw.getValue();
+  loggingMessage.LeSDLR_a_IMU6AyRaw = VeSNSR_a_IMU6AyRaw.getValue();
+  loggingMessage.LeSDLR_a_IMU6AzRaw = VeSNSR_a_IMU6AzRaw.getValue();
+  loggingMessage.LeSDLR_w_IMU6WxRaw = VeSNSR_w_IMU6WxRaw.getValue();
+  loggingMessage.LeSDLR_w_IMU6WyRaw = VeSNSR_w_IMU6WyRaw.getValue();
+  loggingMessage.LeSDLR_w_IMU6WzRaw = VeSNSR_w_IMU6WzRaw.getValue();
   loggingMessage.LeSDLR_a_IMU6AxFilt = VeSNSR_a_IMU6AxFilt.getValue();
   loggingMessage.LeSDLR_a_IMU6AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
   loggingMessage.LeSDLR_a_IMU6AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
   loggingMessage.LeSDLR_w_IMU6WxFilt = VeSNSR_w_IMU6WxFilt.getValue();
   loggingMessage.LeSDLR_w_IMU6WyFilt = VeSNSR_w_IMU6WyFilt.getValue();
   loggingMessage.LeSDLR_w_IMU6WzFilt = VeSNSR_w_IMU6WzFilt.getValue();
+  loggingMessage.LeSDLR_e_BatterySelectionTarget = VeCHEN_e_BatterySelectionTarget.getValue();
   loggingMessage.LeSDLR_t_endTime = (double)esp_timer_get_time() / 1000000.0;
 
   return (xQueueSend( loggingQueue, ( void * ) &loggingMessage, portMAX_DELAY ) == pdTRUE);
@@ -139,6 +269,10 @@ inline void logging_write_header(File logfile){
   WRAP_SPI_MUTEX(logfile.print(", VeCRLR_b_ControlReadyFlag");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_CANx_OpModeRequest");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_HVTargetState");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_Pre1RelayState");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_Rel1RelayState");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_Pre2RelayState");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeHVPR_e_Rel2RelayState");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeBMSR_v_CAN0_BatteryMINCell");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeBMSR_v_CAN0_BatteryMAXCell");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeBMSR_V_CAN0_BatteryVoltage");, portMAX_DELAY)
@@ -180,13 +314,74 @@ inline void logging_write_header(File logfile){
   WRAP_SPI_MUTEX(logfile.print(", VeCANR_tq_CAN1_iBSGInstMinTrqLim");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeCANR_tq_CAN1_iBSGInstMaxTrqLim");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeCANR_I_CAN0_BatteryCurrentRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell1");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell2");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell3");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell4");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell5");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell6");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell7");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell8");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell9");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell10");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell11");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell12");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell13");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell14");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell15");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN0_BatteryVoltageCell16");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp1");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp2");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp3");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp4");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp5");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp6");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp7");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp8");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp9");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp10");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN0_BatteryTemp11");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeCANR_I_CAN1_BatteryCurrentRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell1");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell2");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell3");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell4");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell5");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell6");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell7");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell8");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell9");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell10");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell11");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell12");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell13");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell14");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell15");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_v_CAN1_BatteryVoltageCell16");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp1");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp2");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp3");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp4");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp5");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp6");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp7");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp8");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp9");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp10");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCANR_T_CAN1_BatteryTemp11");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AxRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AyRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AzRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_w_IMU6WxRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_w_IMU6WyRaw");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeSNSR_w_IMU6WzRaw");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AxFilt");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AyFilt");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeSNSR_a_IMU6AzFilt");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeSNSR_w_IMU6WxFilt");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeSNSR_w_IMU6WyFilt");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", VeSNSR_w_IMU6WzFilt");, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", VeCHEN_e_BatterySelectionTarget");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", LeSDLR_t_endTime");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print("\n");, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)
@@ -197,6 +392,10 @@ inline void logging_write_line(File logfile, struct loggingData *pdataToLog){
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_b_ControlReadyFlag, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_CANx_OpModeRequest, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_HVTargetState, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_Pre1RelayState, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_Rel1RelayState, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_Pre2RelayState, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_Rel2RelayState, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryMINCell, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryMAXCell, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_V_CAN0_BatteryVoltage, 4);, portMAX_DELAY)
@@ -238,13 +437,74 @@ inline void logging_write_line(File logfile, struct loggingData *pdataToLog){
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_tq_CAN1_iBSGInstMinTrqLim, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_tq_CAN1_iBSGInstMaxTrqLim, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_I_CAN0_BatteryCurrentRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell1, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell2, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell3, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell4, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell5, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell6, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell7, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell8, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell9, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell10, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell11, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell12, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell13, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell14, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell15, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN0_BatteryVoltageCell16, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp1, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp2, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp3, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp4, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp5, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp6, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp7, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp8, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp9, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp10, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN0_BatteryTemp11, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_I_CAN1_BatteryCurrentRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell1, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell2, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell3, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell4, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell5, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell6, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell7, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell8, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell9, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell10, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell11, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell12, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell13, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell14, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell15, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_v_CAN1_BatteryVoltageCell16, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp1, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp2, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp3, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp4, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp5, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp6, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp7, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp8, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp9, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp10, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_T_CAN1_BatteryTemp11, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AxRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AyRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AzRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WxRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WyRaw, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WzRaw, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AxFilt, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AyFilt, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AzFilt, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WxFilt, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WyFilt, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WzFilt, 4);, portMAX_DELAY)
+  WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_e_BatterySelectionTarget, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print(", "); logfile.print(pdataToLog->LeSDLR_t_endTime, 4);, portMAX_DELAY)
   WRAP_SPI_MUTEX(logfile.print("\n");,portMAX_DELAY)
 }

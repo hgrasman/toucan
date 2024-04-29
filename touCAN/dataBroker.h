@@ -44,6 +44,10 @@ extern BrokerData VeCRLR_b_ControlReadyFlag;
 //HVPR high voltage propulsion
 extern BrokerData VeHVPR_e_CANx_OpModeRequest;
 extern BrokerData VeHVPR_e_HVTargetState;
+extern BrokerData VeHVPR_e_Pre1RelayState;
+extern BrokerData VeHVPR_e_Rel1RelayState;
+extern BrokerData VeHVPR_e_Pre2RelayState;
+extern BrokerData VeHVPR_e_Rel2RelayState;
 
 //BMSR battery management observer
 extern BrokerData VeBMSR_v_CAN0_BatteryMINCell;
@@ -71,6 +75,7 @@ extern BrokerData VeBPER_R_CAN1_ESRObserved;
 //VDKR VDKart Ring
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest;
 extern BrokerData VeVDKR_tq_CAN1_TorqueRequest;
+extern BrokerData VeVDKR_e_MotorStateRequest;
 
 //CANR CAN driver Ring
 extern BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed;

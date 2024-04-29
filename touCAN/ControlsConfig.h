@@ -50,7 +50,7 @@ inline double REGEN_TAPER_FUNC(double rpm){
 #define VECTOR_CENTER_SPLIT .5
 
 //state machine standby time
-#define OFF_STATE_TIMEOUT 50
+#define OFF_STATE_TIMEOUT 20
 
 //State machine comparisons
 #define STALE_DATA_THRESHOLD 50000
