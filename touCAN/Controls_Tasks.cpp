@@ -65,7 +65,6 @@ void VDKartTask(void *pvParameters){
     //stop the thing from spinning backward
     double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); 
     if (LeVDKR_tq_CAN0_MinTrqLim < LeVDKR_tq_MinTrqTaperL){LeVDKR_tq_CAN0_MinTrqLim = LeVDKR_tq_MinTrqTaperL;}
-    
 
     //Calculate max power and limit -> recalculate max torque. At very low rpm, use constant min rpm for this calculation
     double LeVDKR_rpm_MaxPowerClampedSpeedL = LeVDKR_rpm_CAN0_iBSGRotorSpeed;
@@ -75,7 +74,8 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL) / NM_RPM_TO_W; //quite possibly 28kW
 
     //limit mechanical power according to competition rules/safety margin
-    double LeVDKR_tq_CombinedMaxTrq, LeVDKR_tq_CombinedMinTrq;
+    double LeVDKR_tq_CombinedMaxTrq = LeVDKR_tq_CAN0_MaxTrqLim;
+    double LeVDKR_tq_CombinedMinTrq = LeVDKR_tq_CAN0_MinTrqLim;
     if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
       LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
       LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / (LeVDKR_rpm_MaxPowerClampedSpeedL);
