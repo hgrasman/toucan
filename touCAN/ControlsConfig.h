@@ -8,16 +8,16 @@
 #define ENABLE_LOGGING
 
 #define PDGP_POWER_LIMIT 14000
-#define POWER_LIMIT_MARGIN 13000
+#define POWER_LIMIT_MARGIN 13900
 #define POWER_LIMIT_MINRPM 250
-#define REGEN_POWER_LIMIT -1000 //-5000
+#define REGEN_POWER_LIMIT -100 //-5000
 #define REGEN_IDLE_FORWARD_TQ 0
-#define REGEN_LIMIT_MAX_REV_DAMPING 1
+#define REGEN_LIMIT_MAX_REV_DAMPING 0
 inline double REGEN_TAPER_FUNC(double rpm){
   if (rpm>0){
     return (-(log(abs(rpm)/1000+1)*50.0) + REGEN_IDLE_FORWARD_TQ);
   }else{
-    return ( (log(abs(rpm)/1000+1)*10.0) + REGEN_IDLE_FORWARD_TQ);
+    return (0);
   }
 } 
 

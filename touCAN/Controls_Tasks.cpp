@@ -63,7 +63,7 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_tq_CAN0_MaxTrqLim = VeCANR_tq_CAN0_iBSGInstMaxTrqLim.getValue();
 
     //stop the thing from spinning backward
-    double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); if (LeVDKR_tq_MinTrqTaperL>REGEN_LIMIT_MAX_REV_DAMPING){LeVDKR_tq_MinTrqTaperL = REGEN_LIMIT_MAX_REV_DAMPING;}
+    double LeVDKR_tq_MinTrqTaperL = REGEN_TAPER_FUNC(LeVDKR_rpm_CAN0_iBSGRotorSpeed); 
     if (LeVDKR_tq_CAN0_MinTrqLim < LeVDKR_tq_MinTrqTaperL){LeVDKR_tq_CAN0_MinTrqLim = LeVDKR_tq_MinTrqTaperL;}
     
 
@@ -91,7 +91,7 @@ void VDKartTask(void *pvParameters){
       LeVDKR_tq_TorqueL = (1-(LeVDKR_p_PedalPosition*4))*LeVDKR_tq_CombinedMinTrq;
     }
     if (LeVDKR_p_PedalPosition > .75){
-      LeVDKR_tq_TorqueL = (1-((LeVDKR_p_PedalPosition-.75)*4))*LeVDKR_tq_CombinedMaxTrq;
+      LeVDKR_tq_TorqueL = (((LeVDKR_p_PedalPosition-.75)*4))*LeVDKR_tq_CombinedMaxTrq;
     }
 
     //trigger battery switch
