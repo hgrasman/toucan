@@ -20,6 +20,8 @@
   This task synthesizes information into state modes and torque requests, namely pedal position -> VDKArt -> torques
   VDKR
 */
+#define CeCHEN_e_HVSelectHighBattery 0
+#define CeCHEN_e_HVSelectLowBattery 1
 TaskHandle_t xTaskVDKartHandle;
 void VDKartTask(void *pvParameters){
   TickType_t xLastWakeTime;
@@ -73,6 +75,7 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_P_CombinedMinPower = (LeVDKR_tq_CAN0_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedL) / NM_RPM_TO_W; //quite possibly 28kW
 
     //limit mechanical power according to competition rules/safety margin
+    double LeVDKR_tq_CombinedMaxTrq, LeVDKR_tq_CombinedMinTrq;
     if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
       LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
       LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / (LeVDKR_rpm_MaxPowerClampedSpeedL);
@@ -91,6 +94,14 @@ void VDKartTask(void *pvParameters){
       LeVDKR_tq_TorqueL = (1-((LeVDKR_p_PedalPosition-.75)*4))*LeVDKR_tq_CombinedMaxTrq;
     }
 
+    //trigger battery switch
+    if (LeVDKR_p_PedalPosition > .625){
+      VeCHEN_e_BatterySelectionTarget.setValue(CeCHEN_e_HVSelectHighBattery);
+    }
+    if (LeVDKR_p_PedalPosition < .375){
+      VeCHEN_e_BatterySelectionTarget.setValue(CeCHEN_e_HVSelectLowBattery);
+    }
+    
     //send torque request if prop system is active, otherwise zero
     if (VeHVPR_e_CANx_OpModeRequest.getValue() == X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE){
       VeVDKR_tq_CAN0_TorqueRequest.setValue(LeVDKR_tq_TorqueL);
@@ -105,8 +116,11 @@ void VDKartTask(void *pvParameters){
 //This task controls the relays and propulsion mode, and observes states
 //HVPR
 #define CeHVPR_e_HVTargetState_OFF 0
-#define CeHVPR_e_HVTargetState_PRECHARGE 1
+#define CeHVPR_e_HVTargetState_TRANSITION 1
 #define CeHVPR_e_HVTargetState_PROPACTIVE 2
+#define CeHVPR_e_Battery0Selected 0
+#define CeHVPR_e_Battery1Selected 1
+#define CeHVPR_e_BatteryNoneSelected 2
 void HVPropTask(void *pvParameters){
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
@@ -118,21 +132,27 @@ void HVPropTask(void *pvParameters){
   WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
 
   uint8_t LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
+  uint8_t LeHVPR_e_HVBatterySelected = CeHVPR_e_BatteryNoneSelected;
+  double LeHVPR_e_HighBattery, LeHVPR_e_LowBattery;
   TickType_t offStateTimer = xTaskGetTickCount();
-  TickType_t preStateTimer;
 
   xLastWakeTime = xTaskGetTickCount(); // Initialize
   for(;;){
 
-    bool Motor0PreCharged;
-    bool Motor1PreCharged;
-    bool TimoutReached;
-    bool BatteriesBalanced;
-    bool bmsCheck;
-    bool MotorCheck;
-    bool Motor0Powered;
-    bool Motor1Powered;
-    bool MotorPowerCondition;
+    //calculate the low battery
+    double LeHVPR_V_CAN0_BatteryVoltage = VeBMSR_V_CAN0_BatteryVoltage.getValue();
+    double LeHVPR_V_CAN1_BatteryVoltage = VeBMSR_V_CAN1_BatteryVoltage.getValue();
+
+    double LeHVPR_e_BatterySelectionTarget = VeCHEN_e_BatterySelectionTarget.getValue();
+
+    //store high vs low batteries
+    if (LeHVPR_V_CAN0_BatteryVoltage>LeHVPR_V_CAN1_BatteryVoltage){
+      LeHVPR_e_HighBattery = CeHVPR_e_Battery0Selected;
+      LeHVPR_e_LowBattery = CeHVPR_e_Battery1Selected;
+    }else{
+      LeHVPR_e_HighBattery = CeHVPR_e_Battery1Selected;
+      LeHVPR_e_LowBattery = CeHVPR_e_Battery0Selected;
+    }
 
     //act on states
     switch (LeHVPR_e_HVTargetState){
@@ -140,116 +160,65 @@ void HVPropTask(void *pvParameters){
         
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
 
-        //disable the HV system
+        //turn everything off
         digitalWrite(GATEKEEPER_1_REL_PIN, LOW);
         digitalWrite(GATEKEEPER_1_PRE_PIN, LOW);
         digitalWrite(GATEKEEPER_2_REL_PIN, LOW);
         digitalWrite(GATEKEEPER_2_PRE_PIN, LOW);
+        LeHVPR_e_HVBatterySelected = CeHVPR_e_BatteryNoneSelected;
 
         //try to transition to precharge. will be stopped by safety limits
         if ((xTaskGetTickCount() - offStateTimer) > pdMS_TO_TICKS(OFF_STATE_TIMEOUT)){
 
-          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
-          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Precharge");, pdMS_TO_TICKS(8))
-          preStateTimer = xTaskGetTickCount(); //start timer
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_TRANSITION;
 
         }
 
         break;
-      case CeHVPR_e_HVTargetState_PRECHARGE:
+      case CeHVPR_e_HVTargetState_TRANSITION:
 
-        //force into off state if safety conditions are not met
-        if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-            VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-            VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-            VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-            VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-            VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-            VeBMSR_V_CAN0_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
-            VeBMSR_V_CAN1_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
-            VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
-            VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
-        ){
-          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Precharge Not Ready");, pdMS_TO_TICKS(5))
-          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
-          offStateTimer = xTaskGetTickCount(); //start chill out timer
+        VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the mot
+
+        if (LeHVPR_e_HVBatterySelected != CeHVPR_e_BatteryNoneSelected){
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
           break;
         }
 
-        VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
-
-        //Start the precharge relays
-        digitalWrite(GATEKEEPER_1_REL_PIN, LOW);
-        digitalWrite(GATEKEEPER_1_PRE_PIN, HIGH);
-        digitalWrite(GATEKEEPER_2_REL_PIN, LOW);
-        digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
-
-        //transition to prop active once motors are up to voltage
-        Motor0PreCharged   = abs(VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN0_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT;
-        Motor1PreCharged   = abs(VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < PRECHARGE_END_AGREEMENT;
-        TimoutReached      = (xTaskGetTickCount() - preStateTimer) > pdMS_TO_TICKS(PRE_STATE_TIMEOUT);
-        BatteriesBalanced  = abs(VeBMSR_V_CAN0_BatteryVoltage.getValue() - VeBMSR_V_CAN1_BatteryVoltage.getValue()) < BATTERY_AGREEMENT_THRESHOLD;
-#ifdef ENABLE_REDUNDANT_BMS
-        if (VeBMSR_b_CAN0_BMSReporting.getValue() && VeBMSR_b_CAN1_BMSReporting.getValue()){
-          bmsCheck = BatteriesBalanced;
-        }else{
-          bmsCheck = TimoutReached;
-        }     
-#else
-        bmsCheck = BatteriesBalanced;
-#endif
-#ifdef DUAL_MOTOR_CART
-        MotorCheck = Motor0PreCharged && Motor1PreCharged;      
-#else
-        MotorCheck = Motor0PreCharged;
-#endif
-        if (bmsCheck && MotorCheck){
-          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
-          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(8))
-          break;
+        if (LeHVPR_e_BatterySelectionTarget == CeCHEN_e_HVSelectHighBattery){
+          LeHVPR_e_BatterySelectionTarget = LeHVPR_e_HighBattery;
         }
+        if (LeHVPR_e_BatterySelectionTarget == CeCHEN_e_HVSelectLowBattery){
+          LeHVPR_e_BatterySelectionTarget = LeHVPR_e_LowBattery;
+        }
+
+        switch ((uint8_t)LeHVPR_e_BatterySelectionTarget){
+          case CeHVPR_e_Battery0Selected:
+            digitalWrite(GATEKEEPER_1_REL_PIN, HIGH);
+            digitalWrite(GATEKEEPER_1_PRE_PIN, HIGH);
+            digitalWrite(GATEKEEPER_2_REL_PIN, LOW);
+            digitalWrite(GATEKEEPER_2_PRE_PIN, LOW);
+            LeHVPR_e_HVBatterySelected = CeHVPR_e_Battery0Selected;
+            break;
+          case CeHVPR_e_Battery1Selected:
+            digitalWrite(GATEKEEPER_1_REL_PIN, LOW);
+            digitalWrite(GATEKEEPER_1_PRE_PIN, LOW);
+            digitalWrite(GATEKEEPER_2_REL_PIN, HIGH);
+            digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
+            LeHVPR_e_HVBatterySelected = CeHVPR_e_Battery1Selected;
+            break;
+          case CeHVPR_e_BatteryNoneSelected:
+            break;
+        }
+
+        LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE;
 
         break;
       case CeHVPR_e_HVTargetState_PROPACTIVE:
 
-        //force into off state if safety conditions are not met
-        if (VeBMSR_v_CAN0_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-            VeBMSR_v_CAN1_BatteryMAXCell.getValue() > CELL_MAXIMUM_VOLTAGE || \
-            VeBMSR_v_CAN0_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-            VeBMSR_v_CAN1_BatteryMINCell.getValue() < CELL_MINIMUM_VOLTAGE || \
-            VeBMSR_T_CAN0_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-            VeBMSR_T_CAN1_BatteryMAXTemp.getValue() > PACK_MAXIMUM_TEMP    || \
-            VeBMSR_V_CAN0_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
-            VeBMSR_V_CAN1_BatteryVoltage.getValue() < PACK_VOLTAGE_MIN     || \
-            VeBMSR_I_CAN0_BatteryCurrent.getValue() > PACK_CURRENT_MAX     || \
-            VeBMSR_I_CAN1_BatteryCurrent.getValue() > PACK_CURRENT_MAX        \
-        ){
-          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
-          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
-          offStateTimer = xTaskGetTickCount(); //start chill out timer
+        if (LeHVPR_e_BatterySelectionTarget != LeHVPR_e_HVBatterySelected){
+          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
           break;
         }
-
-        //if manual switch cuts relays, put it back in precharge
-        Motor0Powered = VeCANR_V_CAN0_iBSGVoltageDCLink.getValue() < PACK_VOLTAGE_MIN;
-        Motor1Powered = VeCANR_V_CAN1_iBSGVoltageDCLink.getValue() < PACK_VOLTAGE_MIN;
-#ifdef DUAL_MOTOR_CART
-        MotorPowerCondition = Motor0Powered && Motor1Powered;
-#else
-        MotorPowerCondition = Motor0Powered;
-#endif
-        if (MotorPowerCondition){
-          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
-          //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Contactors Open, Pre Charge");, pdMS_TO_TICKS(8))
-          preStateTimer = xTaskGetTickCount();
-          break;
-        }
-
-        //Engage the contactors
-        digitalWrite(GATEKEEPER_1_REL_PIN, HIGH);
-        digitalWrite(GATEKEEPER_1_PRE_PIN, HIGH);
-        digitalWrite(GATEKEEPER_2_REL_PIN, HIGH);
-        digitalWrite(GATEKEEPER_2_PRE_PIN, HIGH);
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE); //ENABLE the motor
 

@@ -203,6 +203,10 @@ BrokerData VeSNSR_w_IMU6WyFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WzFilt = BrokerData();
 
 
+//CHEN RING
+BrokerData VeCHEN_e_BatterySelectionTarget = BrokerData();
+
+
 
 
 

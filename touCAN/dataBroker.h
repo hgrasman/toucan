@@ -168,4 +168,8 @@ extern BrokerData VeSNSR_w_IMU6WxFilt;
 extern BrokerData VeSNSR_w_IMU6WyFilt;
 extern BrokerData VeSNSR_w_IMU6WzFilt;
 
+
+//CHEN RING
+extern BrokerData VeCHEN_e_BatterySelectionTarget;
+
 #endif
