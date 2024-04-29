@@ -139,112 +139,108 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
-    while(digitalRead(params->can_rx_pin)){
+    //see if there actually is data
+    bool msgAvailable;
+    WRAP_SPI_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
+    if (!msgAvailable){continue;}
 
-      //see if there actually is data
-      bool msgAvailable;
-      WRAP_SPI_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
-      if (!msgAvailable){continue;}
+    //do something with the data
+    switch(incomingData.arb_id){
+      case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
+        x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
+        params->VeCANR_pct_CANx_iBSGInverterTempRate->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
+        break;
 
-      //do something with the data
-      switch(incomingData.arb_id){
-        case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
-          x8578_can_db_client_epic_pmz_a_unpack(&params->EncodingData.pmz_a_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_pct_CANx_iBSGInverterTempRate->setValue(x8578_can_db_client_epic_pmz_a_inverter_temperature_decode(params->EncodingData.pmz_a_msg.inverter_temperature));
-          break;
+      case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
+        x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
+        params->VeCANR_tq_CANx_iBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
+        break;
 
-        case X8578_CAN_DB_CLIENT_EPIC_PMZ_C_FRAME_ID:
-          x8578_can_db_client_epic_pmz_c_unpack(&params->EncodingData.pmz_c_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_tq_CANx_iBSGTorqueDelivered->setValue(x8578_can_db_client_epic_pmz_c_em_torque_ext_decode(params->EncodingData.pmz_c_msg.em_torque_ext));
-          break;
- 
-        case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
-          x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_I_CANx_iBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
-          params->VeCANR_T_CANx_iBSGStatorTemp->setValue(x8578_can_db_client_epic_pmz_e_em_temperature_decode(params->EncodingData.pmz_e_msg.em_temperature));
-          params->VeCANR_pct_CANx_iBSGMotorTempRate->setValue(x8578_can_db_client_epic_pmz_e_temperature_rate_decode(params->EncodingData.pmz_e_msg.temperature_rate));
-          break;
+      case X8578_CAN_DB_CLIENT_EPIC_PMZ_E_FRAME_ID:
+        x8578_can_db_client_epic_pmz_e_unpack(&params->EncodingData.pmz_e_msg, incomingData.data, incomingData.data_len);
+        params->VeCANR_I_CANx_iBSGDCCurrent->setValue(x8578_can_db_client_epic_pmz_e_em_current_dc_link_decode(params->EncodingData.pmz_e_msg.em_current_dc_link));
+        params->VeCANR_T_CANx_iBSGStatorTemp->setValue(x8578_can_db_client_epic_pmz_e_em_temperature_decode(params->EncodingData.pmz_e_msg.em_temperature));
+        params->VeCANR_pct_CANx_iBSGMotorTempRate->setValue(x8578_can_db_client_epic_pmz_e_temperature_rate_decode(params->EncodingData.pmz_e_msg.temperature_rate));
+        break;
 
-        case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
-          x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_tq_CANx_iBSGInstMinTrqLim->setValue(x8578_can_db_client_epic_pmz_g_em_min_torque_limit_decode(params->EncodingData.pmz_g_msg.em_min_torque_limit));
-          params->VeCANR_tq_CANx_iBSGInstMaxTrqLim->setValue(x8578_can_db_client_epic_pmz_g_em_max_torque_limit_decode(params->EncodingData.pmz_g_msg.em_max_torque_limit));
-          break;
+      case X8578_CAN_DB_CLIENT_EPIC_PMZ_G_FRAME_ID:
+        x8578_can_db_client_epic_pmz_g_unpack(&params->EncodingData.pmz_g_msg, incomingData.data, incomingData.data_len);
+        params->VeCANR_tq_CANx_iBSGInstMinTrqLim->setValue(x8578_can_db_client_epic_pmz_g_em_min_torque_limit_decode(params->EncodingData.pmz_g_msg.em_min_torque_limit));
+        params->VeCANR_tq_CANx_iBSGInstMaxTrqLim->setValue(x8578_can_db_client_epic_pmz_g_em_max_torque_limit_decode(params->EncodingData.pmz_g_msg.em_max_torque_limit));
+        break;
 
-        case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
-          x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
-          params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
-          params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
-          params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_h_em_voltage_dc_link_mv_decode(params->EncodingData.pmz_h_msg.em_voltage_dc_link_mv));
-          break;
+      case X8578_CAN_DB_CLIENT_EPIC_PMZ_H_FRAME_ID:
+        x8578_can_db_client_epic_pmz_h_unpack(&params->EncodingData.pmz_h_msg, incomingData.data, incomingData.data_len);
+        params->VeCANR_rpm_CANx_iBSGRotorSpeed->setValue(x8578_can_db_client_epic_pmz_h_bisg_speed_decode(params->EncodingData.pmz_h_msg.bisg_speed));
+        params->VeCANR_e_CANx_iBSGOpMode->setValue(x8578_can_db_client_epic_pmz_h_em_operating_mode_ext2_decode(params->EncodingData.pmz_h_msg.em_operating_mode_ext2));
+        params->VeCANR_V_CANx_iBSGVoltageDCLink->setValue(x8578_can_db_client_epic_pmz_h_em_voltage_dc_link_mv_decode(params->EncodingData.pmz_h_msg.em_voltage_dc_link_mv));
+        break;
 
-        case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
-          x8578_can_db_client_epic_pmz_i_unpack(&params->EncodingData.pmz_i_msg, incomingData.data, incomingData.data_len);
-          if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {Serial.print("Diagnostic: ");Serial.println(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
-          break;
+      case X8578_CAN_DB_CLIENT_EPIC_PMZ_I_FRAME_ID:
+        x8578_can_db_client_epic_pmz_i_unpack(&params->EncodingData.pmz_i_msg, incomingData.data, incomingData.data_len);
+        if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {Serial.print("Diagnostic: ");Serial.println(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
+        break;
 
-        case BMS_MC2_BMS_DATA_A_FRAME_ID:
-          bms_mc2_bms_data_a_unpack(&params->EncodingData.bms_a_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->setValue(bms_mc2_bms_data_a_cell_1_voltage_decode(params->EncodingData.bms_a_msg.cell_1_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->setValue(bms_mc2_bms_data_a_cell_2_voltage_decode(params->EncodingData.bms_a_msg.cell_2_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->setValue(bms_mc2_bms_data_a_cell_3_voltage_decode(params->EncodingData.bms_a_msg.cell_3_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->setValue(bms_mc2_bms_data_a_cell_4_voltage_decode(params->EncodingData.bms_a_msg.cell_4_voltage));
-          break;
+      case BMS_MC2_BMS_DATA_A_FRAME_ID:
+        bms_mc2_bms_data_a_unpack(&params->EncodingData.bms_a_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->setValue(bms_mc2_bms_data_a_cell_1_voltage_decode(params->EncodingData.bms_a_msg.cell_1_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->setValue(bms_mc2_bms_data_a_cell_2_voltage_decode(params->EncodingData.bms_a_msg.cell_2_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->setValue(bms_mc2_bms_data_a_cell_3_voltage_decode(params->EncodingData.bms_a_msg.cell_3_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->setValue(bms_mc2_bms_data_a_cell_4_voltage_decode(params->EncodingData.bms_a_msg.cell_4_voltage));
+        break;
 
-        case BMS_MC2_BMS_DATA_B_FRAME_ID:
-          bms_mc2_bms_data_b_unpack(&params->EncodingData.bms_b_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->setValue(bms_mc2_bms_data_b_cell_5_voltage_decode(params->EncodingData.bms_b_msg.cell_5_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->setValue(bms_mc2_bms_data_b_cell_6_voltage_decode(params->EncodingData.bms_b_msg.cell_6_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->setValue(bms_mc2_bms_data_b_cell_7_voltage_decode(params->EncodingData.bms_b_msg.cell_7_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->setValue(bms_mc2_bms_data_b_cell_8_voltage_decode(params->EncodingData.bms_b_msg.cell_8_voltage));
-          break;
+      case BMS_MC2_BMS_DATA_B_FRAME_ID:
+        bms_mc2_bms_data_b_unpack(&params->EncodingData.bms_b_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->setValue(bms_mc2_bms_data_b_cell_5_voltage_decode(params->EncodingData.bms_b_msg.cell_5_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->setValue(bms_mc2_bms_data_b_cell_6_voltage_decode(params->EncodingData.bms_b_msg.cell_6_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->setValue(bms_mc2_bms_data_b_cell_7_voltage_decode(params->EncodingData.bms_b_msg.cell_7_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->setValue(bms_mc2_bms_data_b_cell_8_voltage_decode(params->EncodingData.bms_b_msg.cell_8_voltage));
+        break;
 
-        case BMS_MC2_BMS_DATA_C_FRAME_ID:
-          bms_mc2_bms_data_c_unpack(&params->EncodingData.bms_c_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->setValue(bms_mc2_bms_data_c_cell_9_voltage_decode(params->EncodingData.bms_c_msg.cell_9_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->setValue(bms_mc2_bms_data_c_cell_10_voltage_decode(params->EncodingData.bms_c_msg.cell_10_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->setValue(bms_mc2_bms_data_c_cell_11_voltage_decode(params->EncodingData.bms_c_msg.cell_11_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->setValue(bms_mc2_bms_data_c_cell_12_voltage_decode(params->EncodingData.bms_c_msg.cell_12_voltage));
-          break;
+      case BMS_MC2_BMS_DATA_C_FRAME_ID:
+        bms_mc2_bms_data_c_unpack(&params->EncodingData.bms_c_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->setValue(bms_mc2_bms_data_c_cell_9_voltage_decode(params->EncodingData.bms_c_msg.cell_9_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->setValue(bms_mc2_bms_data_c_cell_10_voltage_decode(params->EncodingData.bms_c_msg.cell_10_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->setValue(bms_mc2_bms_data_c_cell_11_voltage_decode(params->EncodingData.bms_c_msg.cell_11_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->setValue(bms_mc2_bms_data_c_cell_12_voltage_decode(params->EncodingData.bms_c_msg.cell_12_voltage));
+        break;
 
-        case BMS_MC2_BMS_DATA_D_FRAME_ID:
-          bms_mc2_bms_data_d_unpack(&params->EncodingData.bms_d_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->setValue(bms_mc2_bms_data_d_cell_13_voltage_decode(params->EncodingData.bms_d_msg.cell_13_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->setValue(bms_mc2_bms_data_d_cell_14_voltage_decode(params->EncodingData.bms_d_msg.cell_14_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->setValue(bms_mc2_bms_data_d_cell_15_voltage_decode(params->EncodingData.bms_d_msg.cell_15_voltage));
-          params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->setValue(bms_mc2_bms_data_d_cell_16_voltage_decode(params->EncodingData.bms_d_msg.cell_16_voltage));
-          break;
+      case BMS_MC2_BMS_DATA_D_FRAME_ID:
+        bms_mc2_bms_data_d_unpack(&params->EncodingData.bms_d_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->setValue(bms_mc2_bms_data_d_cell_13_voltage_decode(params->EncodingData.bms_d_msg.cell_13_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->setValue(bms_mc2_bms_data_d_cell_14_voltage_decode(params->EncodingData.bms_d_msg.cell_14_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->setValue(bms_mc2_bms_data_d_cell_15_voltage_decode(params->EncodingData.bms_d_msg.cell_15_voltage));
+        params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->setValue(bms_mc2_bms_data_d_cell_16_voltage_decode(params->EncodingData.bms_d_msg.cell_16_voltage));
+        break;
 
-        case BMS_MC2_BMS_DATA_E_FRAME_ID:
-          bms_mc2_bms_data_e_unpack(&params->EncodingData.bms_e_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp1->setValue(bms_mc2_bms_data_e_temp1_decode(params->EncodingData.bms_e_msg.temp1));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp2->setValue(bms_mc2_bms_data_e_temp2_decode(params->EncodingData.bms_e_msg.temp2));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp3->setValue(bms_mc2_bms_data_e_temp3_decode(params->EncodingData.bms_e_msg.temp3));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp4->setValue(bms_mc2_bms_data_e_temp4_decode(params->EncodingData.bms_e_msg.temp4));
-          break;
+      case BMS_MC2_BMS_DATA_E_FRAME_ID:
+        bms_mc2_bms_data_e_unpack(&params->EncodingData.bms_e_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp1->setValue(bms_mc2_bms_data_e_temp1_decode(params->EncodingData.bms_e_msg.temp1));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp2->setValue(bms_mc2_bms_data_e_temp2_decode(params->EncodingData.bms_e_msg.temp2));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp3->setValue(bms_mc2_bms_data_e_temp3_decode(params->EncodingData.bms_e_msg.temp3));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp4->setValue(bms_mc2_bms_data_e_temp4_decode(params->EncodingData.bms_e_msg.temp4));
+        break;
 
-        case BMS_MC2_BMS_DATA_F_FRAME_ID:
-          bms_mc2_bms_data_f_unpack(&params->EncodingData.bms_f_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp5->setValue(bms_mc2_bms_data_f_temp5_decode(params->EncodingData.bms_f_msg.temp5));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp6->setValue(bms_mc2_bms_data_f_temp6_decode(params->EncodingData.bms_f_msg.temp6));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp7->setValue(bms_mc2_bms_data_f_temp7_decode(params->EncodingData.bms_f_msg.temp7));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp8->setValue(bms_mc2_bms_data_f_temp8_decode(params->EncodingData.bms_f_msg.temp8));
-          break;
+      case BMS_MC2_BMS_DATA_F_FRAME_ID:
+        bms_mc2_bms_data_f_unpack(&params->EncodingData.bms_f_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp5->setValue(bms_mc2_bms_data_f_temp5_decode(params->EncodingData.bms_f_msg.temp5));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp6->setValue(bms_mc2_bms_data_f_temp6_decode(params->EncodingData.bms_f_msg.temp6));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp7->setValue(bms_mc2_bms_data_f_temp7_decode(params->EncodingData.bms_f_msg.temp7));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp8->setValue(bms_mc2_bms_data_f_temp8_decode(params->EncodingData.bms_f_msg.temp8));
+        break;
 
-        case BMS_MC2_BMS_DATA_G_FRAME_ID:
-          bms_mc2_bms_data_g_unpack(&params->EncodingData.bms_g_msg, incomingData.data, incomingData.data_len);
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp9->setValue(bms_mc2_bms_data_g_temp9_decode(params->EncodingData.bms_g_msg.temp9));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp10->setValue(bms_mc2_bms_data_g_temp10_decode(params->EncodingData.bms_g_msg.temp10));
-          params->BatteryData.VeCANR_T_CANx_BatteryTemp11->setValue(bms_mc2_bms_data_g_temp11_decode(params->EncodingData.bms_g_msg.temp11));
-          params->BatteryData.VeCANR_I_CANx_BatteryCurrent->setValue(bms_mc2_bms_data_g_current_decode(params->EncodingData.bms_g_msg.current));
-          break;
+      case BMS_MC2_BMS_DATA_G_FRAME_ID:
+        bms_mc2_bms_data_g_unpack(&params->EncodingData.bms_g_msg, incomingData.data, incomingData.data_len);
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp9->setValue(bms_mc2_bms_data_g_temp9_decode(params->EncodingData.bms_g_msg.temp9));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp10->setValue(bms_mc2_bms_data_g_temp10_decode(params->EncodingData.bms_g_msg.temp10));
+        params->BatteryData.VeCANR_T_CANx_BatteryTemp11->setValue(bms_mc2_bms_data_g_temp11_decode(params->EncodingData.bms_g_msg.temp11));
+        params->BatteryData.VeCANR_I_CANx_BatteryCurrent->setValue(bms_mc2_bms_data_g_current_decode(params->EncodingData.bms_g_msg.current));
+        break;
 
-        default:
-          //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
-          break;
-      }
+      default:
+        //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
+        break;
     }
-
   }
 }
 
