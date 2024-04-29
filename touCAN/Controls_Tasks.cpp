@@ -146,7 +146,7 @@ void HVPropTask(void *pvParameters){
     double LeHVPR_e_BatterySelectionTarget = VeCHEN_e_BatterySelectionTarget.getValue();
 
     //store high vs low batteries
-    if (LeHVPR_V_CAN0_BatteryVoltage>LeHVPR_V_CAN1_BatteryVoltage){
+    if (LeHVPR_V_CAN0_BatteryVoltage>(LeHVPR_V_CAN1_BatteryVoltage+ (((double) analogRead(STEER_IN_NML_PIN) / 4095.0)-.5))){
       LeHVPR_e_HighBattery = CeHVPR_e_Battery0Selected;
       LeHVPR_e_LowBattery = CeHVPR_e_Battery1Selected;
     }else{
