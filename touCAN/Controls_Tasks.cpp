@@ -151,7 +151,7 @@ void HVPropTask(void *pvParameters){
     double LeHVPR_e_BatterySelectionTargetPhysical;
 
     //store high vs low batteries
-    if (LeHVPR_V_CAN0_BatteryVoltage>(LeHVPR_V_CAN1_BatteryVoltage+1)){
+    if (LeHVPR_V_CAN0_BatteryVoltage>(LeHVPR_V_CAN1_BatteryVoltage)){
       LeHVPR_e_HighBattery = CeHVPR_e_Battery0Selected;
       LeHVPR_e_LowBattery = CeHVPR_e_Battery1Selected;
     }else{
@@ -187,11 +187,6 @@ void HVPropTask(void *pvParameters){
       case CeHVPR_e_HVTargetState_TRANSITION:
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the mot
-
-        if (LeHVPR_e_HVBatterySelected != CeHVPR_e_BatteryNoneSelected){
-          LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
-          break;
-        }
 
         if (LeHVPR_e_BatterySelectionTarget == CeCHEN_e_HVSelectHighBattery){
           LeHVPR_e_BatterySelectionTargetPhysical = LeHVPR_e_HighBattery;
