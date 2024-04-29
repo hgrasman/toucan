@@ -47,6 +47,7 @@ typedef struct CANEncodingData{
 
 //Struct for passing parameters to the CANTasks
 typedef struct CANTaskParams{
+  const uint8_t can_rx_pin;
   MCP_CAN CANx;
   CANEncodingData EncodingData;
   BatteryBroker BatteryData;
@@ -83,7 +84,7 @@ BatteryBroker BatteryDataCAN0 = { &VeCANR_v_CAN0_BatteryVoltageCell1, &VeCANR_v_
                                   &VeCANR_T_CAN0_BatteryTemp1, &VeCANR_T_CAN0_BatteryTemp2, &VeCANR_T_CAN0_BatteryTemp3, &VeCANR_T_CAN0_BatteryTemp4,
                                   &VeCANR_T_CAN0_BatteryTemp5, &VeCANR_T_CAN0_BatteryTemp6, &VeCANR_T_CAN0_BatteryTemp7, &VeCANR_T_CAN0_BatteryTemp8, 
                                   &VeCANR_T_CAN0_BatteryTemp9, &VeCANR_T_CAN0_BatteryTemp10, &VeCANR_T_CAN0_BatteryTemp11, &VeCANR_I_CAN0_BatteryCurrentRaw};
-CANTaskParams CAN0Params = {CAN0, EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
+CANTaskParams CAN0Params = {CAN0_INT_RX_PIN, CAN0, EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
                             &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                             &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
                             &VeCANR_pct_CAN0_iBSGInverterTempRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemp,
@@ -99,7 +100,7 @@ BatteryBroker BatteryDataCAN1 = { &VeCANR_v_CAN1_BatteryVoltageCell1, &VeCANR_v_
                                   &VeCANR_T_CAN1_BatteryTemp1, &VeCANR_T_CAN1_BatteryTemp2, &VeCANR_T_CAN1_BatteryTemp3, &VeCANR_T_CAN1_BatteryTemp4,
                                   &VeCANR_T_CAN1_BatteryTemp5, &VeCANR_T_CAN1_BatteryTemp6, &VeCANR_T_CAN1_BatteryTemp7, &VeCANR_T_CAN1_BatteryTemp8, 
                                   &VeCANR_T_CAN1_BatteryTemp9, &VeCANR_T_CAN1_BatteryTemp10, &VeCANR_T_CAN1_BatteryTemp11, &VeCANR_I_CAN1_BatteryCurrentRaw};
-CANTaskParams CAN1Params = {CAN1, EncodingCAN1, BatteryDataCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
+CANTaskParams CAN1Params = {CAN1_INT_RX_PIN, CAN1, EncodingCAN1, BatteryDataCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
                             &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                             &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
                             &VeCANR_pct_CAN1_iBSGInverterTempRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemp,
@@ -138,11 +139,13 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
-    bool canAvailable;
-    WRAP_SPI_MUTEX(canAvailable = params->CANx.checkReceive() == CAN_MSGAVAIL;, portMAX_DELAY)
+    while(digitalRead(params->can_rx_pin)){
 
-    while(canAvailable){
-      WRAP_SPI_MUTEX(params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data);, portMAX_DELAY) //get data
+      //see if there actually is data
+      bool msgAvailable;
+      WRAP_SPI_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
+      if (!msgAvailable){continue;}
+
       //do something with the data
       switch(incomingData.arb_id){
         case X8578_CAN_DB_CLIENT_EPIC_PMZ_A_FRAME_ID:
@@ -240,7 +243,6 @@ void CANRxTask(void *pvParameters){
           //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 
           break;
       }
-      WRAP_SPI_MUTEX(canAvailable = params->CANx.checkReceive() == CAN_MSGAVAIL;, portMAX_DELAY)
     }
 
   }
