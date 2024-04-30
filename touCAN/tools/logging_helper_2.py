@@ -27,17 +27,26 @@ listbx.pack(padx = 10, pady = 10,
 # Attach listbox to vertical scrollbar 
 yscrollbar.config(command = listbx.yview) 
 
-
+precisions = []
 def RefreshCallBack():
    listbx.delete(0,'end')
    with open("../dataBroker.h", 'r') as brokerfile:
-    for line in csv.reader(brokerfile, delimiter=';'):
+    for line in csv.reader(brokerfile):
         if len(line)<=0:
             continue
         index = line[0].find("extern BrokerData ")
-        if (not index < 0):
+        end_index = line[0].find(";")
+        if (index >= 0 and end_index >= 0):
             string = line[0]
-            listbx.insert(END, string[index+18:])
+            listbx.insert(END, string[index+18:end_index])
+            
+            index = line[0].find("LOGPRECISION")
+            end_index = line[0].find(".", end_index)
+            if (index >= 0 and end_index >= 0):
+                precisions.append(int(string[index+13:end_index]))
+            else:
+                precisions.append(0) #default
+
    
    
 B = Button(window, text ="Refresh", command = RefreshCallBack)
@@ -49,9 +58,11 @@ def GenerateCallBack():
    # Get the indices of all the selected items
    selectedIndices = listbx.curselection()
    selectedItems = []
+   indexes = []
    # Loop over the selected indices and get the values of the selected items
    for index in selectedIndices:
     selectedItems.append(listbx.get(index))
+    indexes.append(index)
    
    with open("LoggingConfig.h", 'w+') as config:
     config.write("\n//Generated {} with logging_helper_2.py for EV Kartz Kettering University\n//Henry Grasman\n\n".format(datetime.now()))
@@ -111,8 +122,8 @@ uint8_t flushCounter = 0;
     #populate logger write function
     config.write("inline void logging_write_line(File logfile, struct loggingData *pdataToLog){\n")
     config.write("  WRAP_SPI_MUTEX(logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);, portMAX_DELAY)\n")
-    for item in local:
-        config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->{}, 4);, portMAX_DELAY)\n".format(item))
+    for i, item in enumerate(local):
+        config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->{}, {});, portMAX_DELAY)\n".format(item, precisions[indexes[i]]))
     config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->LeSDLR_t_endTime, 4);, portMAX_DELAY)\n")
     config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
     
