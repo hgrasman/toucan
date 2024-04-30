@@ -19,10 +19,6 @@
 // The setup function runs once when you press reset or power on the board.
 void setup() {
 
-  //disable gps as LED indicator of setup time
-  digitalWrite(GPS_ENABLE_PIN, LOW);
-  pinMode(GPS_ENABLE_PIN, OUTPUT);
-
   // Initialize serial communication at 115200 bits per second:
   WRAP_SERIAL_MUTEX(\
     delay(500);\
@@ -65,7 +61,6 @@ void setup() {
   delay(5);
 
   WRAP_SERIAL_MUTEX(Serial.println("\nStarting Threads\n");, pdMS_TO_TICKS(5))
-  digitalWrite(GPS_ENABLE_PIN, HIGH); //Turn on GPS to show setup is complete
   VeCRLR_b_ControlReadyFlag.setValue(0); //tell the threads to figure themselves out
 
 

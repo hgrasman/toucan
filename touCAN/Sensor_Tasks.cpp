@@ -10,8 +10,11 @@
 */
 
 #include "Arduino.h" 
+#include "Adafruit_GPS.h"
 #include "Sensor_Tasks.h"
 #include "pins.h"
+
+Adafruit_GPS GPS(&Serial2); //on the gps pins
 
 MPU6050 accelgyro;
 int16_t ax, ay, az;
@@ -232,6 +235,24 @@ void BMSObserverTask(void *pvParameters){
 }
 
 
+//this task serves to monitor the gps and update the relevant values
+//GPSR
+void GPSTask(void *pvParameters){
+
+  for (;;){
+
+    if (GPS.newNMEAreceived()) {
+      
+      if (!GPS.parse(GPS.lastNMEA())){ continue; } //failed, try next time
+
+      
+
+    }
+
+  }
+}
+
+
 //Spawn threads
 uint8_t Sensing_SetupTasks(void){
 
@@ -271,6 +292,22 @@ uint8_t Sensing_SetupTasks(void){
       MCU6050Task
       ,  "IMU MCU6050" 
       ,  2048        
+      ,  NULL
+      ,  7  // Priority
+      ,  NULL // Task handle
+      ,  tskNO_AFFINITY // run on whatever core
+      );
+
+   //GPS
+  GPS.begin(9600);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //setup minimum data plus fix data
+  GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);   // calculate fix a 5hz
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 5 Hz update rate over uart
+
+  xTaskCreatePinnedToCore(
+      GPSTask
+      ,  "GPS Task" 
+      ,  1024      
       ,  NULL
       ,  7  // Priority
       ,  NULL // Task handle
