@@ -142,7 +142,7 @@ void CANRxTask(void *pvParameters){
     //see if there actually is data
     bool msgAvailable;
     WRAP_SPI_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
-    if (!msgAvailable){continue;}
+    if (!msgAvailable){vTaskDelay(1); continue;}
 
     //do something with the data
     switch(incomingData.arb_id){
@@ -360,7 +360,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN0 Rx Task" 
       ,  2048        
       ,  (void*) &CAN0Params 
-      ,  8  // Priority
+      ,  9  // Priority
       ,  &xTaskCAN0RxHandle // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -370,7 +370,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN0 Tx Task" 
       ,  2048        
       ,  (void*) &CAN0Params 
-      ,  8  // Priority
+      ,  9  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -390,7 +390,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN1 Rx Task" 
       ,  2048        
       ,  (void*) &CAN1Params 
-      ,  8  // Priority
+      ,  9  // Priority
       ,  &xTaskCAN1RxHandle // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -400,7 +400,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN1 Tx Task" 
       ,  2048        
       ,  (void*) &CAN1Params 
-      ,  8  // Priority
+      ,  9  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );

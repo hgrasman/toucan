@@ -341,7 +341,7 @@ uint8_t Sensing_SetupTasks(void){
       ,  "IMU MCU6050" 
       ,  2048        
       ,  NULL
-      ,  6  // Priority
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -358,7 +358,7 @@ uint8_t Sensing_SetupTasks(void){
       ,  "GPS Task" 
       ,  1024      
       ,  NULL
-      ,  6  // Priority
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );

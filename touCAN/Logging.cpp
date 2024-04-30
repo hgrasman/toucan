@@ -72,7 +72,7 @@ uint8_t Logging_SetupTasks(void){
       ,  "SD Logger Writer" 
       ,  4096        
       ,  NULL 
-      ,  7  // Priority
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
   );
@@ -82,7 +82,7 @@ uint8_t Logging_SetupTasks(void){
       ,  "SD Logger Queuer" 
       ,  4096        
       ,  NULL 
-      ,  7  // Priority
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
   );
