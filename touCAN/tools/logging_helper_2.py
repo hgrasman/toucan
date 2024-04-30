@@ -41,7 +41,7 @@ def RefreshCallBack():
             listbx.insert(END, string[index+18:end_index])
             
             index = line[0].find("LOGPRECISION")
-            end_index = line[0].find(".", end_index)
+            end_index = line[0].find(".", index)
             if (index >= 0 and end_index >= 0):
                 precisions.append(int(string[index+13:end_index]))
             else:

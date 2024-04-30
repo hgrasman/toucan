@@ -239,10 +239,25 @@ void BMSObserverTask(void *pvParameters){
 //GPSR
 #define KNOTS_PER_MPS 1.9438452
 void GPSTask(void *pvParameters){
+  TickType_t xLastWakeTime;
+  const TickType_t xPeriod = pdMS_TO_TICKS(50);
 
+  while (VeCRLR_b_ControlReadyFlag.dataInitialized() != true){
+    vTaskDelay(1);
+  }
+
+  WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Go");, pdMS_TO_TICKS(100))
+
+  xLastWakeTime = xTaskGetTickCount(); // Initialize
   for (;;){
 
-    if (GPS.newNMEAreceived()) {
+    //get data
+    while(GPS.available()){
+      GPS.read();
+    }
+
+    //if a string is complete, parse the daa
+    if(GPS.newNMEAreceived()) {
       
       if (!GPS.parse(GPS.lastNMEA())){ continue; } //failed, try next time
 
@@ -253,7 +268,7 @@ void GPSTask(void *pvParameters){
       VeGPSR_t_GPSMillisecondsUnix.setValue(GPS.milliseconds);
 
       //fix quality
-      VeGPSR_e_GPSFix.setValue(GPS.fixquality);
+      VeGPSR_e_GPSFixQuality.setValue(GPS.fixquality);
 
       //check for fix to update location data
       if (!GPS.fix){
@@ -264,9 +279,9 @@ void GPSTask(void *pvParameters){
         VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LatitudeRaw);
 
         //longitude
-        double LeGPSR_LongitudeRaw = GPS.latitude/100;
+        double LeGPSR_LongitudeRaw = GPS.longitude/100;
         if (GPS.lon == 'W'){LeGPSR_LongitudeRaw *= -1;} //negate for west
-        VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LongitudeRaw);
+        VeGPSR_deg_GPSLongitude.setValue(LeGPSR_LongitudeRaw);
 
         //altitude
         VeGPSR_m_GPSAltitude.setValue(GPS.altitude); //meters
@@ -279,6 +294,8 @@ void GPSTask(void *pvParameters){
       }
 
     }
+
+    vTaskDelayUntil(&xLastWakeTime, xPeriod);
 
   }
 }
@@ -324,7 +341,7 @@ uint8_t Sensing_SetupTasks(void){
       ,  "IMU MCU6050" 
       ,  2048        
       ,  NULL
-      ,  7  // Priority
+      ,  6  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -334,13 +351,14 @@ uint8_t Sensing_SetupTasks(void){
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //setup minimum data plus fix data
   GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);   // calculate fix a 5hz
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 5 Hz update rate over uart
+  Serial.println("GPS Configured");
 
   xTaskCreatePinnedToCore(
       GPSTask
       ,  "GPS Task" 
       ,  1024      
       ,  NULL
-      ,  7  // Priority
+      ,  6  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
