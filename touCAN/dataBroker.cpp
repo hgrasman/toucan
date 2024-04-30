@@ -203,6 +203,16 @@ BrokerData VeSNSR_w_IMU6WyFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WzFilt = BrokerData();
 
 
+//GPSR GPS RING
+BrokerData VeGPSR_deg_GPSLatitude  = BrokerData();
+BrokerData VeGPSR_deg_GPSLongitude = BrokerData();
+BrokerData VeGPSR_m_GPSAltitude = BrokerData();
+BrokerData VeGPSR_deg_GPSHeading = BrokerData();
+BrokerData VeGPSR_mps_GPSSpeed = BrokerData();
+BrokerData VeGPSR_n_GPSSatellites = BrokerData();
+BrokerData VeGPSR_t_GPSMillisecondsUnix = BrokerData();
+BrokerData VeGPSR_e_GPSFixQuality = BrokerData();
+
 
 
 

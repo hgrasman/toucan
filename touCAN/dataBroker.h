@@ -168,4 +168,14 @@ extern BrokerData VeSNSR_w_IMU6WxFilt;
 extern BrokerData VeSNSR_w_IMU6WyFilt;
 extern BrokerData VeSNSR_w_IMU6WzFilt;
 
+//GPSR GPS RING
+extern BrokerData VeGPSR_deg_GPSLatitude;
+extern BrokerData VeGPSR_deg_GPSLongitude;
+extern BrokerData VeGPSR_m_GPSAltitude;
+extern BrokerData VeGPSR_deg_GPSHeading;
+extern BrokerData VeGPSR_mps_GPSSpeed;
+extern BrokerData VeGPSR_n_GPSSatellites;
+extern BrokerData VeGPSR_t_GPSMillisecondsUnix;
+extern BrokerData VeGPSR_e_GPSFixQuality;
+
 #endif

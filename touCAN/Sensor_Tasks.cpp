@@ -237,6 +237,7 @@ void BMSObserverTask(void *pvParameters){
 
 //this task serves to monitor the gps and update the relevant values
 //GPSR
+#define KNOTS_PER_MPS 1.9438452
 void GPSTask(void *pvParameters){
 
   for (;;){
@@ -245,7 +246,37 @@ void GPSTask(void *pvParameters){
       
       if (!GPS.parse(GPS.lastNMEA())){ continue; } //failed, try next time
 
-      
+      //number of tracked satellites
+      VeGPSR_n_GPSSatellites.setValue(GPS.satellites);
+
+      //time since the start of the universe (1970)
+      VeGPSR_t_GPSMillisecondsUnix.setValue(GPS.milliseconds);
+
+      //fix quality
+      VeGPSR_e_GPSFix.setValue(GPS.fixquality);
+
+      //check for fix to update location data
+      if (!GPS.fix){
+        
+        //latitude
+        double LeGPSR_LatitudeRaw = GPS.latitude/100;
+        if (GPS.lat == 'S'){LeGPSR_LatitudeRaw *= -1;} //negate for south
+        VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LatitudeRaw);
+
+        //longitude
+        double LeGPSR_LongitudeRaw = GPS.latitude/100;
+        if (GPS.lon == 'W'){LeGPSR_LongitudeRaw *= -1;} //negate for west
+        VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LongitudeRaw);
+
+        //altitude
+        VeGPSR_m_GPSAltitude.setValue(GPS.altitude); //meters
+
+        //Heading
+        VeGPSR_deg_GPSHeading.setValue(GPS.angle); //degrees from north clockwise
+
+        //ground speed
+        VeGPSR_mps_GPSSpeed.setValue(GPS.speed/KNOTS_PER_MPS);
+      }
 
     }
 
