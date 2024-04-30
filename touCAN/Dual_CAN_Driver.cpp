@@ -139,6 +139,9 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
+    //check for data
+    if (digitalRead(params->can_rx_pin)){vTaskDelay(1); continue;}
+
     //see if there actually is data
     bool msgAvailable;
     WRAP_SPI_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
