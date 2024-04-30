@@ -8,7 +8,7 @@
 #include "FS.h"
 
 #define LOG_RATE 100
-#define FLUSH_RATE 100
+#define FLUSH_RATE 1
 uint8_t flushCounter = 0;
 
 struct loggingData{

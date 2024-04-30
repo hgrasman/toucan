@@ -360,7 +360,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN0 Rx Task" 
       ,  2048        
       ,  (void*) &CAN0Params 
-      ,  9  // Priority
+      ,  8  // Priority
       ,  &xTaskCAN0RxHandle // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -369,8 +369,8 @@ uint8_t CAN_SetupTasks(void){
       CANTxTask
       ,  "CAN0 Tx Task" 
       ,  2048        
-      ,  (void*) &CAN0Params 
-      ,  9  // Priority
+      ,  (void*) &CAN0Params
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -390,7 +390,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN1 Rx Task" 
       ,  2048        
       ,  (void*) &CAN1Params 
-      ,  9  // Priority
+      ,  8  // Priority
       ,  &xTaskCAN1RxHandle // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
@@ -400,7 +400,7 @@ uint8_t CAN_SetupTasks(void){
       ,  "CAN1 Tx Task" 
       ,  2048        
       ,  (void*) &CAN1Params 
-      ,  9  // Priority
+      ,  8  // Priority
       ,  NULL // Task handle
       ,  tskNO_AFFINITY // run on whatever core
       );
