@@ -10,6 +10,7 @@
 */
 
 #include "Arduino.h"
+#include "driver/adc.h"
 #include "pins.h"
 #include <stdint.h> 
 #include "Dual_CAN_Driver.h"
@@ -352,6 +353,9 @@ void CANTxTask(void *pvParameters){
 uint8_t CAN_SetupTasks(void){
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
+
+  //turn the ADC power on constantly +1mA current draw
+  adc_power_acquire(); //fix the broken interrupts on pin36 and pin39?
 
   WRAP_SERIAL_MUTEX(Serial.println("CAN0 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
