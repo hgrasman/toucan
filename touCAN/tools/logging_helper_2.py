@@ -95,7 +95,7 @@ uint8_t flushCounter = 0;
     #flush logic
     config.write("""inline void logging_flush_buffer(File logfile){
   if (flushCounter++ > FLUSH_RATE){
-    WRAP_SPI_MUTEX(logfile.flush();, portMAX_DELAY)
+    logfile.flush();
     flushCounter = 0;
   }
 }
@@ -113,21 +113,23 @@ uint8_t flushCounter = 0;
     
     #populate header function
     config.write("inline void logging_write_header(File logfile){\n")
-    config.write("  WRAP_SPI_MUTEX(logfile.print(\"LeSDLR_t_currentTime\");, portMAX_DELAY)\n")
+    config.write("  logfile.print(\"LeSDLR_t_currentTime\");\n")
     for item in selectedItems:
-        config.write("  WRAP_SPI_MUTEX(logfile.print(\", {}\");, portMAX_DELAY)\n".format(item))
-    config.write("  WRAP_SPI_MUTEX(logfile.print(\", LeSDLR_t_endTime\");, portMAX_DELAY)\n")
-    config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");, portMAX_DELAY)\n  WRAP_SPI_MUTEX(logfile.flush();,portMAX_DELAY)\n}\n\n")
+        config.write("  logfile.print(\", {}\");\n".format(item))
+    config.write("  logfile.print(\", LeSDLR_t_endTime\");\n")
+    config.write("  logfile.print(\"\\n\");\n  logfile.flush();\n}\n\n")
     
     #populate logger write function
     config.write("inline void logging_write_line(File logfile, struct loggingData *pdataToLog){\n")
-    config.write("  WRAP_SPI_MUTEX(logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);, portMAX_DELAY)\n")
+    config.write("  logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);\n")
     for i, item in enumerate(local):
-        config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->{}, {});, portMAX_DELAY)\n".format(item, precisions[indexes[i]]))
-    config.write("  WRAP_SPI_MUTEX(logfile.print(\", \"); logfile.print(pdataToLog->LeSDLR_t_endTime, 4);, portMAX_DELAY)\n")
-    config.write("  WRAP_SPI_MUTEX(logfile.print(\"\\n\");,portMAX_DELAY)\n}\n\n")
+        config.write("  logfile.print(\", \"); logfile.print(pdataToLog->{}, {});\n".format(item, precisions[indexes[i]]))
+    config.write("  logfile.print(\", \"); logfile.print(pdataToLog->LeSDLR_t_endTime, 4);\n")
+    config.write("  logfile.print(\"\\n\");\n}\n\n")
     
     config.write("#endif")
+    
+    window.destroy()
 B = Button(window, text ="Generate Logger Code", command = GenerateCallBack)
 B.place(x=70,y=15)
 
