@@ -61,7 +61,7 @@ uint8_t Logging_SetupTasks(void){
   }
 
   //init the log file 
-  WRAP_SPI_MUTEX(logfile = SD.open("/kartlog.csv", FILE_WRITE);, portMAX_DELAY)
+  logfile = SD.open("/kartlog.csv", FILE_WRITE);
   if (!logfile){
     WRAP_SERIAL_MUTEX(Serial.println("SD Log File Open Failed");, pdMS_TO_TICKS(100))
     return (LOGGING_SETUP_FAILURE);

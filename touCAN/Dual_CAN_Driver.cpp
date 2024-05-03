@@ -47,6 +47,7 @@ typedef struct CANEncodingData{
 
 //Struct for passing parameters to the CANTasks
 typedef struct CANTaskParams{
+  SemaphoreHandle_t CANx_Semaphore;
   const uint8_t can_rx_pin;
   MCP_CAN CANx;
   CANEncodingData EncodingData;
@@ -75,6 +76,7 @@ typedef struct CANData{
 
 
 //Unique data for CAN0
+SemaphoreHandle_t CAN0_Semaphore = xSemaphoreCreateMutex();
 CANEncodingData EncodingCAN0;
 MCP_CAN CAN0(CAN0_SPI_CS_PIN);
 BatteryBroker BatteryDataCAN0 = { &VeCANR_v_CAN0_BatteryVoltageCell1, &VeCANR_v_CAN0_BatteryVoltageCell2, &VeCANR_v_CAN0_BatteryVoltageCell3, &VeCANR_v_CAN0_BatteryVoltageCell4, 
@@ -84,13 +86,14 @@ BatteryBroker BatteryDataCAN0 = { &VeCANR_v_CAN0_BatteryVoltageCell1, &VeCANR_v_
                                   &VeCANR_T_CAN0_BatteryTemp1, &VeCANR_T_CAN0_BatteryTemp2, &VeCANR_T_CAN0_BatteryTemp3, &VeCANR_T_CAN0_BatteryTemp4,
                                   &VeCANR_T_CAN0_BatteryTemp5, &VeCANR_T_CAN0_BatteryTemp6, &VeCANR_T_CAN0_BatteryTemp7, &VeCANR_T_CAN0_BatteryTemp8, 
                                   &VeCANR_T_CAN0_BatteryTemp9, &VeCANR_T_CAN0_BatteryTemp10, &VeCANR_T_CAN0_BatteryTemp11, &VeCANR_I_CAN0_BatteryCurrentRaw};
-CANTaskParams CAN0Params = {CAN0_INT_RX_PIN, CAN0, EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
+CANTaskParams CAN0Params = {CAN0_Semaphore, CAN0_INT_RX_PIN, CAN0, EncodingCAN0, BatteryDataCAN0, &VeVDKR_tq_CAN0_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
                             &VeCANR_rpm_CAN0_iBSGRotorSpeed, 
                             &VeCANR_e_CAN0_iBSGOpMode, &VeCANR_I_CAN0_iBSGDCCurrent, &VeCANR_tq_CAN0_iBSGTorqueDelivered,
                             &VeCANR_pct_CAN0_iBSGInverterTempRate, &VeCANR_V_CAN0_iBSGVoltageDCLink, &VeCANR_T_CAN0_iBSGStatorTemp,
                             &VeCANR_pct_CAN0_iBSGMotorTempRate, &VeCANR_tq_CAN0_iBSGInstMinTrqLim, &VeCANR_tq_CAN0_iBSGInstMaxTrqLim};
 
 //CAN1 Data
+SemaphoreHandle_t CAN1_Semaphore = xSemaphoreCreateMutex();
 CANEncodingData EncodingCAN1;
 MCP_CAN CAN1(CAN1_SPI_CS_PIN);
 BatteryBroker BatteryDataCAN1 = { &VeCANR_v_CAN1_BatteryVoltageCell1, &VeCANR_v_CAN1_BatteryVoltageCell2, &VeCANR_v_CAN1_BatteryVoltageCell3, &VeCANR_v_CAN1_BatteryVoltageCell4, 
@@ -100,7 +103,7 @@ BatteryBroker BatteryDataCAN1 = { &VeCANR_v_CAN1_BatteryVoltageCell1, &VeCANR_v_
                                   &VeCANR_T_CAN1_BatteryTemp1, &VeCANR_T_CAN1_BatteryTemp2, &VeCANR_T_CAN1_BatteryTemp3, &VeCANR_T_CAN1_BatteryTemp4,
                                   &VeCANR_T_CAN1_BatteryTemp5, &VeCANR_T_CAN1_BatteryTemp6, &VeCANR_T_CAN1_BatteryTemp7, &VeCANR_T_CAN1_BatteryTemp8, 
                                   &VeCANR_T_CAN1_BatteryTemp9, &VeCANR_T_CAN1_BatteryTemp10, &VeCANR_T_CAN1_BatteryTemp11, &VeCANR_I_CAN1_BatteryCurrentRaw};
-CANTaskParams CAN1Params = {CAN1_INT_RX_PIN, CAN1, EncodingCAN1, BatteryDataCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
+CANTaskParams CAN1Params = {CAN1_Semaphore, CAN1_INT_RX_PIN, CAN1, EncodingCAN1, BatteryDataCAN1, &VeVDKR_tq_CAN1_TorqueRequest, &VeHVPR_e_CANx_OpModeRequest,
                             &VeCANR_rpm_CAN1_iBSGRotorSpeed, 
                             &VeCANR_e_CAN1_iBSGOpMode, &VeCANR_I_CAN1_iBSGDCCurrent, &VeCANR_tq_CAN1_iBSGTorqueDelivered,
                             &VeCANR_pct_CAN1_iBSGInverterTempRate, &VeCANR_V_CAN1_iBSGVoltageDCLink, &VeCANR_T_CAN1_iBSGStatorTemp,
@@ -109,7 +112,7 @@ CANTaskParams CAN1Params = {CAN1_INT_RX_PIN, CAN1, EncodingCAN1, BatteryDataCAN1
 
 static TaskHandle_t xTaskCAN0RxHandle;
 static TaskHandle_t xTaskCAN1RxHandle;
-static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
+//static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
 //ISRs for each CAN interrupt with a macro bc I'm lazy
 /*#define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
 ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
@@ -144,7 +147,7 @@ void CANRxTask(void *pvParameters){
 
     //see if there actually is data
     bool msgAvailable;
-    WRAP_SPI_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
+    WRAP_CAN_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
     if (!msgAvailable){vTaskDelay(1); continue;}
 
     //do something with the data
@@ -278,12 +281,11 @@ void CANTxTask(void *pvParameters){
     double LeCANR_e_OpModeRequest = params->VeHVPR_e_CANx_OpModeRequest->getValue();
     PrepareFHybrid(&params->EncodingData.f_hybrid_msg, data, sizeof(data), f_hybrid_counter,
                    LeCANR_e_OpModeRequest,0,0,LeCANR_tq_TorqueRequest);
-    if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+    WRAP_CAN_MUTEX(
       if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_LENGTH, data) == CAN_OK ){
         f_hybrid_counter = ComputeCounter(f_hybrid_counter);
       }
-      xSemaphoreGive( xSemaphore_CANSPIMutex );
-    }
+      , portMAX_DELAY)
 
     //Send configs one every 10ms tx period
     switch(configSelector++){
@@ -291,52 +293,47 @@ void CANTxTask(void *pvParameters){
         //WMHEV
         PrepareWMHEV(&params->EncodingData.w_mhev_msg, data, sizeof(data), 
                     0, W_MHEV_TORQUE_GRAD_POS, 0,  W_MHEV_TORQUE_GRAD_NEG, W_MHEV_DC_CURR_LIMIT, w_mhev_counter, W_MHEV_DC_VOLT_MIN);
-        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+        WRAP_CAN_MUTEX(
           if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_W_MHEV_LENGTH, data) == CAN_OK ){
             w_mhev_counter = ComputeCounter(w_mhev_counter);
           }
-          xSemaphoreGive( xSemaphore_CANSPIMutex );
-        }
+          , portMAX_DELAY)
         break;
       case 1:
         //UMHEV
         PrepareUMHEV(&params->EncodingData.u_mhev_msg, data, sizeof(data),
                     u_mhev_counter, U_MHEV_TORQ_MIN_LIMIT, U_MHEV_TORQ_MAX_LIMIT, U_MHEV_DMP_MIN_LIMIT, U_MHEV_DMP_MAX_LIMIT);           
-        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+        WRAP_CAN_MUTEX(
           if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_U_MHEV_LENGTH, data) == CAN_OK ){
             u_mhev_counter = ComputeCounter(u_mhev_counter);
           }
-          xSemaphoreGive( xSemaphore_CANSPIMutex );
-        }
+          , portMAX_DELAY)
         break;
       case 2:
         //TMHEV
         PrepareTMHEV(&params->EncodingData.t_mhev_msg, data, sizeof(data),
                     0, 0, T_MHEV_REGEN_CURR_LIMIT, t_mhev_counter, T_MHEV_REGEN_VOLT_LIMIT);
-        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+        WRAP_CAN_MUTEX(
           if (params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_FRAME_ID, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_IS_EXTENDED, X8578_CAN_DB_CLIENT_PCM_PMZ_T_MHEV_LENGTH, data) == CAN_OK ){
             t_mhev_counter = ComputeCounter(t_mhev_counter);
           }
-          xSemaphoreGive( xSemaphore_CANSPIMutex );
-        }
+          , portMAX_DELAY)
         break;
       case 3:
         //BCM
         PrepareBCM(&params->EncodingData.bcm_pmz_msg, data, sizeof(data),
                   X8578_CAN_DB_CLIENT_BCM_PMZ_A_CAR_MODE_HS_NORMAL_CHOICE, 0, 0, X8578_CAN_DB_CLIENT_BCM_PMZ_A_POWER_MODE_RUNNING_2_CHOICE);
-        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+        WRAP_CAN_MUTEX(
           params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_BCM_PMZ_A_FRAME_ID, X8578_CAN_DB_CLIENT_BCM_PMZ_A_IS_EXTENDED, X8578_CAN_DB_CLIENT_BCM_PMZ_A_LENGTH, data);
-          xSemaphoreGive( xSemaphore_CANSPIMutex );
-        }
+          , portMAX_DELAY)
         break;
       case 4:
         //GWM
         PrepareGWM(&params->EncodingData.gwm_pmz_msg, data, sizeof(data),
                   X8578_CAN_DB_CLIENT_GWM_PMZ_H_CRASH_STATUS_RCM_NO_CRASH_CHOICE, 0);
-        if(xSemaphoreTake( xSemaphore_CANSPIMutex, portMAX_DELAY) == pdTRUE ){
+        WRAP_CAN_MUTEX(
           params->CANx.sendMsgBuf(X8578_CAN_DB_CLIENT_GWM_PMZ_H_FRAME_ID, X8578_CAN_DB_CLIENT_GWM_PMZ_H_IS_EXTENDED, X8578_CAN_DB_CLIENT_GWM_PMZ_H_LENGTH, data);
-          xSemaphoreGive( xSemaphore_CANSPIMutex );
-        }
+          , portMAX_DELAY)
         break;
       default:
         configSelector = 0; //reset

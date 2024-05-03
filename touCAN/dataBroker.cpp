@@ -69,7 +69,6 @@ bool BrokerData::dataInitialized(void){
 
 SemaphoreHandle_t xSemaphore_SerialMutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t xSemaphore_I2CMutex = xSemaphoreCreateMutex();
-SemaphoreHandle_t xSemaphore_CANSPIMutex = xSemaphoreCreateMutex();
 
 //CRLR Controller Ring
 BrokerData VeCRLR_b_ControlReadyFlag = BrokerData();
@@ -210,7 +209,6 @@ BrokerData VeGPSR_m_GPSAltitude = BrokerData();
 BrokerData VeGPSR_deg_GPSHeading = BrokerData();
 BrokerData VeGPSR_mps_GPSSpeed = BrokerData();
 BrokerData VeGPSR_n_GPSSatellites = BrokerData();
-BrokerData VeGPSR_t_GPSMillisecondsUnix = BrokerData();
 BrokerData VeGPSR_e_GPSFixQuality = BrokerData();
 
 

@@ -264,9 +264,6 @@ void GPSTask(void *pvParameters){
       //number of tracked satellites
       VeGPSR_n_GPSSatellites.setValue(GPS.satellites);
 
-      //time since the start of the universe (1970)
-      VeGPSR_t_GPSMillisecondsUnix.setValue(GPS.milliseconds);
-
       //fix quality
       VeGPSR_e_GPSFixQuality.setValue(GPS.fixquality);
 

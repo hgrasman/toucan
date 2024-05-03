@@ -16,6 +16,7 @@
 #include "bms_mc2.h"
 #include "DataBroker.h"
 
+#define WRAP_CAN_MUTEX(x,y) if(xSemaphoreTake( params->CANx_Semaphore, y) == pdTRUE ){ x xSemaphoreGive( params->CANx_Semaphore );}
 
 //Struct for all the battery data
 typedef struct BatteryBroker{
