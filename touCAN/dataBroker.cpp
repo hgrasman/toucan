@@ -15,35 +15,37 @@
 BrokerData::BrokerData(){
       this->value = 0;
       this->last_update_time = -1; //data not valid
+      portMUX_INITIALIZE(spinlock);
 }
 
 BrokerData::BrokerData(double initial_value){
       this->value = initial_value;
       this->last_update_time = esp_timer_get_time();
+      portMUX_INITIALIZE(spinlock);
 }
 
 void BrokerData::setValue(double new_value) {
-      taskENTER_CRITICAL($this->spinlock);
+      taskENTER_CRITICAL(spinlock);
       this->value = new_value;
       this->last_update_time = esp_timer_get_time();
-      taskEXIT_CRITICAL($this->spinlock);
+      taskEXIT_CRITICAL(spinlock);
 }
 
 void BrokerData::setValueISR(double new_value) {
-      taskENTER_CRITICAL_ISR($this->spinlock);
+      taskENTER_CRITICAL_ISR(spinlock);
       this->value = new_value;
       this->last_update_time = esp_timer_get_time();
-      taskEXIT_CRITICAL_ISR($this->spinlock);
+      taskEXIT_CRITICAL_ISR(spinlock);
 }
 
 bool BrokerData::setDefault(double default_value) {
       bool status = false;
-      taskENTER_CRITICAL($this->spinlock);
+      taskENTER_CRITICAL(spinlock);
       if (this->last_update_time == -1){
         this->value = default_value;
         status = true;
       }
-      taskEXIT_CRITICAL($this->spinlock);
+      taskEXIT_CRITICAL(spinlock);
       return (status);
 }
 
@@ -52,19 +54,19 @@ double BrokerData::getValue() {
 }
 
 double BrokerData::getValue(int64_t* time_Variable) { 
-      taskENTER_CRITICAL($this->spinlock);
+      taskENTER_CRITICAL(spinlock);
       *time_Variable = esp_timer_get_time() - this->last_update_time;
       double atomic = this->value;
-      taskEXIT_CRITICAL($this->spinlock);
+      taskEXIT_CRITICAL(spinlock);
       return (atomic);
 }
 
 double BrokerData::getValue(int64_t* time_Variable, int64_t* last_time) { 
-      taskENTER_CRITICAL($this->spinlock);
+      taskENTER_CRITICAL(spinlock);
       *time_Variable = esp_timer_get_time() - this->last_update_time;
       *last_time = this->last_update_time;
       double atomic = this->value;
-      taskEXIT_CRITICAL($this->spinlock);
+      taskEXIT_CRITICAL(spinlock);
       return (atomic);
 }
 

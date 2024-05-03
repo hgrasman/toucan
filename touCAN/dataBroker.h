@@ -28,7 +28,7 @@ class BrokerData {
   private:    
     volatile double value;
     volatile int64_t last_update_time;
-    volatile SportMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
+    portMUX_TYPE *spinlock = (portMUX_TYPE*) malloc(sizeof(portMUX_TYPE));
 };
 
 //Exclusive hardware access
