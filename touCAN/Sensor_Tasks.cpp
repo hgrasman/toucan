@@ -10,6 +10,7 @@
 */
 
 #include "Arduino.h" 
+#include "driver/adc.h"
 #include "Adafruit_GPS.h"
 #include "Sensor_Tasks.h"
 #include "pins.h"
@@ -306,6 +307,9 @@ void GPSTask(void *pvParameters){
 //Spawn threads
 uint8_t Sensing_SetupTasks(void){
 
+  adc_power_acquire(); //keep the adc on
+  attachInterrupt(digitalPinToInterrupt(WSS_HALL_FRONTR), WSS_COUNT_ISR, FALLING);
+
   xTaskCreatePinnedToCore(
       BMSObserverTask
       ,  "Batt0 Obsrvr" 
@@ -358,7 +362,7 @@ uint8_t Sensing_SetupTasks(void){
   xTaskCreatePinnedToCore(
       GPSTask
       ,  "GPS Task" 
-      ,  1024      
+      ,  2048     
       ,  NULL
       ,  7  // Priority
       ,  NULL // Task handle
