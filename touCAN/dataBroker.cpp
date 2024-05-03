@@ -15,30 +15,35 @@
 BrokerData::BrokerData(){
       this->value = 0;
       this->last_update_time = -1; //data not valid
-      this->access_mutex = xSemaphoreCreateMutex();
 }
 
 BrokerData::BrokerData(double initial_value){
       this->value = initial_value;
       this->last_update_time = esp_timer_get_time();
-      this->access_mutex = xSemaphoreCreateMutex();
 }
 
 void BrokerData::setValue(double new_value) {
-      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
+      taskENTER_CRITICAL($this->spinlock);
       this->value = new_value;
       this->last_update_time = esp_timer_get_time();
-      xSemaphoreGive( this->access_mutex );
+      taskEXIT_CRITICAL($this->spinlock);
+}
+
+void BrokerData::setValueISR(double new_value) {
+      taskENTER_CRITICAL_ISR($this->spinlock);
+      this->value = new_value;
+      this->last_update_time = esp_timer_get_time();
+      taskEXIT_CRITICAL_ISR($this->spinlock);
 }
 
 bool BrokerData::setDefault(double default_value) {
       bool status = false;
-      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
+      taskENTER_CRITICAL($this->spinlock);
       if (this->last_update_time == -1){
         this->value = default_value;
         status = true;
       }
-      xSemaphoreGive( this->access_mutex );
+      taskEXIT_CRITICAL($this->spinlock);
       return (status);
 }
 
@@ -47,19 +52,19 @@ double BrokerData::getValue() {
 }
 
 double BrokerData::getValue(int64_t* time_Variable) { 
-      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
+      taskENTER_CRITICAL($this->spinlock);
       *time_Variable = esp_timer_get_time() - this->last_update_time;
       double atomic = this->value;
-      xSemaphoreGive( this->access_mutex );
+      taskEXIT_CRITICAL($this->spinlock);
       return (atomic);
 }
 
 double BrokerData::getValue(int64_t* time_Variable, int64_t* last_time) { 
-      xSemaphoreTake( this->access_mutex , portMAX_DELAY);
+      taskENTER_CRITICAL($this->spinlock);
       *time_Variable = esp_timer_get_time() - this->last_update_time;
       *last_time = this->last_update_time;
       double atomic = this->value;
-      xSemaphoreGive( this->access_mutex );
+      taskEXIT_CRITICAL($this->spinlock);
       return (atomic);
 }
 
@@ -200,6 +205,10 @@ BrokerData VeSNSR_a_IMU6AzFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WxFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WyFilt = BrokerData();
 BrokerData VeSNSR_w_IMU6WzFilt = BrokerData();
+
+
+//WSSR
+BrokerData VeWSSR_cnt_WSSPulseCount = BrokerData();
 
 
 //GPSR GPS RING

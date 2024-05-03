@@ -19,6 +19,7 @@ class BrokerData {
     BrokerData();
     BrokerData(double initial_value);
     void setValue(double new_value);
+    void setValueISR(double new_value);
     bool setDefault(double default_value);
     double getValue(void);  
     double getValue(int64_t* time_Variable);  
@@ -27,7 +28,7 @@ class BrokerData {
   private:    
     volatile double value;
     volatile int64_t last_update_time;
-    volatile SemaphoreHandle_t access_mutex;
+    volatile SportMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 };
 
 //Exclusive hardware access
@@ -165,6 +166,9 @@ extern BrokerData VeSNSR_a_IMU6AzFilt; //LOGPRECISION 4.
 extern BrokerData VeSNSR_w_IMU6WxFilt;
 extern BrokerData VeSNSR_w_IMU6WyFilt;
 extern BrokerData VeSNSR_w_IMU6WzFilt;
+
+//WSSR
+extern BrokerData VeWSSR_cnt_WSSPulseCount;
 
 //GPSR GPS RING
 extern BrokerData VeGPSR_deg_GPSLatitude; //LOGPRECISION 8.

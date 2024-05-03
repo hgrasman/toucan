@@ -10,7 +10,6 @@
 */
 
 #include "Arduino.h"
-#include "driver/adc.h"
 #include "pins.h"
 #include <stdint.h> 
 #include "Dual_CAN_Driver.h"
@@ -113,9 +112,9 @@ CANTaskParams CAN1Params = {CAN1_Semaphore, CAN1_INT_RX_PIN, CAN1, EncodingCAN1,
 
 static TaskHandle_t xTaskCAN0RxHandle;
 static TaskHandle_t xTaskCAN1RxHandle;
-static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
+//static portMUX_TYPE CAN_INT_spinlock = portMUX_INITIALIZER_UNLOCKED;
 //ISRs for each CAN interrupt with a macro bc I'm lazy
-#define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
+/*#define CREATE_CANx_ISR(CANx_RX_ISR, xTaskCANxRxHandle)\
 ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
   taskENTER_CRITICAL_ISR(&CAN_INT_spinlock);\
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;\
@@ -124,7 +123,7 @@ ICACHE_RAM_ATTR void CANx_RX_ISR(void){\
   taskEXIT_CRITICAL_ISR(&CAN_INT_spinlock);\
 }
 CREATE_CANx_ISR(CAN0_RX_ISR, xTaskCAN0RxHandle)
-CREATE_CANx_ISR(CAN1_RX_ISR, xTaskCAN1RxHandle)
+CREATE_CANx_ISR(CAN1_RX_ISR, xTaskCAN1RxHandle)*/
 
 /*
   This function defines a receive thread for the CAN hardware defined by pvParameters.
@@ -143,15 +142,13 @@ void CANRxTask(void *pvParameters){
   CANData incomingData; 
   for (;;){
 
-    //wait for interrupt
-    if(xTaskNotifyWait( pdFALSE, ULONG_MAX,  NULL, pdMS_TO_TICKS(100)) == pdFALSE){
-      WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" Rx Timeout");, portMAX_DELAY)
-    }
+    //check for data
+    if (digitalRead(params->can_rx_pin)){vTaskDelay(1); continue;}
 
     //see if there actually is data
     bool msgAvailable;
     WRAP_CAN_MUTEX(msgAvailable = params->CANx.readMsgBuf(&incomingData.arb_id, &incomingData.data_len, incomingData.data) == CAN_OK;, portMAX_DELAY) //get data
-    if (!msgAvailable){continue;}
+    if (!msgAvailable){vTaskDelay(1); continue;}
 
     //do something with the data
     switch(incomingData.arb_id){
@@ -354,9 +351,6 @@ uint8_t CAN_SetupTasks(void){
 
   uint8_t status = CAN_SETUP_BOTH_SUCCESS;
 
-  //turn the ADC power on constantly +1mA current draw
-  adc_power_acquire(); //fix the broken interrupts on pin36 and pin39?
-
   WRAP_SERIAL_MUTEX(Serial.println("CAN0 Setup Beginning");, pdMS_TO_TICKS(5)) 
   if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK ){
     CAN0.setMode(MCP_NORMAL);
@@ -381,7 +375,7 @@ uint8_t CAN_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-      attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
+      //attachInterrupt(digitalPinToInterrupt(CAN0_INT_RX_PIN), CAN0_RX_ISR, FALLING);
 
   }else{
     status |= CAN_SETUP_CAN0_FAILURE;
@@ -411,7 +405,7 @@ uint8_t CAN_SetupTasks(void){
       ,  tskNO_AFFINITY // run on whatever core
       );
 
-      attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
+      //attachInterrupt(digitalPinToInterrupt(CAN1_INT_RX_PIN), CAN1_RX_ISR, FALLING);
 
   }else{
     status |= CAN_SETUP_CAN1_FAILURE;

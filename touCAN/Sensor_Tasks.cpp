@@ -29,7 +29,7 @@ double LeSNSR_w_WzFilt = 0;
 
 //interrupt on WSS pin saving count and timestamp
 ICACHE_RAM_ATTR void WSS_COUNT_ISR(void){
-  VeWSSR_cnt_WSSPulseCount.setValueFromISR(VeWSSR_cnt_WSSPulseCount.getValue() + 1); //increment pulse count
+  VeWSSR_cnt_WSSPulseCount.setValueISR(VeWSSR_cnt_WSSPulseCount.getValue() + 1); //increment pulse count
 }
 
 void MCU6050Task(void *pvParameters){  // This is a task.
