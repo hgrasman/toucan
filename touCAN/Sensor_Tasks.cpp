@@ -27,6 +27,11 @@ double LeSNSR_w_WxFilt = 0;
 double LeSNSR_w_WyFilt = 0;
 double LeSNSR_w_WzFilt = 0;
 
+//interrupt on WSS pin saving count and timestamp
+ICACHE_RAM_ATTR void WSS_COUNT_ISR(void){
+  VeWSSR_cnt_WSSPulseCount.setValueFromISR(VeWSSR_cnt_WSSPulseCount.getValue() + 1); //increment pulse count
+}
+
 void MCU6050Task(void *pvParameters){  // This is a task.
   TickType_t xLastWakeTime;
   const TickType_t xPeriod = pdMS_TO_TICKS(10);
