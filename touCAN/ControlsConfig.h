@@ -38,8 +38,6 @@ inline double REGEN_TAPER_FUNC(double rpm){
 #define IMU_A_FILT_STRENGTH 0.9
 #define IMU_W_FILT_STRENGTH 0.9
 
-#define COUNTS_PER_VOLT (UINT16_MAX/5)
-
 //SWA
 #define SWA_ERROR_THRESHOLD .15
 #define SWA_ERROR_RETURN_FILT .98
@@ -54,7 +52,7 @@ inline double REGEN_TAPER_FUNC(double rpm){
 #define PRE_STATE_TIMEOUT 5000
 
 //State machine comparisons
-#define STALE_DATA_THRESHOLD 50000
+#define STALE_DATA_THRESHOLD 150000
 #define PRECHARGE_END_AGREEMENT 1.0
 #define BATTERY_AGREEMENT_THRESHOLD .1
 #define USEDCELLS 13
