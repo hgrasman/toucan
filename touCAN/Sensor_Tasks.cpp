@@ -262,11 +262,12 @@ void GPSTask(void *pvParameters){
       GPS.read();
     }
 
-    //if a string is complete, parse the daa
+    //if a string is complete, parse the data
     if(GPS.newNMEAreceived()) {
       
       if (!GPS.parse(GPS.lastNMEA())){ continue; } //failed, try next time
 
+      Serial.println("nms");
       //number of tracked satellites
       VeGPSR_n_GPSSatellites.setValue(GPS.satellites);
 
@@ -274,7 +275,7 @@ void GPSTask(void *pvParameters){
       VeGPSR_e_GPSFixQuality.setValue(GPS.fixquality);
 
       //check for fix to update location data
-      if (!GPS.fix){
+      if (GPS.fix){
         
         //latitude
         double LeGPSR_LatitudeRaw = GPS.latitude/100;

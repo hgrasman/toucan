@@ -1,5 +1,5 @@
 /*
-  Software component responsible for interfacing with kart sensors. Primarily IMU and WSS
+  Software component responsible for interfacing with the SD card and broker for the purpose of logging data
 
   Contributors:
     -Henry Grasman

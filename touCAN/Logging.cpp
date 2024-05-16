@@ -1,5 +1,5 @@
 /*
-  Software component responsible for monitoring cart systems and issuing commands.
+  Software component responsible for interfacing with the SD card and broker for the purpose of logging data
 
   Contributors:
     -Henry Grasman

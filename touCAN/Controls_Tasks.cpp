@@ -82,7 +82,7 @@ void VDKartTask(void *pvParameters){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = .5; 
+      LeVDKR_p_TorqueSplitTarget = (LeVDKR_phi_ApproxSWA+90)/180; 
     }
     double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
 #else
@@ -106,8 +106,8 @@ void VDKartTask(void *pvParameters){
                                         + LeVDKR_tq_CAN1_MinTrqLim*LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt) / NM_RPM_TO_W; //quite possibly 28kW
 
     //limit mechanical power according to competition rules/safety margin
-    if (LeVDKR_P_CombinedMaxPower > (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN)){
-      LeVDKR_P_CombinedMaxPower = (PDGP_POWER_LIMIT-POWER_LIMIT_MARGIN);
+    if (LeVDKR_P_CombinedMaxPower > (MECH_POWER_LIMIT)){
+      LeVDKR_P_CombinedMaxPower = (MECH_POWER_LIMIT);
       LeVDKR_tq_CombinedMaxTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMaxPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
     }
     if (LeVDKR_P_CombinedMinPower < REGEN_POWER_LIMIT){
