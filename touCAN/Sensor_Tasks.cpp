@@ -267,7 +267,6 @@ void GPSTask(void *pvParameters){
       
       if (!GPS.parse(GPS.lastNMEA())){ continue; } //failed, try next time
 
-      Serial.println("nms");
       //number of tracked satellites
       VeGPSR_n_GPSSatellites.setValue(GPS.satellites);
 
@@ -278,14 +277,16 @@ void GPSTask(void *pvParameters){
       if (GPS.fix){
         
         //latitude
-        double LeGPSR_LatitudeRaw = GPS.latitude/100;
+        double LeGPSR_LatitudeRaw = GPS.latitude;
         if (GPS.lat == 'S'){LeGPSR_LatitudeRaw *= -1;} //negate for south
-        VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LatitudeRaw);
+        double LeGPSR_LatitudeProcessed = floor(LeGPSR_LatitudeRaw/100) + (fmod(LeGPSR_LatitudeRaw/100, 1.0)*100)/60;
+        VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LatitudeProcessed);
 
         //longitude
-        double LeGPSR_LongitudeRaw = GPS.longitude/100;
+        double LeGPSR_LongitudeRaw = GPS.longitude;
         if (GPS.lon == 'W'){LeGPSR_LongitudeRaw *= -1;} //negate for west
-        VeGPSR_deg_GPSLongitude.setValue(LeGPSR_LongitudeRaw);
+        double LeGPSR_LongitudeProcessed = floor(LeGPSR_LongitudeRaw/100) + (fmod(LeGPSR_LongitudeRaw/100, 1.0)*100)/60;
+        VeGPSR_deg_GPSLongitude.setValue(LeGPSR_LongitudeProcessed);
 
         //altitude
         VeGPSR_m_GPSAltitude.setValue(GPS.altitude); //meters

@@ -1,5 +1,5 @@
 
-//Generated 2024-05-15 23:33:46.493429 with logging_helper_2.py for EV Kartz Kettering University
+//Generated 2024-05-16 13:01:57.154906 with logging_helper_2.py for EV Kartz Kettering University
 //Henry Grasman
 
 #ifndef LOGGING_CONFIG
@@ -13,6 +13,16 @@ uint8_t flushCounter = 0;
 
 struct loggingData{
   double LeSDLR_t_currentTime;
+  double LeSDLR_b_ControlReadyFlag;
+  double LeSDLR_a_IMU6AxRaw;
+  double LeSDLR_a_IMU6AyRaw;
+  double LeSDLR_a_IMU6AzRaw;
+  double LeSDLR_w_IMU6WxRaw;
+  double LeSDLR_w_IMU6WyRaw;
+  double LeSDLR_w_IMU6WzRaw;
+  double LeSDLR_a_IMU6AxFilt;
+  double LeSDLR_a_IMU6AyFilt;
+  double LeSDLR_a_IMU6AzFilt;
   double LeSDLR_deg_GPSLatitude;
   double LeSDLR_deg_GPSLongitude;
   double LeSDLR_m_GPSAltitude;
@@ -34,6 +44,16 @@ inline void logging_flush_buffer(File logfile){
 
 inline bool logging_queue_data(void){
   loggingMessage.LeSDLR_t_currentTime = (double)esp_timer_get_time() / 1000000.0;
+  loggingMessage.LeSDLR_b_ControlReadyFlag = VeCRLR_b_ControlReadyFlag.getValue();
+  loggingMessage.LeSDLR_a_IMU6AxRaw = VeSNSR_a_IMU6AxRaw.getValue();
+  loggingMessage.LeSDLR_a_IMU6AyRaw = VeSNSR_a_IMU6AyRaw.getValue();
+  loggingMessage.LeSDLR_a_IMU6AzRaw = VeSNSR_a_IMU6AzRaw.getValue();
+  loggingMessage.LeSDLR_w_IMU6WxRaw = VeSNSR_w_IMU6WxRaw.getValue();
+  loggingMessage.LeSDLR_w_IMU6WyRaw = VeSNSR_w_IMU6WyRaw.getValue();
+  loggingMessage.LeSDLR_w_IMU6WzRaw = VeSNSR_w_IMU6WzRaw.getValue();
+  loggingMessage.LeSDLR_a_IMU6AxFilt = VeSNSR_a_IMU6AxFilt.getValue();
+  loggingMessage.LeSDLR_a_IMU6AyFilt = VeSNSR_a_IMU6AyFilt.getValue();
+  loggingMessage.LeSDLR_a_IMU6AzFilt = VeSNSR_a_IMU6AzFilt.getValue();
   loggingMessage.LeSDLR_deg_GPSLatitude = VeGPSR_deg_GPSLatitude.getValue();
   loggingMessage.LeSDLR_deg_GPSLongitude = VeGPSR_deg_GPSLongitude.getValue();
   loggingMessage.LeSDLR_m_GPSAltitude = VeGPSR_m_GPSAltitude.getValue();
@@ -48,6 +68,16 @@ inline bool logging_queue_data(void){
 
 inline void logging_write_header(File logfile){
   logfile.print("LeSDLR_t_currentTime");
+  logfile.print(", VeCRLR_b_ControlReadyFlag");
+  logfile.print(", VeSNSR_a_IMU6AxRaw");
+  logfile.print(", VeSNSR_a_IMU6AyRaw");
+  logfile.print(", VeSNSR_a_IMU6AzRaw");
+  logfile.print(", VeSNSR_w_IMU6WxRaw");
+  logfile.print(", VeSNSR_w_IMU6WyRaw");
+  logfile.print(", VeSNSR_w_IMU6WzRaw");
+  logfile.print(", VeSNSR_a_IMU6AxFilt");
+  logfile.print(", VeSNSR_a_IMU6AyFilt");
+  logfile.print(", VeSNSR_a_IMU6AzFilt");
   logfile.print(", VeGPSR_deg_GPSLatitude");
   logfile.print(", VeGPSR_deg_GPSLongitude");
   logfile.print(", VeGPSR_m_GPSAltitude");
@@ -62,8 +92,18 @@ inline void logging_write_header(File logfile){
 
 inline void logging_write_line(File logfile, struct loggingData *pdataToLog){
   logfile.print(pdataToLog->LeSDLR_t_currentTime, 4);
-  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_deg_GPSLatitude, 8);
-  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_deg_GPSLongitude, 8);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_b_ControlReadyFlag, 0);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AxRaw, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AyRaw, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AzRaw, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WxRaw, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WyRaw, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_w_IMU6WzRaw, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AxFilt, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AyFilt, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_a_IMU6AzFilt, 4);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_deg_GPSLatitude, 10);
+  logfile.print(", "); logfile.print(pdataToLog->LeSDLR_deg_GPSLongitude, 10);
   logfile.print(", "); logfile.print(pdataToLog->LeSDLR_m_GPSAltitude, 4);
   logfile.print(", "); logfile.print(pdataToLog->LeSDLR_deg_GPSHeading, 2);
   logfile.print(", "); logfile.print(pdataToLog->LeSDLR_mps_GPSSpeed, 2);

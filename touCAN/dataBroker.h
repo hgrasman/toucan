@@ -171,8 +171,8 @@ extern BrokerData VeSNSR_w_IMU6WzFilt;
 extern BrokerData VeWSSR_cnt_WSSPulseCount;
 
 //GPSR GPS RING
-extern BrokerData VeGPSR_deg_GPSLatitude; //LOGPRECISION 8.
-extern BrokerData VeGPSR_deg_GPSLongitude; //LOGPRECISION 8.
+extern BrokerData VeGPSR_deg_GPSLatitude; //LOGPRECISION 10.
+extern BrokerData VeGPSR_deg_GPSLongitude; //LOGPRECISION 10.
 extern BrokerData VeGPSR_m_GPSAltitude; //LOGPRECISION 4.
 extern BrokerData VeGPSR_deg_GPSHeading; //LOGPRECISION 2.
 extern BrokerData VeGPSR_mps_GPSSpeed; //LOGPRECISION 2.
