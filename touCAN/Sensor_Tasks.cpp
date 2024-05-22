@@ -280,7 +280,7 @@ void GPSTask(void *pvParameters){
         VeGPSR_deg_GPSLatitude.setValue(GPS.latitudeDegrees);
 
         //longitude
-        VeGPSR_deg_GPSLongitude.setValue(GPS.latitudeDegrees);
+        VeGPSR_deg_GPSLongitude.setValue(GPS.longitudeDegrees);
 
 
         //altitude
