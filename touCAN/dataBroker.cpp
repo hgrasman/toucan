@@ -110,6 +110,8 @@ BrokerData VeBPER_R_CAN1_ESRObserved     = BrokerData();
 //VDKR VDKart Ring
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
 BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();
+BrokerData VeVDKR_phi_SteeringWheelAngle = BrokerData();
+BrokerData VeVDKR_p_PedalPosition = BrokerData();
 BrokerData VeVDKR_tq_TotalTorqueDesired = BrokerData();
 BrokerData VeVDKR_P_CombinedMaxPower = BrokerData();
 BrokerData VeVDKR_P_CombinedMinPower = BrokerData();

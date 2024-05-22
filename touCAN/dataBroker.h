@@ -70,6 +70,8 @@ extern BrokerData VeBPER_R_CAN1_ESRObserved; //LOGPRECISION 5.
 //VDKR VDKart Ring
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest; //LOGPRECISION 2.
 extern BrokerData VeVDKR_tq_CAN1_TorqueRequest; //LOGPRECISION 2.
+extern BrokerData VeVDKR_phi_SteeringWheelAngle; //LOGPRECISION 1.
+extern BrokerData VeVDKR_p_PedalPosition; //LOGPRECISION 3.
 extern BrokerData VeVDKR_tq_TotalTorqueDesired; //LOGPRECISION 2.
 extern BrokerData VeVDKR_P_CombinedMaxPower;
 extern BrokerData VeVDKR_P_CombinedMinPower;
@@ -79,7 +81,7 @@ extern BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed;
 extern BrokerData VeCANR_e_CAN0_iBSGOpMode;
 extern BrokerData VeCANR_I_CAN0_iBSGDCCurrent; //LOGPRECISION 3.
 extern BrokerData VeCANR_tq_CAN0_iBSGTorqueDelivered; //LOGPRECISION 3.
-extern BrokerData VeCANR_pct_CAN0_iBSGInverterTempRate; //LOGPRECISION 1
+extern BrokerData VeCANR_pct_CAN0_iBSGInverterTempRate; //LOGPRECISION 1.
 extern BrokerData VeCANR_V_CAN0_iBSGVoltageDCLink; //LOGPRECISION 3.
 extern BrokerData VeCANR_T_CAN0_iBSGStatorTemp; //LOGPRECISION 3.
 extern BrokerData VeCANR_pct_CAN0_iBSGMotorTempRate; //LOGPRECISION 3.

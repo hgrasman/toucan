@@ -60,8 +60,11 @@ void VDKartTask(void *pvParameters){
     double LeVDKR_p_SWAPositionINV = (double) analogRead(STEER_IN_INV_PIN) / 4095.0;
     LeVDKR_phi_SWASensorError = 1 - (LeVDKR_p_SWAPositionNML+LeVDKR_p_SWAPositionINV);
     LeVDKR_phi_ApproxSWA   = (LeVDKR_p_SWAPositionNML - LeVDKR_p_SWAPositionINV)*(SWA_RANGE_DEG/2);
+    VeVDKR_phi_SteeringWheelAngle.setValue(LeVDKR_phi_ApproxSWA);
     
     LeVDKR_p_PedalPosition = (double) analogRead(PEDAL_IN_NML_PIN) / 4095.0;
+    VeVDKR_p_PedalPosition.setValue(LeVDKR_p_PedalPosition);
+
 
     //Get limits from the motor
     double LeVDKR_tq_CAN0_MinTrqLim = VeCANR_tq_CAN0_iBSGInstMinTrqLim.getValue();
@@ -82,9 +85,9 @@ void VDKartTask(void *pvParameters){
       LeVDKR_p_TorqueSplitTarget = LeVDKR_p_TorqueSplitTarget*SWA_ERROR_RETURN_FILT + VECTOR_CENTER_SPLIT * (1-SWA_ERROR_RETURN_FILT); //smoothly return to even split
     }else{
       //TORQUE SPLIT
-      LeVDKR_p_TorqueSplitTarget = (LeVDKR_phi_ApproxSWA+90)/180; 
+      LeVDKR_p_TorqueSplitTarget = (LeVDKR_phi_ApproxSWA+90)/180; //DEMO ONLY
     }
-    double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT);
+    double LeVDKR_p_TorqueSplitTargetFilt = LeVDKR_p_TorqueSplitTargetFilt*VECTOR_RATE_FILT + LeVDKR_p_TorqueSplitTarget * (1-VECTOR_RATE_FILT); //filter it so nothing crazy happens
 #else
     double LeVDKR_p_TorqueSplitTargetFilt = 0; //quick and dirty way to put all the power to 1mc
 #endif

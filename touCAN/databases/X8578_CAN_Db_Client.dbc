@@ -1,0 +1,692 @@
+VERSION "EPIC"
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: SCU Vector_XXX
+
+
+BO_ 1254 EPIC_PMZ_K: 8 SCU
+ SG_ BISGCalibrationID02 : 7|56@0+ (1,0) [0|7.20575940379279E+016] ""  Vector_XXX
+
+BO_ 1256 EPIC_PMZ_L: 8 SCU
+ SG_ BISGCalibVerifNumber : 7|32@0+ (1,0) [0|4294967295] ""  Vector_XXX
+
+BO_ 1252 EPIC_PMZ_J: 8 SCU
+ SG_ BISGCalibrationID01 : 7|56@0+ (1,0) [0|7.20575940379279E+016] ""  Vector_XXX
+
+BO_ 1250 EPIC_PMZ_I: 8 SCU
+ SG_ BISGDiagnostic01 : 7|32@0+ (1,0) [0|4294967295] ""  Vector_XXX
+
+BO_ 47 PCM_PMZ_V_MHEV: 8 Vector_XXX
+ SG_ EngineTorqTgtWoTrans : 50|11@0+ (1,-1023) [-1023|1024] "Nm"  SCU
+ SG_ SlipStartTypeRequest : 55|5@0+ (1,0) [17|30] "Not used"  SCU
+ SG_ EngineTorqChecksum : 47|8@0+ (1,0) [0|255] "checksum"  SCU
+ SG_ EngineTorqAct : 26|11@0+ (1,-1023) [-1023|1024] "Nm"  SCU
+ SG_ DrvlineDampEnblFlgMd1 : 31|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EngineTorqCounter : 30|4@0+ (1,0) [0|15] "N = E (modulo 16). One increment"  SCU
+ SG_ EngineStartTorque : 23|8@0+ (1,0) [0|255] "Nm"  SCU
+ SG_ EngineTorqActQF : 11|2@0+ (1,0) [0|3] ""  SCU
+ SG_ K0ModeRequest : 9|2@0+ (1,0) [0|3] ""  SCU
+
+BO_ 36 EPIC_PMZ_A: 8 SCU
+ SG_ RapidDschrgDiagStatus : 42|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ InverterTemperature : 7|8@0+ (1,-40) [-40|213] "%"  Vector_XXX
+ SG_ InverterHVILStatus : 15|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ InvActiveShortCircuit : 13|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ EPICPumpDiagStatus : 19|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ EPICChrgEMPumpDiagStat : 18|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ EMVoltageDCLink : 17|10@0+ (1,0) [0|1021] "Volts"  Vector_XXX
+ SG_ EMVoltageDCLinkExt : 41|10@0+ (1,0) [0|1023] "Volts"  Vector_XXX
+ SG_ EMOpModeExtGpCS : 63|8@0+ (1,0) [0|255] "checksum"  Vector_XXX
+ SG_ EMOpModeExtGpCounter : 47|4@0+ (1,0) [0|15] "Counter value"  Vector_XXX
+ SG_ EMOperatingModeExt : 35|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ EMACOCMonitorStatus : 43|1@0+ (1,0) [0|1] ""  Vector_XXX
+
+BO_ 80 EPIC_PMZ_C: 8 SCU
+ SG_ EMSpeedQF : 1|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ DrvlineDampTorqueDelta : 10|11@0+ (0.1,-102.3) [-102.3|102.4] "Nm"  Vector_XXX
+ SG_ EMSpeed : 30|15@0+ (1,-16382) [-16382|16383] "RPM"  Vector_XXX
+ SG_ EMTorqSpeedExtGpCounter : 14|4@0+ (1,0) [0|15] "N = E (modulo 16). One increment"  Vector_XXX
+ SG_ EMTorqSpeedExtGpCS : 47|8@0+ (1,0) [0|255] "checksum"  Vector_XXX
+ SG_ EMTorqueExt : 54|15@0+ (0.1,-1638.3) [-1638.3|1638.4] "Nm"  Vector_XXX
+
+BO_ 90 EPIC_PMZ_E: 8 SCU
+ SG_ EMCurrentDcLink : 3|12@0+ (0.25,-511.5) [-511.5|511.75] "Amps"  Vector_XXX
+ SG_ EMPumpDiagStatus : 18|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ EMRotorTemperature : 32|9@0+ (1,-40) [-40|471] "deg C"  Vector_XXX
+ SG_ EMTemperature : 16|9@0+ (1,-40) [-40|469] "degC"  Vector_XXX
+ SG_ EPICMILRequest : 20|2@0+ (1,0) [0|3] ""  Vector_XXX
+ SG_ InvShortTimeCurDerate : 21|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ InvStartCurrentDerate : 22|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ InvTemperatureDerate : 17|1@0+ (1,0) [0|1] ""  Vector_XXX
+ SG_ TemperatureRate : 54|7@0+ (1,0) [0|120] "%"  Vector_XXX
+ SG_ TOCPumpDiagStatus : 23|1@0+ (1,0) [0|1] ""  Vector_XXX
+
+BO_ 94 EPIC_PMZ_G: 8 SCU
+ SG_ EMMaxContTorqueLimit : 49|10@0+ (1,0) [0|1023] "Nm"  Vector_XXX
+ SG_ EMMaxTorqueLimit : 43|10@0+ (1,0) [0|1023] "Nm"  Vector_XXX
+ SG_ EMMinContTorqueLimit : 37|10@0+ (1,-1023) [-1023|0] "Nm"  Vector_XXX
+ SG_ EMMinTorqueLimit : 31|10@0+ (1,-1023) [-1023|0] "Nm"  Vector_XXX
+ SG_ EMTorqLimitGpCounter : 19|4@0+ (1,0) [0|15] "N = E (modulo 16). One increment"  Vector_XXX
+ SG_ EMTorqLimitGpCS : 15|8@0+ (1,0) [0|255] "checksum"  Vector_XXX
+
+BO_ 96 EPIC_PMZ_H: 8 SCU
+ SG_ BISGSpeed : 55|16@0+ (1,-32767) [-32767|32768] "RPM"  Vector_XXX
+ SG_ EMOperatingModeExt2 : 47|4@0+ (1,0) [0|15] ""  Vector_XXX
+ SG_ EMOpModeMVGpCounter : 43|4@0+ (1,0) [0|15] "N = E (modulo 16). One increment"  Vector_XXX
+ SG_ EMOpModeMVGpCS : 39|8@0+ (1,0) [0|255] "checksum"  Vector_XXX
+ SG_ EMVoltageDCLinkMV : 17|10@0+ (0.1,0) [0|102.3] "Volts"  Vector_XXX
+
+BO_ 2031 UDS_DIAG_Resp: 8 SCU
+ SG_ Dummy_Signal : 0|8@1- (1,0) [0|0] "" Vector__XXX
+
+BO_ 18 BCM_PMZ_A: 8 Vector_XXX
+ SG_ CarModeHS : 3|4@0+ (1,0) [6|15] "Unused"  SCU
+ SG_ CarModeHS_UB : 15|1@0+ (1,0) [0|1] ""  SCU
+ SG_ PowerMode : 44|5@0+ (1,0) [10|31] "Not Used"  SCU
+ SG_ PowerMode_UB : 33|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 432 GWM_PMZ_H: 8 Vector_XXX
+ SG_ CrashStatusRCM : 14|1@0+ (1,0) [0|1] ""  SCU
+ SG_ CrashStatusRCM_UB : 13|1@0+ (1,0) [0|1] ""  SCU
+
+BO_ 74 PCM_PMZ_AC_MHEV: 8 Vector_XXX
+ SG_ EMVoltageDcLinkReqMV : 33|10@0+ (0.1,0) [0|102.3] "Volts"  SCU
+
+BO_ 60 PCM_PMZ_F_Hybrid: 8 Vector_XXX
+ SG_ EMOperatingModeReqExt : 11|4@0+ (1,0) [0|15] ""  SCU
+ SG_ EMSpeedRequestExt : 38|15@0+ (1,-16382) [-16382|16383] "rpm"  SCU
+ SG_ EMTorqueRequestExt : 54|15@0+ (0.1,-1638.3) [-1638.3|1638.4] "Nm"  SCU
+ SG_ EMVoltageDCLinkReqExt : 17|10@0+ (1,0) [0|1021] "Volts"  SCU
+ SG_ VSCEMReqGpCounter : 15|4@0+ (1,0) [0|15] "Counter value"  SCU
+ SG_ VSCEMReqGpCS : 7|8@0+ (1,0) [0|255] "checksum"  SCU
+
+BO_ 42 PCM_PMZ_T_MHEV: 8 Vector_XXX
+ SG_ EMCoolantPumpDRReq : 15|7@0+ (1,0) [0|100] "%"  SCU
+ SG_ EMCurDcLinkGenLimit : 8|9@0+ (1,-509) [-509|0] "Amps"  SCU
+ SG_ EMGenLimitGrpCounter : 37|4@0+ (1,0) [0|15] ""  SCU
+ SG_ EMGenLimitGrpCS : 31|8@0+ (1,0) [0|255] "checksum"  SCU
+ SG_ EMVolDcLinkGenLimit : 33|10@0+ (1,0) [0|1021] "Volts"  SCU
+ SG_ TOCPumpDRReq : 6|7@0+ (1,0) [0|100] "%"  SCU
+
+BO_ 45 PCM_PMZ_U_MHEV: 8 Vector_XXX
+ SG_ DrvlineDampTorqMaxLim : 41|10@0+ (0.1,0) [0|102.3] "Nm"  SCU
+ SG_ DrvlineDampTorqMinLim : 35|10@0+ (0.1,-102.3) [-102.3|0] "Nm"  SCU
+ SG_ EMTorqueMaxLimit : 29|10@0+ (1,0) [0|1021] "Nm"  SCU
+ SG_ EMTorqueMinLimit : 23|10@0+ (1,-1021) [-1021|0] "Nm"  SCU
+ SG_ VSCEMTorqLimGpCounter : 11|4@0+ (1,0) [0|15] "Counter value"  SCU
+ SG_ VSCEMTorqLimGpCS : 63|8@0+ (1,0) [0|255] "checksum"  SCU
+
+BO_ 62 PCM_PMZ_W_MHEV: 8 Vector_XXX
+ SG_ BISGCalibrationIDReq : 7|1@0+ (1,0) [0|1] ""  SCU
+ SG_ EMCurDcLinkMotorLimit : 32|9@0+ (1,0) [0|509] "Amps"  SCU
+ SG_ EMMotorLimitGrpCounter : 53|4@0+ (1,0) [0|15] "N = E (modulo 16). One increment"  SCU
+ SG_ EMMotorLimitGrpCS : 31|8@0+ (1,0) [0|255] "checksum"  SCU
+ SG_ EMTorqueGradientNeg : 39|7@0+ (-10,0) [-1270|0] "Nm/s"  SCU
+ SG_ EMTorqueGradientPos : 6|7@0+ (10,0) [0|1270] "Nm/s"  SCU
+ SG_ EMVolDcLinkMotorLimit : 49|10@0+ (1,0) [0|1021] "Volts"  SCU
+ SG_ EngineTorqueRipple : 9|10@0+ (1,0) [0|1023] "Nm"  SCU
+
+BO_ 704 PCM_PMZ_X_MHEV: 8 Vector_XXX
+ SG_ EMDurationMaxESA : 38|5@0+ (0.1,0) [0|3.1] "s"  SCU
+ SG_ EMEndSpeedESA : 22|7@0+ (10,0) [0|1270] "rpm"  SCU
+ SG_ EMSpeedGradientESA : 49|10@0+ (-10,0) [-10230|0] "rpm/s"  SCU
+ SG_ EMTorqueLimitESA : 55|6@0+ (-1,0) [-63|0] "Nm"  SCU
+
+BO_ 2015 UDS_DIAG_Fun_Req: 8 Vector_XXX
+ SG_ Dummy_Signal : 0|8@1- (1,0) [0|0] ""  SCU
+
+BO_ 2023 UDS_DIAG_Phy_Req: 8 Vector_XXX
+ SG_ Dummy_Signal : 0|8@1- (1,0) [0|0] ""  SCU
+
+BO_ 1024 VEHCONFIG_400PMZ_AutoSAR: 8 Vector_XXX
+ SG_ SF_VEHCONFIG_400PMZ_AutoSAR_PDU M : 0|8@1+ (1,0) [0|255] ""  SCU
+ SG_ CcfVINPart1 m87 : 39|32@0+ (1,0) [0|4294967295] ""  SCU
+ SG_ CcfVINPart2 m88 : 15|56@0+ (1,0) [0|7.20575940379279E+016] ""  SCU
+ SG_ CcfVINPart3 m89 : 15|48@0+ (1,0) [0|281474976710655] ""  SCU
+ SG_ CcfMildHybridType m97 : 47|4@0+ (1,0) [6|14] "Unused"  SCU
+ SG_ CcfDD00GlobalRealTime m176 : 15|32@0+ (1,0) [0|4294967295] ""  SCU
+ SG_ CcfDD02MainECUSupVolts m176 : 47|8@0+ (0.25,0) [0|63.75] "Volts"  SCU
+ SG_ CcfDD06PowerModePKT m176 : 52|5@0+ (1,0) [0|31] ""  SCU
+ SG_ CcfDD01TotalDistance m177 : 15|24@0+ (1,0) [0|16777215] ""  SCU
+ SG_ CcfDD04InCarTemp m177 : 39|8@0+ (1,-40) [-40|215] "Deg C"  SCU
+ SG_ CcfDD05OutdoorTemp m177 : 47|8@0+ (1,-40) [-40|215] "Deg C"  SCU
+
+
+
+CM_ SG_ 1254 BISGCalibrationID02 "Sporadic Signal  - Calibration Identification for the software installed on the ECU. Format is 16 character 128 bit ASCII ($20 through $7E). This signal comprises characters 9 to 16 of 16 characters.";
+CM_ SG_ 1256 BISGCalibVerifNumber "Sporadic Signal  - Number used to verify the integrity of the vehicle software. Consists of four Bytes values interpreted as Hexadecimal eg 0B 9F 4E D5";
+CM_ SG_ 1252 BISGCalibrationID01 "Sporadic Signal  - Calibration Identification for the software installed on the ECU. Format is 16 character 128 bit ASCII ($20 through $7E) Each character is 7 bits and is split over two messages. This signal comprises characters 1 to 8 of 16 characters.";
+CM_ SG_ 1250 BISGDiagnostic01 "Bit coded Diagnostic message contained in a single CAN signal. Periodically broadcast by component to the Diagnostic Service Manager
+
+";
+CM_ SG_ 47 K0ModeRequest "Hybrid Systems = Request to the TCM to engage and disengage K0 Clutch
+
+Non-Hybrid Systems = Request to the TCM to enagage and disengage Gliding Clutch";
+CM_ SG_ 36 RapidDschrgDiagStatus "Status of the HV DC bus rapid discharge mechanism";
+CM_ SG_ 36 InverterTemperature "Temperature of the ACDC Inverter";
+CM_ SG_ 36 InverterHVILStatus "Status of the EPIC Inverter Hazardous Voltage Interlock Loop.";
+CM_ SG_ 36 InvActiveShortCircuit "ACDC Inverter Active Short Circuit function status
+";
+CM_ SG_ 36 EPICPumpDiagStatus "Inverter and DCDC Converter coolant pump diagnostic status
+";
+CM_ SG_ 36 EPICChrgEMPumpDiagStat "Inverter/DCDC, Charger & EM coolant pump diagnostic status";
+CM_ SG_ 36 EMVoltageDCLink "High Voltage DC Bus Voltage measured at the Electric Machine Inverter.";
+CM_ SG_ 36 EMVoltageDCLinkExt "High voltage DC bus voltage measured at the electric machine inverter.";
+CM_ SG_ 36 EMOpModeExtGpCS "Signals contained in SAE J1850 CRC8 Checksum: EMOperatingModeExt,
+EMVoltageDCLinkExt, EMACOCMonitorStatus, RapidDschrgDiagStatus,
+EMOpModeExtGpCounter .
+
+The calculation method is specified in STJLR 18.036.
+Signals used in the calculation must be in the same message frame.
+
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola
+Backwards notation :-
+
+Byte 1 is the leftmost byte in SAEJ1850 Table 1.
+
+Byte 1
+Signal marker Signal name                                                     Offset
+=========== ==========                                                   =====
+A 	           EMVoltageDCLinkExt (Most significant 8 bits) 0
+
+Byte 2
+Signal marker Signal name                                                     Offset
+=========== ==========                                                   =====
+B                     RapidDschrgDiagStatus                                    0
+C                     EMACOCMonitorStatus                                    1
+D    ";
+CM_ SG_ 36 EMOpModeExtGpCounter "Used to ensure that the EPIC is still in active communications with its Micro controller.
+
+Value to increment with each new message sent.
+
+Value initialises at 0 and Increases to 15 at which point the signal is reset to 0 and begins counting up again.
+
+Value initialises to 0.
+
+Stuck count also indicates a fault.";
+CM_ SG_ 36 EMOperatingModeExt "Electrical Machine operating mode";
+CM_ SG_ 36 EMACOCMonitorStatus "The status of the EPIC's open circuit monitor for the HV AC Bus.";
+CM_ SG_ 80 EMSpeedQF "Quality Factor for the Speed of the Electric Machine.";
+CM_ SG_ 80 DrvlineDampTorqueDelta "The additional torque scheduled by the Inverter for driveline damping";
+CM_ SG_ 80 EMSpeed "Speed of the Electric Machine
+(Hybrid Specific Signal)";
+CM_ SG_ 80 EMTorqSpeedExtGpCounter "Used to ensure that the Inverter is still in active communications with its Micro controller.
+
+Value to increment with each new message sent.
+
+Value initialises at 0 and increases to 15 at which point the signal is reset to 0 and begins counting up again.
+
+Value initialises to 0.
+
+Stuck count also indicates a fault.";
+CM_ SG_ 80 EMTorqSpeedExtGpCS "Signals contained in SAE J1850 CRC8 Checksum: EMSpeed, EMSpeedQF, EMTorqueExt,
+DrvlineDampTorqueDelta, EMTorqSpeedExtGpCounter.
+The calculation method is specified in STJLR 18.036.
+Signals used in the calculation must be in the same message frame.
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola Backwards notation :-
+Byte 1 is the leftmost byte in SAEJ1850 Table 1.
+Byte 1
+Signal marker Signal name Offset
+=========== ========== =====
+A DrvlineDampTorqueDelta (Most significant 8 bits) 0
+Byte 2
+Signal marker Signal name Offset
+=========== ========== =====
+B EMSpeedQF 0
+0 3 padding bit of zero 2
+C DrvlineDampTorqueDelta (Least significant 3 bits) 5
+Byte 3
+Signal marker Signal name Offset
+=========== ========== =====
+D EMSpeed (Most significant 7 bits) 0
+0 1 padding bit of zero 7
+Byte 4
+Signal marker Signal name Offset
+=========== ========== =====
+E EMSpeed (Least significant 8 bits) 0
+Byte 5
+Signal marker Signal name Offset
+=========== ========== ====";
+CM_ SG_ 80 EMTorqueExt "Torque of the EM machine without inertial compensation
+(Hybrid Specific Signal)
+
+Note: More precise version of the EMTorque signal.";
+CM_ SG_ 90 EMCurrentDcLink "High Voltage DC Bus current measured at the Electrical Machine Inverter
+Positive - Motoring Mode
+Negative - Generating Mode
+";
+CM_ SG_ 90 EMPumpDiagStatus "Electrical Machine coolant pump diagnostic status
+";
+CM_ SG_ 90 EMRotorTemperature "Temperature of the Electric Machine's Rotor";
+CM_ SG_ 90 EMTemperature "Coil temperature of the Electrical Machine
+
+For PHEV:
+Temperature of the Electric Machine's Stator";
+CM_ SG_ 90 EPICMILRequest "MIL request signal required to be raised by EPIC module and received by PCM. This is necessary in order to comply with the OBDII requirement for NAS market.";
+CM_ SG_ 90 InvShortTimeCurDerate "ACDC Inverter short time current derate status
+";
+CM_ SG_ 90 InvStartCurrentDerate "ACDC Inverter start current derate status
+";
+CM_ SG_ 90 InvTemperatureDerate "ACDC Inverter temperarture derate status
+";
+CM_ SG_ 90 TemperatureRate "Rate of change of Electric Machine temperature (warning of change of Max / Min limits)";
+CM_ SG_ 90 TOCPumpDiagStatus "Transmission Oil Coolant (TOC) coolant pump diagnostic status";
+CM_ SG_ 94 EMMaxContTorqueLimit "Continuous Maximum torque available from the Electric Machine in 'Torque Control' Mode.";
+CM_ SG_ 94 EMMaxTorqueLimit "Instantaneous Maximum torque available from the Electric Machine in 'Torque Control' Mode.";
+CM_ SG_ 94 EMMinContTorqueLimit "Continuous Minimum torque available from the Electric Machine in 'Torque Control' Mode.";
+CM_ SG_ 94 EMMinTorqueLimit "Instantaneous Minimum torque available from the Electric Machine in 'Torque Control' Mode.";
+CM_ SG_ 94 EMTorqLimitGpCounter "Used to ensure that the Inverter is still in active communications with its Micro controller.
+
+Value to increment with each new message sent.
+
+Value initialises at 0 and Increases to 15 at which point the signal is reset to 0 and begins counting up again.
+
+Value initialises to 0.
+
+Stuck count also indicates a fault.";
+CM_ SG_ 94 EMTorqLimitGpCS "Signals contained in SAE J1850 CRC8 Checksum: EMMaxTorqueLimit, EMMinTorqueLimit,
+EMMinContTorqueLimit, EMMaxContTorqueLimit, EMTorqLimitGpCounter .
+The calculation method is specified in STJLR 18.036.
+Signals used in the calculation must be in the same message frame.
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola
+Backwards
+notation :-
+Byte 1 is the leftmost byte in SAEJ1850 Table 1.
+Byte 1
+Signal marker Signal name Offset
+=========== ========== =====
+A EMMaxTorqueLimit (Most significant 8 bits) 0
+Byte 2
+Signal marker Signal name Offset
+=========== ========== =====
+B EMMinTorqueLimit (Most significant 2 bits) 0
+C EMTorqLimitGpCounter 2
+D EMMaxTorqueLimit (Least significant 2 bits) 6
+Byte 3
+Signal marker Signal name Offset
+=========== ========== =====
+E EMMinTorqueLimit (Least significant 8 bits) 0
+Byte 4
+Signal marker Signal name Offset
+=========== ========== =====
+F EMMaxContTorqueLimit (Most significant 8 bits) 0
+Byte 5
+Signal marker Signal na";
+CM_ SG_ 96 BISGSpeed "Speed of the BISG.
+";
+CM_ SG_ 96 EMOperatingModeExt2 "Electrical Machine operating mode
+";
+CM_ SG_ 96 EMOpModeMVGpCounter "Used to ensure that the BISG is still in active communications with its Micro controller.
+
+
+
+Value to increment with each new message sent.
+
+
+
+Value initialises at 0 and Increases to 15 at which point the signal is reset to 0 and begins counting up again.
+
+
+
+Value initialises to 0.
+
+Stuck count also indicates a fault.";
+CM_ SG_ 96 EMOpModeMVGpCS "Group:  EMOpModeMVGp	Checksum: EMOpModeMVGpCS	
+
+Signals contained in SAE J1850 CRC8 Checksum: EMVoltageDCLinkMV, EMOperatingModeExt2, EMOpModeMVGpCounter, BISGSpeed
+
+The calculation method is specified in STJLR 18.036.
+Signals used in the calculation must be in the same message frame.
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola
+Backwards notation:-
+
+Byte 1
+Signal marker 	Signal name 						Offset
+========== 	========== =========================		=====
+A		EMVoltageDCLinkMV	(most significant 8 bits)		0
+
+Byte 2
+Signal marker 	Signal name 						Offset
+========== 	========== =========================		=====
+B 		EMOperatingModeExt2 			(4 bits)		0
+C		EMVoltageDCLinkMV	(least significant 2 bits)		4
+0		Two padding bits of zero		(4 bits)		6
+
+Byte 3
+Signal marker 	Signal name 						Offset
+========== 	========== =========================		=====
+D 		BISGSpeed		(most significant 8 bits)		0
+
+
+Byte4
+Signal marker 	Signal name 						Offset
+========== 	======";
+CM_ SG_ 96 EMVoltageDCLinkMV "MHEV DC Bus Voltage measured at the Electric Machine Inverter.
+";
+CM_ SG_ 18 CarModeHS "Information about which Carmode the vehicle is in i.e. Normal, factory etc.
+";
+CM_ SG_ 18 PowerMode "Information of current PowerMode, reflects the current  state of the Power Mode Superviser
+
+For L538:
+The signals PowerModeHS, PowerModeHSQF & PowerModeComp are all with the group PowerModeGrpHS. This grouping is to ensure that the signals are packed within the same frame, they are not treated as a group within the BCM. ";
+CM_ SG_ 432 CrashStatusRCM "This signal defines the crash status of the vehicle safety system.";
+CM_ SG_ 74 EMVoltageDcLinkReqMV "Requested DC link voltage value in Electric Machine 'Voltage control' mode";
+CM_ SG_ 60 EMOperatingModeReqExt "Electrical Machine (ACDC) operating mode request";
+CM_ SG_ 60 EMSpeedRequestExt "Requested Electric machine speed value in 'Speed control mode'
+";
+CM_ SG_ 60 EMTorqueRequestExt "Torque request for the electrical machine. Positive for motoring, negative for generating
+(Hybrid Specific Signal)
+
+Note: More precise version of the EMTorqueRequest signal.";
+CM_ SG_ 60 EMVoltageDCLinkReqExt "Requested DC link voltage value in Electric Machine 'Voltage control' mode";
+CM_ SG_ 60 VSCEMReqGpCounter "Initilalised to zero, increments from 0 to 15";
+CM_ SG_ 60 VSCEMReqGpCS "Signals contained in SAE J1850 CRC8 Checksum: EMOperatingModeReqExt,
+EMSpeedRequest, EMVoltageDCLinkRequest, EMTorqueRequestExt,
+VSCEMReqGpCounter
+The calculation method is specified in STJLR 18.036.
+Signals used in the calculation must be in the same message frame.
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola
+Backwards notation :-
+Byte 1 is the leftmost byte in SAEJ1850 Table 1.
+Byte 1
+Signal marker  Signal name          Offset
+=========== ========== =====
+A                        EMSpeedRequest  (Most significant 8 bits) 0
+Byte 2
+Signal marker Signal name Offset
+=========== ========== =====
+0 1 padding bit of zero 0
+B EMSpeedRequest (Least significant 7 bits) 1
+Byte 3
+Signal marker Signal name Offset
+=========== ========== =====
+C EMTorqueRequestExt (Most significant 8 bits) 0
+Byte 4
+Signal marker Signal name Offset
+=========== ========== =====
+0 1 padding bit of zero 0
+D EMTorqueRequestExt (Least significant 7 bits) 1
+Byte 5
+Signal marker S";
+CM_ SG_ 42 EMCoolantPumpDRReq "Electric Machine coolant pump duty ratio request as percentage of maximum
+";
+CM_ SG_ 42 EMCurDcLinkGenLimit "Instantaneous minimum DC Link current that can be supplied during generating mode derived from battery power limits, not to overload HV battery in generating mode. Current is negative in generating mode.
+";
+CM_ SG_ 42 EMGenLimitGrpCounter "Used to ensure that the PCM is still in active communications with its Micro controller.
+
+Value to increment with each new message sent.
+
+Value initialises at 0 and Increases to 15 at which point the signal is reset to 0 and begins counting up again.
+
+Value initialises to 0.
+
+Stuck count also indicates a fault.
+";
+CM_ SG_ 42 EMGenLimitGrpCS "Signals contained in SAE J1850 CRC8 Checksum: EMCurDcLinkGenLimit,  EMVolDcLinkGenLimit and EMGenLimitGrpCounter.
+
+Signals used in the calculation must be in the same message frame.
+
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola Backwards notation :-
+Byte 1 is the leftmost byte in SAEJ1850 Table 1.
+
+Byte 1
+
+Signal marker         Signal name             Offset
+===========        ==========            =====
+A                        EMCurDcLinkGenLimit        0 (most significant 8 bits)
+
+Byte 2
+
+Signal marker         Signal name                                                         Offset
+===========        ==========                                                        =====
+A                        EMCurDcLinkGenLimit (least significant 1 bit)    7
+B                        EMGenLimitGrpCounter.                                              3
+C                        EMVolDcLinkGenLimit (most significant 3 bits)   0
+
+Byte 3
+Signal marker         Si";
+CM_ SG_ 42 EMVolDcLinkGenLimit "Instantaneous maximum DC Link voltage allowed in generating mode so as not to exceed the HV battery high voltage limit
+";
+CM_ SG_ 42 TOCPumpDRReq "Coolant pump duty ratio request as percentage of maximum for the Transmissions Oil Coolant Loop";
+CM_ SG_ 45 DrvlineDampTorqMaxLim "Maximum allowable Electric Machine modulation torque that can be used during Driveline Damping.
+Modulated torque limit relative to the EMTorqueRequestExt rather than an absolute value.";
+CM_ SG_ 45 DrvlineDampTorqMinLim "Minimum allowable Electric Machine modulation torque that can be used during Driveline Damping.
+Modulated torque limit relative to the EMTorqueRequestExt rather than an absolute value.";
+CM_ SG_ 45 EMTorqueMaxLimit "Maximum allowed Electric Machine torque in motor mode used only for Voltage and Speed control modes. Motoring torque is positive.
+";
+CM_ SG_ 45 EMTorqueMinLimit "Minimum allowed Electric Machine torque in generator mode used only for Voltage and Speed control modes. Generating torque is negative.
+";
+CM_ SG_ 45 VSCEMTorqLimGpCS "Signals contained in SAE J1850 CRC8 Checksum: EMTorqueMaxLimit , EMTorqueMinLimit , DrvlineDampTorqMaxLim , DrvlineDampTorqMinLim , VSCEMTorqLimGpCounter .
+The calculation method is specified in STJLR 18.036. Signals used in the calculation must be in the same message frame. The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola Backwards notation :-
+Byte 1 is the leftmost byte in SAEJ1850 Table 1. Byte 1 Signal marker Signal name Offset =========== ========== ===== A EMTorqueMaxLimit (Most significant 8 bits) 0
+Byte 2 Signal marker Signal name Offset =========== ========== ===== B EMTorqueMinLimit (Most significant 2 bits) 0 C VSCEMTorqLimGpCounter 2 D EMTorqueMaxLimit (Least significant 2 bits) 6
+Byte 3 Signal marker Signal name Offset =========== ========== ===== E EMTorqueMinLimit (Least significant 8 bits) 0
+Byte 4 Signal marker Signal name Offset =========== ========== ===== F DrvlineDampTorqMaxLim (Most significant 8 bits) 0
+Byte 5 Signal marker Signal name Offset ==";
+CM_ SG_ 62 BISGCalibrationIDReq "Sporadic Signal PCM Diagnostic request to BISG to send the Calibration Verification Number (CVN) and Calibration Identification";
+CM_ SG_ 62 EMCurDcLinkMotorLimit "Instantaneous maximum DC Link current that can be taken during motoring mode derived from battery power limits, not to overload HV battery in motor mode. Current is positive in motoring mode.
+";
+CM_ SG_ 62 EMMotorLimitGrpCounter "Used to ensure that the PCM is still in active communications with its Micro controller.
+
+Value to increment with each new message sent.
+
+Value initialises at 0 and Increases to 15 at which point the signal is reset to 0 and begins counting up again.
+
+Value initialises to 0.
+
+Stuck count also indicates a fault.
+";
+CM_ SG_ 62 EMMotorLimitGrpCS "Signals contained in SAE J1850 CRC8 Checksum: EMCurDcLinkMotorLimit,  EMVolDcLinkMotorLimit and EMMotorLimitGrpCounter.
+
+Signals used in the calculation must be in the same message frame.
+
+The Data Segment Polynomial shall be assembled as follows, with offsets in Motorola Backwards notation :-
+Byte 1 is the leftmost byte in SAEJ1850 Table 1.
+
+Byte 1
+
+Signal marker         Signal name                    Offset
+===========        ==========                   =====
+A                        EMCurDcLinkMotorLimit        0 (most significant 8 bits)
+
+Byte 2
+
+Signal marker         Signal name                                                         Offset
+===========        ==========                                                        =====
+A                        EMCurDcLinkMotorLimit ( least significant 1 bit)    7
+B                        EMMotorLimitGrpCounter.                                              3
+C                        EMVolDcLinkMotorLimit (most significant 3 bits)   0
+
+Byt";
+CM_ SG_ 62 EMTorqueGradientNeg "Negative Torque Gradient for BISG";
+CM_ SG_ 62 EMTorqueGradientPos "Positive Torque Gradient for BISG
+";
+CM_ SG_ 62 EMVolDcLinkMotorLimit "Instantaneous minimum  DC Link voltage allowed in motoring mode so as not to go below the HV battery low voltage limit
+";
+CM_ SG_ 62 EngineTorqueRipple "The amplitude of torque ripple (1st Harmonic) of the engine.";
+CM_ SG_ 704 EMDurationMaxESA "Controls Engine Stop Assist (BISG) - Maximum duration of ESA";
+CM_ SG_ 704 EMEndSpeedESA "Controls Engine Stop Assist (BISG) - Machine end speed for ESA mode";
+CM_ SG_ 704 EMSpeedGradientESA "Controls Engine Stop Assist (BISG) - Negative torque gradient during Negative Torque control operation
+";
+CM_ SG_ 704 EMTorqueLimitESA "Controls Engine Stop Assist (BISG) - Torque limitation set point in ESA mode";
+BA_DEF_  "BaudRate" FLOAT 1000 1000000;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "cyclic","spontaneous","cyclicIfActive","spontaneousWithDelay","cyclicAndSpontaneous","cyclicAndSpontaneousWithDelay","not_used","not_used","not_used","cyclicWithRepeatOnDemand";
+BA_DEF_ BO_  "GenMsgCycleTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgStartDelayTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgDelayTime" FLOAT 0 300000;
+BA_DEF_ BO_  "GenMsgNrOfRepetition" INT 0 100000;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType";
+BA_DEF_ SG_  "GenSigStartValue" FLOAT -1.79769313486232E+308 1.84467440737096E+019;
+BA_DEF_DEF_  "BaudRate" 1000;
+BA_DEF_DEF_  "GenMsgSendType" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenMsgNrOfRepetition" 0;
+BA_DEF_DEF_  "GenSigSendType" "";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "BaudRate" 500000;
+BA_ "GenMsgCycleTime" BO_ 1254 10;
+BA_ "GenMsgSendType" BO_ 1254 0;
+BA_ "GenMsgDelayTime" BO_ 1254 500;
+BA_ "GenMsgSendType" BO_ 1256 0;
+BA_ "GenMsgDelayTime" BO_ 1256 500;
+BA_ "GenMsgCycleTime" BO_ 1256 10;
+BA_ "GenMsgCycleTime" BO_ 1252 10;
+BA_ "GenMsgSendType" BO_ 1252 0;
+BA_ "GenMsgDelayTime" BO_ 1252 500;
+BA_ "GenMsgSendType" BO_ 1250 0;
+BA_ "GenMsgDelayTime" BO_ 1250 500;
+BA_ "GenMsgCycleTime" BO_ 1250 10;
+BA_ "GenMsgSendType" BO_ 36 0;
+BA_ "GenMsgCycleTime" BO_ 36 10;
+BA_ "GenMsgCycleTime" BO_ 80 10;
+BA_ "GenMsgSendType" BO_ 80 0;
+BA_ "GenMsgCycleTime" BO_ 90 10;
+BA_ "GenMsgSendType" BO_ 90 0;
+BA_ "GenMsgCycleTime" BO_ 94 10;
+BA_ "GenMsgSendType" BO_ 94 0;
+BA_ "GenMsgCycleTime" BO_ 96 10;
+BA_ "GenMsgSendType" BO_ 96 0;
+BA_ "GenMsgDelayTime" BO_ 2031 0;
+BA_ "GenMsgSendType" BO_ 2031 1;
+BA_ "GenSigStartValue" SG_ 47 EngineTorqTgtWoTrans 1023;
+BA_ "GenSigStartValue" SG_ 47 EngineTorqAct 1023;
+BA_ "GenSigStartValue" SG_ 47 EngineStartTorque 254;
+BA_ "GenSigStartValue" SG_ 47 EngineTorqActQF 1;
+BA_ "GenSigSendType" SG_ 36 RapidDschrgDiagStatus 0;
+BA_ "GenSigStartValue" SG_ 36 InverterTemperature 40;
+BA_ "GenSigSendType" SG_ 36 InverterTemperature 0;
+BA_ "GenSigStartValue" SG_ 36 InverterHVILStatus 2;
+BA_ "GenSigSendType" SG_ 36 InverterHVILStatus 0;
+BA_ "GenSigSendType" SG_ 36 InvActiveShortCircuit 0;
+BA_ "GenSigSendType" SG_ 36 EPICPumpDiagStatus 0;
+BA_ "GenSigSendType" SG_ 36 EPICChrgEMPumpDiagStat 0;
+BA_ "GenSigSendType" SG_ 36 EMVoltageDCLink 0;
+BA_ "GenSigSendType" SG_ 36 EMVoltageDCLinkExt 0;
+BA_ "GenSigSendType" SG_ 36 EMOpModeExtGpCS 0;
+BA_ "GenSigSendType" SG_ 36 EMOpModeExtGpCounter 0;
+BA_ "GenSigStartValue" SG_ 36 EMOperatingModeExt 14;
+BA_ "GenSigSendType" SG_ 36 EMOperatingModeExt 0;
+BA_ "GenSigSendType" SG_ 36 EMACOCMonitorStatus 0;
+BA_ "GenSigStartValue" SG_ 80 EMSpeedQF 1;
+BA_ "GenSigStartValue" SG_ 80 DrvlineDampTorqueDelta 1023;
+BA_ "GenSigSendType" SG_ 80 DrvlineDampTorqueDelta 0;
+BA_ "GenSigStartValue" SG_ 80 EMSpeed 32766;
+BA_ "GenSigSendType" SG_ 80 EMSpeed 0;
+BA_ "GenSigSendType" SG_ 80 EMTorqSpeedExtGpCounter 0;
+BA_ "GenSigSendType" SG_ 80 EMTorqSpeedExtGpCS 0;
+BA_ "GenSigStartValue" SG_ 80 EMTorqueExt 16383;
+BA_ "GenSigSendType" SG_ 80 EMTorqueExt 0;
+BA_ "GenSigStartValue" SG_ 90 EMCurrentDcLink 4094;
+BA_ "GenSigSendType" SG_ 90 EMCurrentDcLink 0;
+BA_ "GenSigSendType" SG_ 90 EMPumpDiagStatus 0;
+BA_ "GenSigSendType" SG_ 90 EMRotorTemperature 0;
+BA_ "GenSigStartValue" SG_ 90 EMRotorTemperature 511;
+BA_ "GenSigSendType" SG_ 90 EMTemperature 0;
+BA_ "GenSigSendType" SG_ 90 EPICMILRequest 0;
+BA_ "GenSigSendType" SG_ 90 InvShortTimeCurDerate 0;
+BA_ "GenSigSendType" SG_ 90 InvStartCurrentDerate 0;
+BA_ "GenSigSendType" SG_ 90 InvTemperatureDerate 0;
+BA_ "GenSigSendType" SG_ 90 TemperatureRate 0;
+BA_ "GenSigSendType" SG_ 90 TOCPumpDiagStatus 0;
+BA_ "GenSigSendType" SG_ 94 EMMaxContTorqueLimit 0;
+BA_ "GenSigSendType" SG_ 94 EMMaxTorqueLimit 0;
+BA_ "GenSigSendType" SG_ 94 EMMinContTorqueLimit 0;
+BA_ "GenSigStartValue" SG_ 94 EMMinContTorqueLimit 1023;
+BA_ "GenSigSendType" SG_ 94 EMMinTorqueLimit 0;
+BA_ "GenSigStartValue" SG_ 94 EMMinTorqueLimit 1023;
+BA_ "GenSigSendType" SG_ 94 EMTorqLimitGpCounter 0;
+BA_ "GenSigSendType" SG_ 94 EMTorqLimitGpCS 0;
+BA_ "GenSigSendType" SG_ 96 BISGSpeed 0;
+BA_ "GenSigSendType" SG_ 96 EMOperatingModeExt2 0;
+BA_ "GenSigStartValue" SG_ 96 EMOperatingModeExt2 14;
+BA_ "GenSigSendType" SG_ 96 EMOpModeMVGpCounter 0;
+BA_ "GenSigSendType" SG_ 96 EMOpModeMVGpCS 0;
+BA_ "GenSigSendType" SG_ 96 EMVoltageDCLinkMV 0;
+BA_ "GenSigStartValue" SG_ 74 EMVoltageDcLinkReqMV 40;
+BA_ "GenSigStartValue" SG_ 60 EMOperatingModeReqExt 4;
+BA_ "GenSigStartValue" SG_ 60 EMTorqueRequestExt 16383;
+BA_ "GenSigStartValue" SG_ 42 TOCPumpDRReq 11;
+BA_ "GenSigStartValue" SG_ 45 DrvlineDampTorqMinLim 1023;
+BA_ "GenSigStartValue" SG_ 45 EMTorqueMaxLimit 55;
+BA_ "GenSigStartValue" SG_ 62 EMTorqueGradientNeg 48;
+BA_ "GenSigStartValue" SG_ 62 EMTorqueGradientPos 48;
+BA_ "GenSigStartValue" SG_ 704 EMDurationMaxESA 2;
+BA_ "GenSigStartValue" SG_ 704 EMEndSpeedESA 50;
+BA_ "GenSigStartValue" SG_ 704 EMSpeedGradientESA 800;
+BA_ "GenSigStartValue" SG_ 704 EMTorqueLimitESA 44;
+VAL_ 47 SlipStartTypeRequest 31 "Failure" 16 "Variant 16" 15 "Variant 15" 14 "Variant 14" 13 "Variant 13" 12 "Variant 12" 11 "Variant 11" 10 "Variant 10" 9 "Variant 9" 8 "Variant 8" 7 "Variant 7" 6 "Variant 6" 5 "Variant 5" 4 "Variant 4" 3 "Variant 3" 2 "Variant 2" 1 "Variant 1" 0 "Initialisation" ;
+VAL_ 47 DrvlineDampEnblFlgMd1 1 "Enabled" 0 "Disabled" ;
+VAL_ 47 EngineStartTorque 255 "Failure" 254 "Initialisation" ;
+VAL_ 47 EngineTorqActQF 3 "Calculated with specific acc" 2 "Accuracy of data not within spec" 1 "Evaluation in progress" 0 "Accuracy of data is undefinable" ;
+VAL_ 47 K0ModeRequest 3 "K0 Connect Engine On" 2 "K0 Connect Engine Off" 1 "K0 Disconnect Engine On" 0 "K0 Disconnect Engine Off" ;
+VAL_ 36 RapidDschrgDiagStatus 0 "Ok" 1 "Not Ok" ;
+VAL_ 36 InverterTemperature 254 "Initialisation" 255 "Failure" ;
+VAL_ 36 InverterHVILStatus 0 "HVIL OK" 1 "HVIL not OK" 2 "HVIL not checked" 3 "reserved" ;
+VAL_ 36 InvActiveShortCircuit 0 "Active Short Circuit Off" 1 "Active Short Circuit On" ;
+VAL_ 36 EPICPumpDiagStatus 0 "Pump OK" 1 "Pump Not OK" ;
+VAL_ 36 EPICChrgEMPumpDiagStat 0 "Pump OK" 1 "Pump Not Ok" ;
+VAL_ 36 EMVoltageDCLink 1022 "Initialisation " 1023 "Failure" ;
+VAL_ 36 EMOperatingModeExt 0 "Standby" 1 "Torque Mode" 2 "Reserved (Speed Mode)" 3 "Voltage Mode" 4 "Bus Test Mode" 5 "Not Capable" 6 "Reserved (Calibration Mode)" 7 "Reserved (Bus Discharge Mode)" 8 "Life Saver Mode" 9 "Pre-Load Mode" 10 "Unused" 11 "Unused" 12 "Unused" 13 "Failure HV Not Allowed" 14 "Initialisation" 15 "Failure" ;
+VAL_ 36 EMACOCMonitorStatus 0 "Ok" 1 "Not Ok" ;
+VAL_ 80 EMSpeedQF 3 "In the specified accuracy" 2 "Accuracy is not within spec" 1 "Evaluation in progress" 0 "Accuracy of data is undefinable" ;
+VAL_ 80 EMSpeed 32766 "Initialisation" 32767 "Failure" ;
+VAL_ 90 EMCurrentDcLink 4094 "Initialisation" 4095 "Failure" ;
+VAL_ 90 EMPumpDiagStatus 0 "Pump OK" 1 "Pump Not OK" ;
+VAL_ 90 EMTemperature 510 "Initialisation" 511 "Failure" ;
+VAL_ 90 EPICMILRequest 0 "No MIL Request" 1 "Request MIL ON" 2 "Request MIL Flashing" 3 "Reserved/Not used" ;
+VAL_ 90 InvShortTimeCurDerate 0 "Not current derating" 1 "Derating Short Time Overload Current" ;
+VAL_ 90 InvStartCurrentDerate 0 "Not current derating" 1 "Derating Start Current" ;
+VAL_ 90 InvTemperatureDerate 0 "Not Temperature derating" 1 "Temperature derating" ;
+VAL_ 90 TOCPumpDiagStatus 0 "Pump OK" 1 "Pump Not Ok" ;
+VAL_ 96 EMOperatingModeExt2 0 "Standby" 1 "Torque Mode" 2 "Speed Mode" 3 "Voltage Mode" 4 "Bus Test Mode" 5 "Not Capable" 6 "Reserved (Calibration Mode)" 7 "Bus Discharge mode" 8 "Life Saver Mode" 9 "Pre-Load Mode" 10 "PreFlux Mode" 11 "Engine Stop Assist - ESA" 12 "Unused" 13 "Failure HV Not Allowed" 14 "Initialisation" 15 "Failure" ;
+VAL_ 18 CarModeHS 0 "Normal" 1 "Factory" 2 "Unused" 3 "Transport" 4 "Unused" 5 "Crash" ;
+VAL_ 18 PowerMode 0 "KeyOut" 1 "KeyRecentlyOut" 2 "KeyApproved_0" 3 "PostAccessory_0" 4 "Accessory_1" 5 "PostIgnition_1" 6 "IgnitionOn_2" 7 "Running_2" 8 "(Not used)" 9 "Crank_3" ;
+VAL_ 432 CrashStatusRCM 0 "No crash" 1 "Crash condition" ;
+VAL_ 60 EMOperatingModeReqExt 0 "Standby" 1 "Torque Mode" 2 "Reserved (Speed Mode)" 3 "Voltage Mode" 4 "Bus Test Mode" 5 "Unused" 6 "Reserved (Calibration Mode)" 7 "Reserved (Bus Discharge Mode)" 8 "Life Saver Mode" 9 "Preflux Mode" 10 "Engine Stop Assist Mode - ESA" 11 "Unused" 12 "Unused" 13 "Unused" 14 "Unused" 15 "Unused" ;
+VAL_ 60 EMSpeedRequestExt 32766 "Initialisation" 32767 "Failure" ;
+VAL_ 60 EMVoltageDCLinkReqExt 1022 "Initialisation" 1023 "Failure" ;
+VAL_ 42 EMCoolantPumpDRReq 127 "Failure" ;
+VAL_ 42 EMCurDcLinkGenLimit 510 "Initialisation" 511 "Failure" ;
+VAL_ 42 EMVolDcLinkGenLimit 1022 "Initialisation" 1023 "Failure" ;
+VAL_ 45 EMTorqueMaxLimit 1022 "Initialisation" 1023 "Failure" ;
+VAL_ 45 EMTorqueMinLimit 1022 "Initialisation" 1023 "Failure" ;
+VAL_ 62 BISGCalibrationIDReq 1 "Active" 0 "Not Active" ;
+VAL_ 62 EMCurDcLinkMotorLimit 510 "Initialisation" 511 "Failure" ;
+VAL_ 62 EMVolDcLinkMotorLimit 1022 "Initialisation" 1023 "Failure" ;
+SIG_GROUP_ 47 EngineTorqGrp 1 : K0ModeRequest EngineTorqActQF EngineStartTorque EngineTorqCounter EngineTorqAct EngineTorqChecksum SlipStartTypeRequest EngineTorqTgtWoTrans;
+SIG_GROUP_ 80 EMTorqSpeedExtGp 1 : EMSpeedQF DrvlineDampTorqueDelta EMSpeed EMTorqSpeedExtGpCounter EMTorqSpeedExtGpCS EMTorqueExt;
+
