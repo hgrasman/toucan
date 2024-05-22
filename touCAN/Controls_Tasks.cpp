@@ -114,23 +114,6 @@ void VDKartTask(void *pvParameters){
       LeVDKR_P_CombinedMinPower = REGEN_POWER_LIMIT;
       LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
     }
-
-    //GPS Specific power limiting
-    if (VeGPSR_e_GPSFixQuality.getValue() > 0){
-      double LeVDKR_gpsLat = VeGPSR_deg_GPSLatitude.getValue();
-      double LeVDKR_gpsLon = VeGPSR_deg_GPSLongitude.getValue();
-      if (LeVDKR_gpsLat >  43.013768 && LeVDKR_gpsLat <  43.014164 && \
-          LeVDKR_gpsLon < -83.714293 && LeVDKR_gpsLon > -83.714913){
-          LeVDKR_P_CombinedMaxPower = 200;
-      }
-      else{
-        LeVDKR_P_CombinedMaxPower = 1500;
-      }
-    }
-    else{
-      LeVDKR_P_CombinedMaxPower = 1000;
-    }
-
     VeVDKR_P_CombinedMaxPower.setValue(LeVDKR_P_CombinedMaxPower);
     VeVDKR_P_CombinedMinPower.setValue(LeVDKR_P_CombinedMinPower);
 
