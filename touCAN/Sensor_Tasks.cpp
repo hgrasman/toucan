@@ -275,24 +275,12 @@ void GPSTask(void *pvParameters){
 
       //check for fix to update location data
       if (GPS.fix){
-
-        Serial.println(GPS.longitude, 4);
         
         //latitude
-        double LeGPSR_LatitudeRaw = GPS.latitude;
-        double LeGPSR_LatitudeDegrees = floor(LeGPSR_LatitudeRaw/100.0);
-        double LeGPSR_LatitudeMinutes =  LeGPSR_LatitudeRaw - (LeGPSR_LatitudeDegrees*100.0);
-        double LeGPSR_LatitudeProcessed = LeGPSR_LatitudeDegrees + LeGPSR_LatitudeMinutes/60.0;
-        if (GPS.lat == 'S'){LeGPSR_LatitudeProcessed *= -1;} //negate for south
-        VeGPSR_deg_GPSLatitude.setValue(LeGPSR_LatitudeProcessed);
+        VeGPSR_deg_GPSLatitude.setValue(GPS.latitudeDegrees);
 
         //longitude
-        double LeGPSR_LongitudeRaw = GPS.longitude;
-        double LeGPSR_LongitudeDegrees = floor(LeGPSR_LongitudeRaw/100.0);
-        double LeGPSR_LongitudeMinutes =  LeGPSR_LongitudeRaw - (LeGPSR_LongitudeDegrees*100.0);
-        double LeGPSR_LongitudeProcessed = LeGPSR_LongitudeDegrees + LeGPSR_LongitudeMinutes/60.0;
-        if (GPS.lon == 'W'){LeGPSR_LongitudeProcessed *= -1;} //negate for west
-        VeGPSR_deg_GPSLongitude.setValue(LeGPSR_LongitudeProcessed);
+        VeGPSR_deg_GPSLongitude.setValue(GPS.latitudeDegrees);
 
 
         //altitude
@@ -300,6 +288,9 @@ void GPSTask(void *pvParameters){
 
         //Heading
         VeGPSR_deg_GPSHeading.setValue(GPS.angle); //degrees from north clockwise
+
+        //magnetometer
+        VeGPSR_deg_GPSMagVariation.setValue(GPS.magvariation);
 
         //ground speed
         VeGPSR_mps_GPSSpeed.setValue(GPS.speed/KNOTS_PER_MPS);
@@ -365,7 +356,7 @@ uint8_t Sensing_SetupTasks(void){
   GPS.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //setup minimum data plus fix data
   GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);   // calculate fix a 5hz
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);   // 10 Hz update rate over uart
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 10 Hz update rate over uart
   GPS.sendCommand(PMTK_ENABLE_WAAS);   // 1enable DGPS in america
   Serial.println("GPS Configured");
 

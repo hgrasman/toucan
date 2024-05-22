@@ -178,6 +178,7 @@ extern BrokerData VeGPSR_deg_GPSLatitude; //LOGPRECISION 10.
 extern BrokerData VeGPSR_deg_GPSLongitude; //LOGPRECISION 10.
 extern BrokerData VeGPSR_m_GPSAltitude; //LOGPRECISION 4.
 extern BrokerData VeGPSR_deg_GPSHeading; //LOGPRECISION 2.
+extern BrokerData VeGPSR_deg_GPSMagVariation; //LOGPRECISION 2.
 extern BrokerData VeGPSR_mps_GPSSpeed; //LOGPRECISION 2.
 extern BrokerData VeGPSR_n_GPSSatellites; 
 extern BrokerData VeGPSR_e_GPSFixQuality;

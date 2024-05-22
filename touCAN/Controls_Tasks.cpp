@@ -121,10 +121,16 @@ void VDKartTask(void *pvParameters){
       double LeVDKR_gpsLon = VeGPSR_deg_GPSLongitude.getValue();
       if (LeVDKR_gpsLat >  43.013768 && LeVDKR_gpsLat <  43.014164 && \
           LeVDKR_gpsLon < -83.714293 && LeVDKR_gpsLon > -83.714913){
-          LeVDKR_P_CombinedMaxPower *= .2;
+          LeVDKR_P_CombinedMaxPower = 200;
+      }
+      else{
+        LeVDKR_P_CombinedMaxPower = 1500;
       }
     }
-    
+    else{
+      LeVDKR_P_CombinedMaxPower = 1000;
+    }
+
     VeVDKR_P_CombinedMaxPower.setValue(LeVDKR_P_CombinedMaxPower);
     VeVDKR_P_CombinedMinPower.setValue(LeVDKR_P_CombinedMinPower);
 
