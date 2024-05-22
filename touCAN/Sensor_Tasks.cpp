@@ -366,6 +366,7 @@ uint8_t Sensing_SetupTasks(void){
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //setup minimum data plus fix data
   GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);   // calculate fix a 5hz
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_10HZ);   // 10 Hz update rate over uart
+  GPS.sendCommand(PMTK_ENABLE_WAAS);   // 1enable DGPS in america
   Serial.println("GPS Configured");
 
   xTaskCreatePinnedToCore(

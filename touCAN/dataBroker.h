@@ -70,6 +70,9 @@ extern BrokerData VeBPER_R_CAN1_ESRObserved; //LOGPRECISION 5.
 //VDKR VDKart Ring
 extern BrokerData VeVDKR_tq_CAN0_TorqueRequest; //LOGPRECISION 2.
 extern BrokerData VeVDKR_tq_CAN1_TorqueRequest; //LOGPRECISION 2.
+extern BrokerData VeVDKR_tq_TotalTorqueDesired; //LOGPRECISION 2.
+extern BrokerData VeVDKR_P_CombinedMaxPower;
+extern BrokerData VeVDKR_P_CombinedMinPower;
 
 //CANR CAN driver Ring
 extern BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed;

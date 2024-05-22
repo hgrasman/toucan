@@ -110,6 +110,9 @@ BrokerData VeBPER_R_CAN1_ESRObserved     = BrokerData();
 //VDKR VDKart Ring
 BrokerData VeVDKR_tq_CAN0_TorqueRequest = BrokerData();
 BrokerData VeVDKR_tq_CAN1_TorqueRequest = BrokerData();
+BrokerData VeVDKR_tq_TotalTorqueDesired = BrokerData();
+BrokerData VeVDKR_P_CombinedMaxPower = BrokerData();
+BrokerData VeVDKR_P_CombinedMinPower = BrokerData();
 
 //CANR CAN driver Ring
 BrokerData VeCANR_rpm_CAN0_iBSGRotorSpeed = BrokerData();

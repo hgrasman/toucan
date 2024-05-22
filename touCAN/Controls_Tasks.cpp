@@ -115,6 +115,9 @@ void VDKartTask(void *pvParameters){
       LeVDKR_tq_CombinedMinTrq = (NM_RPM_TO_W * LeVDKR_P_CombinedMinPower) / ((LeVDKR_rpm_MaxPowerClampedSpeedL*(1-LeVDKR_p_TorqueSplitTargetFilt) + LeVDKR_rpm_MaxPowerClampedSpeedR*LeVDKR_p_TorqueSplitTargetFilt));
     }
 
+    VeVDKR_P_CombinedMaxPower.setValue(LeVDKR_P_CombinedMaxPower);
+    VeVDKR_P_CombinedMinPower.setValue(LeVDKR_P_CombinedMinPower);
+
     //estimate electrical power limit for battery undervoltage protection
     double LeVDKR_V_SSVObservedAvg = (VeBPER_V_CAN0_SSVObserved.getValue() + VeBPER_V_CAN1_SSVObserved.getValue())/2;
     double LeVDKR_R_ESRObservedAvg = (VeBPER_R_CAN0_ESRObserved.getValue() + VeBPER_R_CAN1_ESRObserved.getValue())/2;
@@ -124,6 +127,7 @@ void VDKartTask(void *pvParameters){
 
     //map the pedal and apply the torque split
     double LeVDKR_tq_TotalTorqueDesired = LeVDKR_tq_CombinedMaxTrq*LeVDKR_p_PedalPosition + LeVDKR_tq_CombinedMinTrq*(1-LeVDKR_p_PedalPosition);
+    VeVDKR_tq_TotalTorqueDesired.setValue(LeVDKR_tq_TotalTorqueDesired);
     double LeVDKR_tq_TorqueL = LeVDKR_tq_TotalTorqueDesired*(1-LeVDKR_p_TorqueSplitTargetFilt);
     double LeVDKR_tq_TorqueR = LeVDKR_tq_TotalTorqueDesired*LeVDKR_p_TorqueSplitTargetFilt;
 
@@ -146,14 +150,6 @@ void VDKartTask(void *pvParameters){
       VeVDKR_tq_CAN0_TorqueRequest.setValue(0);
       VeVDKR_tq_CAN1_TorqueRequest.setValue(0);
     }
-
-    /*WRAP_SERIAL_MUTEX(\
-                      Serial.print(VeBMSR_V_CAN0_BatteryVoltage.getValue()); Serial.print(", ");\
-                      Serial.print(LeVDKR_V_SSVObservedAvg); Serial.print(", ");\
-                      Serial.print(VeBPER_V_CAN0_SSVESREstimated.getValue()); Serial.print(", ");\
-                      Serial.print(LeVDKR_R_ESRObservedAvg*1000); Serial.print(", ");\
-                      Serial.print(""); Serial.println("");\
-                      , pdMS_TO_TICKS(100))*/
 
     vTaskDelayUntil(&xLastWakeTime, xPeriod);
   }
