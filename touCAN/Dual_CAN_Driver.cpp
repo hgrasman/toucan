@@ -47,6 +47,7 @@ typedef struct CANEncodingData{
   //NEWBMS add structs from kms_dbc time 
   //ex.
   kms_dbc_real_time_part_cell_volt_t      cell_volt_msg; 
+  kms_dbc_real_time_part_cell_temp_t      cell_temp_msg;
 
 } CANEncodingData;
 
@@ -226,6 +227,36 @@ void CANRxTask(void *pvParameters){
           }
 
           break;
+
+        case KMS_DBC_REAL_TIME_PART_CELL_TEMP_FRAME_ID:
+
+          //NEWBMS there are not as many thermocouples on this one
+          kms_dbc_real_time_part_cell_temp_unpack(&params->EncodingData.cell_temp_msg, incomingData.data, incomingData.data_len);
+
+          //This message is multiplexed, meaning only some values are updated at each step
+          //update broker according to multiplexor "cell_temp_frame_id"
+          switch(params->EncodingData.cell_temp_msg.cell_temp_frame_id){
+            case 1:
+              //there is only one case though
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp1->setValue(kms_dbc_real_time_part_cell_temp_temper1_decode(params->EncodingData.cell_temp_msg.temper1));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp2->setValue(kms_dbc_real_time_part_cell_temp_temper2_decode(params->EncodingData.cell_temp_msg.temper2));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp3->setValue(kms_dbc_real_time_part_cell_temp_temper3_decode(params->EncodingData.cell_temp_msg.temper3));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp4->setValue(kms_dbc_real_time_part_cell_temp_temper4_decode(params->EncodingData.cell_temp_msg.temper4));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp5->setValue(kms_dbc_real_time_part_cell_temp_temper5_decode(params->EncodingData.cell_temp_msg.temper5));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp6->setValue(kms_dbc_real_time_part_cell_temp_temper6_decode(params->EncodingData.cell_temp_msg.temper6));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp7->setValue(kms_dbc_real_time_part_cell_temp_temper7_decode(params->EncodingData.cell_temp_msg.temper7));
+
+              //these are not real, redo 1-4 actual into broker 8-11 (new bms has fewer temperature readings)
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp8->setValue(kms_dbc_real_time_part_cell_temp_temper1_decode(params->EncodingData.cell_temp_msg.temper1));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp9->setValue(kms_dbc_real_time_part_cell_temp_temper2_decode(params->EncodingData.cell_temp_msg.temper2));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp10->setValue(kms_dbc_real_time_part_cell_temp_temper3_decode(params->EncodingData.cell_temp_msg.temper3));
+              params->BatteryData.VeCANR_T_CANx_BatteryTemp11->setValue(kms_dbc_real_time_part_cell_temp_temper4_decode(params->EncodingData.cell_temp_msg.temper4));
+
+              //lie about current
+              params->BatteryData.VeCANR_I_CANx_BatteryCurrent->setValue(0); //this is ignored down the line anyway?
+
+              break;
+          }
 
         /* Replace this with code using the new BMS
         case BMS_MC2_BMS_DATA_A_FRAME_ID:
