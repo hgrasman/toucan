@@ -43,6 +43,11 @@ typedef struct CANEncodingData{
   bms_mc2_bms_data_e_t                    bms_e_msg;
   bms_mc2_bms_data_f_t                    bms_f_msg;
   bms_mc2_bms_data_g_t                    bms_g_msg;
+
+  //NEWBMS add structs from kms_dbc time 
+  //ex.
+  kms_dbc_real_time_part_cell_volt_t      cell_volt_msg; 
+
 } CANEncodingData;
 
 //Struct for passing parameters to the CANTasks
@@ -180,6 +185,49 @@ void CANRxTask(void *pvParameters){
           if (params->EncodingData.pmz_i_msg.bisg_diagnostic01) {Serial.print("Diagnostic: ");Serial.println(params->EncodingData.pmz_i_msg.bisg_diagnostic01);}
           break;
 
+        //NEWBMS this is how the signal is processed
+        case KMS_DBC_REAL_TIME_PART_CELL_VOLT_FRAME_ID:
+
+          kms_dbc_real_time_part_cell_volt_unpack(&params->EncodingData.cell_volt_msg, incomingData.data, incomingData.data_len);
+
+          //This message is multiplexed, meaning only some values are updated at each step
+          //update broker according to multiplexor "cell_volt_frame_id"
+          switch(params->EncodingData.cell_volt_msg.cell_volt_frame_id){
+            case 1:
+              //case 1 updates cells 1, 2, 3
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->setValue(kms_dbc_real_time_part_cell_volt_volt1_decode(params->EncodingData.cell_volt_msg.volt1));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell2->setValue(kms_dbc_real_time_part_cell_volt_volt2_decode(params->EncodingData.cell_volt_msg.volt2));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell3->setValue(kms_dbc_real_time_part_cell_volt_volt3_decode(params->EncodingData.cell_volt_msg.volt3));
+              break;
+            case 2:
+              //case 2 updates cells 4, 5, 6 etc
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell4->setValue(kms_dbc_real_time_part_cell_volt_volt4_decode(params->EncodingData.cell_volt_msg.volt4));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell5->setValue(kms_dbc_real_time_part_cell_volt_volt5_decode(params->EncodingData.cell_volt_msg.volt5));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell6->setValue(kms_dbc_real_time_part_cell_volt_volt6_decode(params->EncodingData.cell_volt_msg.volt6));
+              break;
+            case 3:
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell7->setValue(kms_dbc_real_time_part_cell_volt_volt7_decode(params->EncodingData.cell_volt_msg.volt7));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell8->setValue(kms_dbc_real_time_part_cell_volt_volt8_decode(params->EncodingData.cell_volt_msg.volt8));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell9->setValue(kms_dbc_real_time_part_cell_volt_volt9_decode(params->EncodingData.cell_volt_msg.volt9));
+              break;
+            case 4:
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell10->setValue(kms_dbc_real_time_part_cell_volt_volt10_decode(params->EncodingData.cell_volt_msg.volt10));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell11->setValue(kms_dbc_real_time_part_cell_volt_volt11_decode(params->EncodingData.cell_volt_msg.volt11));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell12->setValue(kms_dbc_real_time_part_cell_volt_volt12_decode(params->EncodingData.cell_volt_msg.volt12));
+              break;
+            case 5:
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell13->setValue(kms_dbc_real_time_part_cell_volt_volt13_decode(params->EncodingData.cell_volt_msg.volt13));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell14->setValue(kms_dbc_real_time_part_cell_volt_volt14_decode(params->EncodingData.cell_volt_msg.volt14));
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell15->setValue(kms_dbc_real_time_part_cell_volt_volt15_decode(params->EncodingData.cell_volt_msg.volt15));
+              break;
+            case 6:
+              params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell16->setValue(kms_dbc_real_time_part_cell_volt_volt16_decode(params->EncodingData.cell_volt_msg.volt16));
+              break;
+          }
+
+          break;
+
+        /* Replace this with code using the new BMS
         case BMS_MC2_BMS_DATA_A_FRAME_ID:
           bms_mc2_bms_data_a_unpack(&params->EncodingData.bms_a_msg, incomingData.data, incomingData.data_len);
           params->BatteryData.VeCANR_v_CANx_BatteryVoltageCell1->setValue(bms_mc2_bms_data_a_cell_1_voltage_decode(params->EncodingData.bms_a_msg.cell_1_voltage));
@@ -234,7 +282,7 @@ void CANRxTask(void *pvParameters){
           params->BatteryData.VeCANR_T_CANx_BatteryTemp10->setValue(bms_mc2_bms_data_g_temp10_decode(params->EncodingData.bms_g_msg.temp10));
           params->BatteryData.VeCANR_T_CANx_BatteryTemp11->setValue(bms_mc2_bms_data_g_temp11_decode(params->EncodingData.bms_g_msg.temp11));
           params->BatteryData.VeCANR_I_CANx_BatteryCurrent->setValue(bms_mc2_bms_data_g_current_decode(params->EncodingData.bms_g_msg.current));
-          break;
+          break; */
 
         default:
           //WRAP_SERIAL_MUTEX(Serial.print("ID: "); Serial.println(incomingData.arb_id);, pdMS_TO_TICKS(5)) 

@@ -14,6 +14,7 @@
 
 #include "Valeo_ext.h"
 #include "bms_mc2.h"
+#include "kms_dbc_real_time_part.h" //NEWBMS
 #include "DataBroker.h"
 
 
