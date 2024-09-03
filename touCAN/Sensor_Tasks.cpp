@@ -243,6 +243,7 @@ void BMSObserverTask(void *pvParameters){
 
 //this task serves to monitor the gps and update the relevant values
 //GPSR
+#define NMEA_EXTENSIONS //for gps
 #define KNOTS_PER_MPS 1.9438452
 void GPSTask(void *pvParameters){
   TickType_t xLastWakeTime;
@@ -282,15 +283,11 @@ void GPSTask(void *pvParameters){
         //longitude
         VeGPSR_deg_GPSLongitude.setValue(GPS.longitudeDegrees);
 
-
         //altitude
         VeGPSR_m_GPSAltitude.setValue(GPS.altitude); //meters
 
         //Heading
         VeGPSR_deg_GPSHeading.setValue(GPS.angle); //degrees from north clockwise
-
-        //magnetometer
-        VeGPSR_deg_GPSMagVariation.setValue(GPS.magvariation);
 
         //ground speed
         VeGPSR_mps_GPSSpeed.setValue(GPS.speed/KNOTS_PER_MPS);
@@ -354,10 +351,10 @@ uint8_t Sensing_SetupTasks(void){
 
    //GPS
   GPS.begin(9600);
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //setup minimum data plus fix data
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_ALLDATA); //setup all data
   GPS.sendCommand(PMTK_API_SET_FIX_CTL_5HZ);   // calculate fix a 5hz
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 10 Hz update rate over uart
-  GPS.sendCommand(PMTK_ENABLE_WAAS);   // 1enable DGPS in america
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ);   // 5 Hz update rate over uart
+  GPS.sendCommand(PMTK_ENABLE_WAAS);   // enable DGPS in america
   Serial.println("GPS Configured");
 
   xTaskCreatePinnedToCore(

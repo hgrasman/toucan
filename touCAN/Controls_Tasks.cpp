@@ -221,7 +221,7 @@ void HVPropTask(void *pvParameters){
           //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Precharge Not Ready");, pdMS_TO_TICKS(5))
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
           offStateTimer = xTaskGetTickCount(); //start chill out timer
-          break;
+          continue;
         }
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //disable the motor
@@ -254,7 +254,7 @@ void HVPropTask(void *pvParameters){
         if (bmsCheck && MotorCheck){
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PROPACTIVE; //switch to prop active
           //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Attempting Prop Active");, pdMS_TO_TICKS(8))
-          break;
+          continue;
         }
 
         break;
@@ -275,7 +275,7 @@ void HVPropTask(void *pvParameters){
           //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Safety Disable");, pdMS_TO_TICKS(5))
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF; //force everything off
           offStateTimer = xTaskGetTickCount(); //start chill out timer
-          break;
+          continue;
         }
 
         //if manual switch cuts relays, put it back in precharge
@@ -290,7 +290,7 @@ void HVPropTask(void *pvParameters){
           LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_PRECHARGE; //attempt to precharge
           //WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println(" -> Contactors Open, Pre Charge");, pdMS_TO_TICKS(8))
           preStateTimer = xTaskGetTickCount();
-          break;
+          continue;
         }
 
         //Engage the contactors
@@ -301,18 +301,11 @@ void HVPropTask(void *pvParameters){
 
         VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_TORQUE__MODE_CHOICE); //ENABLE the motor
 
-        //baby the motor
-        if (VeCANR_e_CAN0_iBSGOpMode.getValue() == X8578_CAN_DB_CLIENT_EPIC_PMZ_A_EM_OPERATING_MODE_EXT_NOT__CAPABLE_CHOICE){
-          //we accidentally hit a motor limit
-          VeHVPR_e_CANx_OpModeRequest.setValue(X8578_CAN_DB_CLIENT_PCM_PMZ_F_HYBRID_EM_OPERATING_MODE_REQ_EXT_STANDBY_CHOICE); //turn it off
-          //hopefully it turns on again next time around
-        }
-
         break;
       default:
         WRAP_SERIAL_MUTEX(Serial.print(pcTaskGetTaskName(NULL)); Serial.println("BAD");, pdMS_TO_TICKS(100))
         LeHVPR_e_HVTargetState = CeHVPR_e_HVTargetState_OFF;
-        continue; //BAD BAD BAD BAD try again 
+        break; //BAD BAD BAD BAD try again 
     }
 
     VeHVPR_e_HVTargetState.setValue(LeHVPR_e_HVTargetState);
